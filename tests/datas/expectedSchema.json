@@ -426,7 +426,7 @@
             "default": "female"
           },
           "numberBy": {
-            "example": null,
+            "example": 5,
             "type": "number"
           },
           "someNum": {
@@ -467,13 +467,12 @@
             "type": "boolean"
           },
           "desc": {
-            "example": "",
             "type": "string",
             "minLength": 4,
             "maxLength": 10
           },
           "email": {
-            "example": "foo@example.com",
+            "example": "foo@bar.com",
             "type": "string",
             "format": "email"
           },
