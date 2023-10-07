@@ -4,10 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  fastest-validator:
-    specifier: ^1.17.0
-    version: 1.17.0
+overrides:
+  fastest-validator: github:thib3113/fastest-validator
 
 devDependencies:
   '@jest/globals':
@@ -40,6 +38,9 @@ devDependencies:
   eslint-plugin-prettier:
     specifier: 5.0.0
     version: 5.0.0(eslint-config-prettier@9.0.0)(eslint@8.50.0)(prettier@3.0.3)
+  fastest-validator:
+    specifier: github:thib3113/fastest-validator
+    version: github.com/thib3113/fastest-validator/c42de38b76d7cdc667917cdfd0acc70ccc887800
   jest:
     specifier: ^29.7.0
     version: 29.7.0(@types/node@20.8.2)
@@ -2387,9 +2388,6 @@ packages:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
     dev: true
 
-  /fastest-validator@1.17.0:
-    resolution: {integrity: sha512-37U/JDP72QSFqcvNnO81f0Aeu9og+5I3mc55b2v2RbV0S2I7KvQEdBtrFeIvaYVgam1bDUgy9F9AK9HolByogA==}
-
   /fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
     dependencies:
@@ -3578,7 +3576,7 @@ packages:
     dependencies:
       args: 5.0.3
       eventemitter2: 6.4.9
-      fastest-validator: 1.17.0
+      fastest-validator: github.com/thib3113/fastest-validator/c42de38b76d7cdc667917cdfd0acc70ccc887800
       glob: 7.2.3
       ipaddr.js: 2.1.0
       kleur: 4.1.5
@@ -4498,4 +4496,10 @@ packages:
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+    dev: true
+
+  github.com/thib3113/fastest-validator/c42de38b76d7cdc667917cdfd0acc70ccc887800:
+    resolution: {tarball: https://codeload.github.com/thib3113/fastest-validator/tar.gz/c42de38b76d7cdc667917cdfd0acc70ccc887800}
+    name: fastest-validator
+    version: 1.17.0
     dev: true

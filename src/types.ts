@@ -1,4 +1,4 @@
-import {
+import type {
     default as ValidatorDefault,
     RuleAny,
     RuleArray,
@@ -78,7 +78,7 @@ export type ValidationRuleMapping = {
         : never;
 };
 
-export type Mapper<Rule extends RuleCustom> = (rule: Rule) => OA.SchemaObject;
+export type Mapper<Rule extends RuleCustom> = (rule: Rule, schema?: ObjectRules) => OA.SchemaObject;
 
 export type Mappers = {
     [K in keyof ValidationRuleMapping]: Mapper<ValidationRuleMapping[K]>;
@@ -86,5 +86,7 @@ export type Mappers = {
 
 export type RuleToSchemaFunction = (pRule: ValidationRule, parentProperties?: Partial<ValidationRuleObject>) => OA.SchemaObject | undefined;
 export type SchemaToRules = (schema: ValidationSchema) => Record<string, OA.SchemaObject>;
+
+export type ObjectRules = ValidationSchema & Record<string, ValidationRule>;
 
 export type ValidatorType = ValidatorDefault.default;

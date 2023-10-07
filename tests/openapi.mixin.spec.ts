@@ -9,7 +9,7 @@ import fs from 'fs';
 import Openapi, { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT, openApiVersionsSupported } from '../src/index.js';
 import path from 'path';
 import { Validator } from '@seriousme/openapi-schema-validator';
-import { testMappersService } from './datas/services/testMappersService';
+import { testMappersService } from './datas/services/testMappersService.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));

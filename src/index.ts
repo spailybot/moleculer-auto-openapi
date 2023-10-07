@@ -4,7 +4,7 @@ import fs from 'fs';
 import { ApiRouteSchema } from 'moleculer-web';
 import type { Context, Service } from 'moleculer';
 import type { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
-import { tSystemParams, ValidatorType } from './types.js';
+import { ObjectRules, tSystemParams, ValidatorType } from './types.js';
 import { getFastestValidatorMappers } from './mappers.js';
 import { ROOT_PROPERTY, UNRESOLVED_ACTION_NAME } from './constants.js';
 
@@ -1117,7 +1117,7 @@ export default {
                 return Object.fromEntries(
                     Object.entries(schema)
                         .filter(([k]) => !k.startsWith('$$'))
-                        .map(([k, v]) => [k, this.getSchemaObjectFromRule(v)])
+                        .map(([k, v]) => [k, this.getSchemaObjectFromRule(v, undefined, schema)])
                 );
             }
 
@@ -1128,7 +1128,8 @@ export default {
         getSchemaObjectFromRule(
             this: openApiService,
             pRule: ValidationRule,
-            parentProperties?: Partial<ValidationRuleObject>
+            parentProperties?: Partial<ValidationRuleObject>,
+            parentSchema?: ObjectRules
         ): OA.SchemaObject | undefined {
             if (!this.validator || !this.mappers?.string) {
                 throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
@@ -1157,8 +1158,9 @@ export default {
                 ...baseRule
             };
 
-            const typeMapper: (rule: unknown) => OA.SchemaObject = this.mappers[rule.type as ValidationRuleName] || this.mappers.string; // Utilise le mapper pour string par défaut
-            const schema = typeMapper(rule);
+            const typeMapper: (rule: unknown, parentSchema: unknown) => OA.SchemaObject =
+                this.mappers[rule.type as ValidationRuleName] || this.mappers.string; // Utilise le mapper pour string par défaut
+            const schema = typeMapper(rule, parentSchema);
 
             if (rule.optional) {
                 schema[EOAExtensions.optional] = true;
