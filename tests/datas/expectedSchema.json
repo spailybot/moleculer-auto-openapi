@@ -2,9 +2,9 @@
   "info": {
     "description": "Foo",
     "title": "Bar",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "tags": [
     {
       "name": "auth"
@@ -308,10 +308,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "example": {
-                    "line": "number",
-                    "text": "string"
-                  }
+                  "examples": [
+                    {
+                      "line": "number",
+                      "text": "string"
+                    }
+                  ]
                 }
               }
             }
@@ -409,11 +411,13 @@
           "roles": {
             "type": "array",
             "items": {
-              "example": "user",
               "type": "string",
               "enum": [
                 "user",
                 "admin"
+              ],
+              "examples": [
+                "user"
               ]
             }
           },
@@ -423,73 +427,95 @@
               "male",
               "female"
             ],
-            "default": "female"
+            "examples": [
+              "male"
+            ]
           },
           "numberBy": {
-            "example": 5,
             "type": "number"
           },
           "someNum": {
-            "description": "Is some num",
-            "example": null,
-            "type": "number"
+            "type": "number",
+            "description": "Is some num"
           },
           "types": {
-            "description": "Types arr",
             "type": "array",
+            "examples": [
+              [
+                {
+                  "id": 1,
+                  "typeId": 5
+                }
+              ]
+            ],
             "default": [
               {
                 "id": 1,
                 "typeId": 5
               }
             ],
-            "minItems": 1,
-            "maxItems": 1,
             "items": {
               "$ref": "#/components/schemas/some.update.types"
-            }
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "description": "Types arr"
           },
           "bars": {
-            "description": "Bars arr",
             "type": "array",
-            "minItems": 1,
-            "maxItems": 2,
             "items": {
               "$ref": "#/components/schemas/some.update.bars"
-            }
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "description": "Bars arr"
           },
           "someObj": {
             "description": "Some obj",
             "$ref": "#/components/schemas/some.update.someObj"
           },
           "someBool": {
-            "example": false,
-            "type": "boolean"
+            "type": "boolean",
+            "examples": [
+              true,
+              false
+            ]
           },
           "desc": {
             "type": "string",
-            "minLength": 4,
-            "maxLength": 10
+            "maxLength": 10,
+            "minLength": 4
           },
           "email": {
-            "example": "foo@bar.com",
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "pattern": "^\\S+@\\S+\\.\\S+$",
+            "examples": [
+              "foo@bar.com"
+            ]
           },
           "date": {
-            "example": "1998-01-10T13:00:00.000Z",
             "type": "string",
-            "format": "date-time"
+            "default": "1998-01-10T13:00:00.000Z",
+            "format": "date-time",
+            "examples": [
+              "1998-01-10T13:00:00.000Z",
+              884437200000
+            ]
           },
           "uuid": {
-            "example": "10ba038e-48da-487b-96e8-8d3b99b6d18a",
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "examples": [
+              "10ba038e-48da-487b-96e8-8d3b99b6d18a"
+            ]
           },
           "url": {
-            "example": "https://example.com",
             "type": "string",
-            "format": "uri"
+            "format": "url",
+            "examples": [
+              "https://foobar.com"
+            ]
           },
           "shortObject": {
             "$ref": "#/components/schemas/some.update.shortObject"
@@ -499,6 +525,7 @@
           }
         },
         "required": [
+          "roles",
           "sex",
           "numberBy",
           "someNum",

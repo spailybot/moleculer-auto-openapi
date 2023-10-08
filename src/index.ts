@@ -1,5 +1,5 @@
 import { getAbsoluteFSPath } from 'swagger-ui-dist';
-import type { OpenAPIV3_1 as OA } from 'openapi-types';
+import { OpenAPIV3_1 as OA3_1, OpenAPIV3 as OA3 } from 'openapi-types';
 import fs from 'fs';
 import { ApiRouteSchema } from 'moleculer-web';
 import type { Context, Service } from 'moleculer';
@@ -7,6 +7,7 @@ import type { ValidationRule, ValidationRuleName, ValidationRuleObject, Validati
 import { ObjectRules, tSystemParams, ValidatorType } from './types.js';
 import { getFastestValidatorMappers } from './mappers.js';
 import { ROOT_PROPERTY, UNRESOLVED_ACTION_NAME } from './constants.js';
+import { moleculerOpenAPITypes } from './moleculer.js';
 
 const swaggerUiAssetPath = getAbsoluteFSPath();
 
@@ -22,10 +23,10 @@ export type openApiMixinSettings = {
     schemaPath: string;
     uiPath: string;
     assetsPath: string;
-    commonPathItemObjectResponses: OA.ResponsesObject;
-    requestBodyAndResponseBodyAreSameOnMethods: Array<OA.HttpMethods>;
+    commonPathItemObjectResponses: OA3_1.ResponsesObject & OA3.ResponsesObject;
+    requestBodyAndResponseBodyAreSameOnMethods: Array<OA3_1.HttpMethods>;
     requestBodyAndResponseBodyAreSameDescription: string;
-    openapi: OA.Document & { version: openApiVersionsSupported };
+    openapi: OA3_1.Document & { openapi: `${openApiVersionsSupported}${string}` };
     /**
      * allow to skip unresolved actions
      */
@@ -39,15 +40,26 @@ export type openApiMixinSettings = {
      * add the openAPI to cache
      */
     cacheOpenApi: boolean;
+    /**
+     * summary template
+     * use variable between double accolades : {{summary}}
+     * @var string summary : the actual summary
+     * @var string action : the action name
+     * @var string autoAlias : print [autoAlias] if an auto alias
+     *
+     */
+    summaryTemplate: string;
 };
 type openApiService = Service<openApiMixinSettings> & { validator?: ValidatorType };
 
-export type openApiVersionsSupported = '3.1';
+const openApiVersionsSupported = ['3.1'] as const;
+export type openApiVersionsSupported = (typeof openApiVersionsSupported)[number];
+const defaultOpenApiVersion: openApiVersionsSupported = '3.1';
 
 export type OA_GENERATE_DOCS_INPUT = {
     version?: openApiVersionsSupported;
 };
-export type OA_GENERATE_DOCS_OUTPUT = OA.Document;
+export type OA_GENERATE_DOCS_OUTPUT = OA3_1.Document;
 
 /*
  * Inspired by https://github.com/grinat/moleculer-auto-openapi
@@ -91,203 +103,21 @@ export default {
             tags: [],
             paths: {},
             components: {
-                schemas: {
-                    // Standard moleculer schemas
-                    DbMixinList: {
-                        type: 'object',
-                        properties: {
-                            rows: {
-                                type: 'array',
-                                items: {
-                                    type: 'object'
-                                }
-                            },
-                            totalCount: {
-                                type: 'number'
-                            }
-                        }
-                    },
-                    DbMixinFindList: {
-                        type: 'array',
-                        items: {
-                            type: 'object'
-                        }
-                    },
-                    Item: {
-                        type: 'object'
-                    },
-                    // Standard moleculer responses
-                    Error: {
-                        type: 'object',
-                        properties: {
-                            name: {
-                                examples: ['InternalServerError'],
-                                type: 'string',
-                                description: 'The name of the error'
-                            },
-                            message: {
-                                examples: ['Example'],
-                                type: 'string',
-                                description: 'an helping message'
-                            },
-                            code: {
-                                type: 'number',
-                                description: 'the status code of the error (can be different of the HTTP status code)'
-                            },
-                            type: {
-                                type: 'string',
-                                description: 'additional information for the error'
-                            },
-                            data: {
-                                type: 'object'
-                            }
-                        },
-                        required: ['name', 'message', 'code']
-                    }
-                },
+                schemas: moleculerOpenAPITypes.schemas,
                 securitySchemes: {},
-                responses: {
-                    ServerError: {
-                        // extends: 'Error',
-                        description: 'Server errors: 500, 501, 400, 404 and etc...',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    allOf: [
-                                        { $ref: '#/components/schemas/Error' },
-                                        {
-                                            examples: [
-                                                {
-                                                    name: 'InternalServerError',
-                                                    message: 'Internal Server Error',
-                                                    code: 500
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    UnauthorizedError: {
-                        description: 'Need auth',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    allOf: [
-                                        { $ref: '#/components/schemas/Error' },
-                                        {
-                                            type: 'object',
-                                            examples: [
-                                                {
-                                                    name: 'UnAuthorizedError',
-                                                    message: 'Unauthorized',
-                                                    code: 401
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    ValidationError: {
-                        description: 'Fields invalid',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    allOf: [
-                                        { $ref: '#/components/schemas/Error' },
-                                        {
-                                            type: 'object',
-                                            examples: [
-                                                {
-                                                    name: 'MoleculerClientError',
-                                                    message: 'Error message',
-                                                    code: 422,
-                                                    data: [
-                                                        { name: 'fieldName', message: 'Field invalid' },
-                                                        { name: 'arrayField[0].fieldName', message: 'Whats wrong' },
-                                                        { name: 'object.fieldName', message: 'Whats wrong' }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    ReturnedData: {
-                        description: '',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    oneOf: [
-                                        {
-                                            $ref: '#/components/schemas/DbMixinList'
-                                        },
-                                        {
-                                            $ref: '#/components/schemas/DbMixinFindList'
-                                        },
-                                        {
-                                            $ref: '#/components/schemas/Item'
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    FileNotExist: {
-                        description: 'File not exist',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    examples: [
-                                        {
-                                            name: 'MoleculerClientError',
-                                            message: 'File missing in the request',
-                                            code: 400
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    FileTooBig: {
-                        description: 'File too big',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    examples: [
-                                        {
-                                            name: 'PayloadTooLarge',
-                                            message: 'Payload too large',
-                                            code: 413,
-                                            type: 'PAYLOAD_TOO_LARGE',
-                                            data: {
-                                                fieldname: 'file',
-                                                filename: '4b2005c0b8.png',
-                                                encoding: '7bit',
-                                                mimetype: 'image/png'
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                }
+                responses: moleculerOpenAPITypes.responses
             }
-        }
-    },
+        },
+        cacheOpenApi: true,
+        skipUnresolvedActions: false,
+        clearCacheOnRoutesGenerated: true,
+        summaryTemplate: '{{summary}}\n            ({{action}}){{autoAlias}}'
+    } as openApiMixinSettings,
     events: {
         async '$api.aliases.regenerated'(this: openApiService) {
             const generateDocsAction = 'generateDocs';
             if (this.settings.clearCacheOnRoutesGenerated && this.broker.cacher && this.actions[generateDocsAction]) {
-                const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.generateDocs`, {}, {}, []);
+                const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.generateDocs*`, {}, {}, []);
                 await this.broker.cacher.clean(cacheKey);
             }
         }
@@ -296,8 +126,9 @@ export default {
         generateDocs: {
             cache: {
                 enabled(this: openApiService) {
-                    return this.setting.cacheOpenApi;
+                    return this.settings.cacheOpenApi;
                 },
+                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => `${actionName}|${params?.version || defaultOpenApiVersion}`,
                 ttl: 600
             },
             openapi: {
@@ -359,6 +190,14 @@ export default {
                     }
                 }
             },
+            // TODO support multiples OA version ?
+            // params: {
+            //     version: {
+            //         type: 'number',
+            //         default: defaultOpenApiVersion,
+            //         enum: openApiVersionsSupported
+            //     }
+            // },
             handler(this: openApiService, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
                 return this.generateSchema(ctx);
             }
@@ -462,7 +301,7 @@ export default {
                 throw new Error('bad initialisation (no validator)');
             }
 
-            const doc: OA.Document = JSON.parse(JSON.stringify(this.settings.openapi));
+            const doc: OA3_1.Document = JSON.parse(JSON.stringify(this.settings.openapi));
 
             const nodes = await this.fetchServicesWithActions();
 
@@ -597,7 +436,7 @@ export default {
 
             return routes;
         },
-        attachRoutesToDoc(routes, doc: OA.Document) {
+        attachRoutesToDoc(this: openApiService, routes, doc: OA3_1.Document) {
             // route to openapi paths
             for (const action in routes) {
                 const { paths, params, actionType, openapi = {} } = routes[action];
@@ -608,7 +447,7 @@ export default {
                 for (const path of paths) {
                     // parse method and path from: POST /api/table
                     const [tmpMethod, subPath] = path.alias.split(' ');
-                    const method = tmpMethod.toLowerCase() as OA.HttpMethods;
+                    const method = tmpMethod.toLowerCase() as OA3_1.HttpMethods;
 
                     // convert /:table to /{table}
                     const openapiPath: string = this.formatParamUrl(this.normalizePath(`${path.base}/${subPath}`));
@@ -623,7 +462,7 @@ export default {
 
                     // Path Item Object
                     // https://github.com/OAI/OpenAPI-Specification/blob/b748a884fa4571ffb6dd6ed9a4d20e38e41a878c/versions/3.0.3.md#path-item-object-example
-                    let currentPathMethod: (typeof currentPath)[OA.HttpMethods] & { components?: OA.ComponentsObject } = {
+                    let currentPathMethod: (typeof currentPath)[OA3_1.HttpMethods] & { components?: OA3_1.ComponentsObject } = {
                         summary: '',
                         tags: [service],
                         // rawParams: params,
@@ -690,16 +529,24 @@ export default {
                         delete currentPathMethod.components;
                     }
 
-                    currentPathMethod.summary = `
-            ${currentPathMethod.summary}
-          `.trim();
+                    const templateVariables = {
+                        summary: currentPathMethod.summary,
+                        action,
+                        autoAlias: path.autoAliases ? '[autoAlias]' : ''
+                    };
 
-                    currentPath[method] = currentPathMethod as (typeof currentPath)[OA.HttpMethods];
+                    currentPathMethod.summary = Object.entries(templateVariables)
+                        .reduce((previous, [k, v]) => {
+                            return previous.replace(new RegExp(`{{${k}}}`, 'g'), v);
+                        }, this.settings.summaryTemplate)
+                        .trim();
+
+                    currentPath[method] = currentPathMethod as (typeof currentPath)[OA3_1.HttpMethods];
                     doc.paths[openapiPath] = currentPath;
                 }
             }
         },
-        addTagToDoc(doc: OA.Document, tagName) {
+        addTagToDoc(doc: OA3_1.Document, tagName) {
             const exist = (doc.tags || []).some((v) => v.name === tagName);
             if (!exist && tagName) {
                 (doc.tags || []).push({
@@ -761,11 +608,11 @@ export default {
         },
         extractSystemParams(obj: Record<string, unknown> = {}): tSystemParams {
             return {
-                description: obj?.$$t as string
+                description: obj?.[EOAExtensions.description] as string
             };
         },
         createSchemaFromParams(
-            doc: OA.Document,
+            doc: OA3_1.Document,
             rootSchemeName: string,
             obj: ValidationRule | ValidationSchema,
             exclude: Array<string> = [],
@@ -777,7 +624,61 @@ export default {
 
             const rules = Object.fromEntries(Object.entries(rootRules).filter(([name, rule]) => !exclude.includes(name) && rule));
 
-            this._createSchemaFromParams(doc, rootSchemeName, rules, parentNode);
+            this._createSchemaComponentFromObject(doc, rootSchemeName, rules, parentNode);
+        },
+        _createSchemaPartFromRule(
+            doc: OA3_1.Document,
+            nextSchemeName: string,
+            rule: OA3_1.SchemaObject
+        ): OA3_1.SchemaObject | OA3_1.ReferenceObject {
+            const systemParams: tSystemParams = this.extractSystemParams(rule);
+
+            rule.description = systemParams.description;
+            //delete extensions
+            Object.values(EOAExtensions).forEach((extension) => {
+                delete rule[extension];
+            });
+
+            if (rule.type == 'object' && rule.properties) {
+                // create child schema per object
+                this._createSchemaComponentFromObject(doc, nextSchemeName, rule.properties);
+                return {
+                    description: rule.description,
+                    $ref: `#/components/schemas/${nextSchemeName}`
+                };
+            }
+
+            if (rule.type === 'array') {
+                return {
+                    ...rule,
+                    items: rule.items ? this._createSchemaPartFromRule(doc, nextSchemeName, rule.items as OA3_1.SchemaObject) : undefined
+                };
+            }
+
+            const multiOAProperties = ['oneOf', 'allOf', 'anyOf'];
+            if (multiOAProperties.some((property) => rule[property])) {
+                let i = 0;
+                multiOAProperties.forEach((property) => {
+                    if (!rule[property]) {
+                        return;
+                    }
+
+                    rule[property] = (rule[property] as Array<OA3_1.SchemaObject>).map((schema) => {
+                        if (schema.type !== 'object') {
+                            return schema;
+                        }
+
+                        const schemeName = `${nextSchemeName}.${i++}`;
+                        this._createSchemaPartFromRule(doc, schemeName, schema);
+
+                        return {
+                            $ref: `#/components/schemas/${schemeName}`
+                        };
+                    });
+                });
+            }
+
+            return rule;
         },
         /**
          * Convert moleculer params to openapi definitions(components schemas)
@@ -786,17 +687,17 @@ export default {
          * @param obj
          * @param parentNode
          */
-        _createSchemaFromParams(
-            doc: OA.Document,
+        _createSchemaComponentFromObject(
+            doc: OA3_1.Document,
             schemeName: string,
-            obj: Record<string, OA.SchemaObject> | { [ROOT_PROPERTY]: OA.SchemaObject },
+            obj: Record<string, OA3_1.SchemaObject> | { [ROOT_PROPERTY]: OA3_1.SchemaObject },
             parentNode: { default?: any } = {}
         ) {
             if (obj[ROOT_PROPERTY]) {
                 const rootObj = obj[ROOT_PROPERTY];
                 const systemParams: tSystemParams = this.extractSystemParams(rootObj);
 
-                const schema: OA.SchemaObject = {
+                const schema: OA3_1.SchemaObject = {
                     ...rootObj
                 };
 
@@ -808,157 +709,15 @@ export default {
                 return;
             }
 
-            const systemParams: tSystemParams = this.extractSystemParams(obj);
-
             const required: Array<string> = [];
             const properties = Object.fromEntries(
                 Object.entries(obj).map(([fieldName, rule]) => {
                     const nextSchemeName = `${schemeName}.${fieldName}`;
-
                     if (rule[EOAExtensions.optional] != true) {
                         required.push(fieldName);
                     }
 
-                    //delete extensions
-                    Object.values(EOAExtensions).forEach((extension) => {
-                        delete rule[extension];
-                    });
-
-                    if (rule.type == 'object' && rule.properties) {
-                        // create child schema per object
-                        this._createSchemaFromParams(doc, nextSchemeName, rule.properties);
-                        return [
-                            fieldName,
-                            {
-                                $ref: `#/components/schemas/${nextSchemeName}`
-                            }
-                        ];
-                    }
-
-                    if (rule.type === 'array') {
-                        const isChildObject = (rule.items as OA.SchemaObject)?.type === 'object';
-                        const items = isChildObject
-                            ? {
-                                  $ref: `#/components/schemas/${nextSchemeName}`
-                              }
-                            : rule.items;
-
-                        if (isChildObject) {
-                            this._createSchemaFromParams(doc, nextSchemeName, rule.items as OA.SchemaObject);
-                        }
-
-                        return [
-                            fieldName,
-                            {
-                                ...rule,
-                                items
-                            }
-                        ];
-                    }
-
-                    return [fieldName, rule];
-                    //
-                    // if (
-                    //     // expand $$type: "object|optional"
-                    //     node &&
-                    //     node.$$type &&
-                    //     node.$$type.includes('object')
-                    // ) {
-                    //     node = {
-                    //         type: 'object',
-                    //         optional: node.$$type.includes('optional'),
-                    //         $$t: node.$$t || '',
-                    //         props: {
-                    //             ...node
-                    //         }
-                    //     };
-                    // } else if (
-                    //     // skip system field in validator scheme
-                    //     fieldName.startsWith('$$')
-                    // ) {
-                    //     continue;
-                    // }
-                    //
-                    // if (exclude.includes(fieldName)) {
-                    //     continue;
-                    // }
-                    //
-                    // // expand from short rule to full
-                    // if (!(node && node.type)) {
-                    //     node = this.expandShortDefinition(node);
-                    // }
-                    //
-                    // // mark as required
-                    // if (node.type === 'array') {
-                    //     if (node.min || node.length || node.max) {
-                    //         (def.required || []).push(fieldName);
-                    //         def.minItems = node.length || node.min;
-                    //         def.maxItems = node.length || node.max;
-                    //     }
-                    //     (def as unknown as OA.ArraySchemaObject).uniqueItems = node.unique;
-                    // } else if (!node.optional) {
-                    //     (def.required || []).push(fieldName);
-                    // }
-                    //
-                    // // common props
-                    // def.properties = def.properties || {};
-                    // def.properties[fieldName] = {
-                    //     description: node.$$t
-                    // };
-                    //
-                    // if (node.type === 'object') {
-                    //     def.properties[fieldName] = {
-                    //         $ref: `#/components/schemas/${nextSchemeName}`
-                    //     };
-                    //     this.createSchemaFromParams(doc, nextSchemeName, node.props, [], node);
-                    //     continue;
-                    // }
-                    //
-                    // // array with objects
-                    // if (node.type === 'array' && node.items && node.items.type === 'object') {
-                    //     def.properties[fieldName] = {
-                    //         ...def.properties[fieldName],
-                    //         type: 'array',
-                    //         default: node.default,
-                    //         uniqueItems: node.unique,
-                    //         minItems: node.length || node.min,
-                    //         maxItems: node.length || node.max,
-                    //         items: {
-                    //             $ref: `#/components/schemas/${nextSchemeName}`
-                    //         }
-                    //     };
-                    //     this.createSchemaFromParams(doc, nextSchemeName, node.items.props, [], node);
-                    //     continue;
-                    // }
-                    //
-                    // // simple array
-                    // if (node.type === 'array') {
-                    //     def.properties[fieldName] = {
-                    //         ...def.properties[fieldName],
-                    //         type: 'array',
-                    //         items: this.getTypeAndExample({
-                    //             default: node.default,
-                    //             enum: node.enum,
-                    //             type: node.items
-                    //         }),
-                    //         uniqueItems: node.unique,
-                    //         minItems: node.length || node.min,
-                    //         maxItems: node.length || node.max
-                    //     };
-                    //     continue;
-                    // }
-                    //
-                    // // string/number/boolean
-                    // def.properties[fieldName] = {
-                    //     ...def.properties[fieldName],
-                    //     ...this.getTypeAndExample(node)
-                    // };
-                    //
-                    // if (!def.required || def.required.length === 0) {
-                    //     delete def.required;
-                    // }
-                    //
-                    // return [fieldName, 'aaaa'];
+                    return [fieldName, this._createSchemaPartFromRule(doc, nextSchemeName, rule)];
                 })
             );
 
@@ -968,7 +727,6 @@ export default {
                 type: 'object',
                 properties,
                 required: required.length > 0 ? required : undefined,
-                description: systemParams.description,
                 default: parentNode.default
             };
         },
@@ -1046,7 +804,7 @@ export default {
          * @returns {[]}
          */
         extractParamsFromUrl(url = '') {
-            const params: Array<OA.ParameterObject> = [];
+            const params: Array<OA3_1.ParameterObject> = [];
             const added: Array<string> = [];
 
             const matches = [...this.matchAll(/{(\w+)}/g, url)] as Array<string>;
@@ -1112,7 +870,7 @@ export default {
                 }
             };
         },
-        getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OA.SchemaObject> {
+        getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OA3_1.SchemaObject> {
             if (schema.$$root !== true) {
                 return Object.fromEntries(
                     Object.entries(schema)
@@ -1130,7 +888,7 @@ export default {
             pRule: ValidationRule,
             parentProperties?: Partial<ValidationRuleObject>,
             parentSchema?: ObjectRules
-        ): OA.SchemaObject | undefined {
+        ): OA3_1.SchemaObject | undefined {
             if (!this.validator || !this.mappers?.string) {
                 throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
             }
@@ -1158,16 +916,20 @@ export default {
                 ...baseRule
             };
 
-            const typeMapper: (rule: unknown, parentSchema: unknown) => OA.SchemaObject =
+            const typeMapper: (rule: unknown, parentSchema: unknown) => OA3_1.SchemaObject =
                 this.mappers[rule.type as ValidationRuleName] || this.mappers.string; // Utilise le mapper pour string par défaut
             const schema = typeMapper(rule, parentSchema);
+
+            if (!schema) {
+                return undefined;
+            }
 
             if (rule.optional) {
                 schema[EOAExtensions.optional] = true;
             }
 
             extensions.forEach(([k, v]) => {
-                rule[k] = v;
+                schema[k] = v;
             });
 
             return schema;

@@ -3,55 +3,14 @@ process.env.PORT = '0';
 
 import { ServiceBroker } from 'moleculer';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import Openapi, { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/index.js';
-import ApiGateway from 'moleculer-web';
-import { testMappersService } from './datas/services/testMappersService.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/index.js';
 import type { OpenAPIV3_1 as OA } from 'openapi-types';
-
-const OpenapiService = {
-    name: 'openapi',
-    mixins: [Openapi],
-    settings: {
-        openapi: {
-            info: {
-                description: 'Foo',
-                title: 'Bar'
-            }
-        }
-    }
-};
-
-const ApiService = {
-    name: 'api',
-    mixins: [ApiGateway],
-    settings: {
-        routes: [
-            {
-                path: '/api',
-                whitelist: ['tests-mappers.*'],
-                autoAliases: true
-            }
-            // {
-            //     path: '/api',
-            //     aliases: {
-            //         'POST tests-simple': 'tests.simple',
-            //         'POST tests-strings': 'tests.strings'
-            //     }
-            // }
-        ]
-    }
-};
+import { ApiService } from './datas/services/api.service.js';
+import { OpenapiService } from './datas/services/openapi.service.js';
+import { testMappersService } from './datas/services/testMappers.service.js';
 
 describe('Test FastestValidator mappers', () => {
     const broker = new ServiceBroker({ logger: false });
-    // const broker = new ServiceBroker({
-    //     logger: {
-    //         type: 'console',
-    //         options: {
-    //             level: 'debug'
-    //         }
-    //     }
-    // });
     broker.createService(testMappersService);
     broker.createService(OpenapiService);
     broker.createService(ApiService);
@@ -173,6 +132,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate correct openapi for type mac', async () => {
             const property = testSchema.properties.mac;
             expect(property).toEqual({
+                examples: ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac',
                 pattern:
                     '^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$',
@@ -205,18 +165,6 @@ describe('Test FastestValidator mappers', () => {
                 type: 'object'
             });
         });
-        // it('should generate correct openapi for type object', async () => {
-        //     const schemaName = 'tests.simple.object';
-        //     expect(testSchema.properties.object).toEqual({
-        //         $ref: `#/components/schemas/${schemaName}`
-        //     });
-        //
-        //     const property = OADocument.components.schemas${testMappersService.name}`chemaName];`        //
-        //     //remove undefined parts
-        //     expect(JSON.parse(JSON.stringify(property))).toStrictEqual({
-        //         type: 'object'
-        //     });
-        // });
 
         it('should generate correct openapi for type objectID', async () => {
             const property = testSchema.properties.objectID;
@@ -291,6 +239,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate correct openapi for type any with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 'test',
                 examples: ['test']
             });
         });
@@ -372,8 +321,29 @@ describe('Test FastestValidator mappers', () => {
         it('should generate correct openapi for type array with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
-                type: 'array',
-                examples: [['test1', 'test2']]
+                default: ['test1', 'test2'],
+                examples: [['test1', 'test2']],
+                type: 'array'
+            });
+        });
+        it('should generate correct openapi for type array with sub object', async () => {
+            const property = testSchema.properties.withSubObject;
+            expect(property).toEqual({
+                items: {
+                    $ref: '#/components/schemas/tests-mappers.array.withSubObject'
+                },
+                type: 'array'
+            });
+
+            const subSchema = OADocument.components.schemas[`${testMappersService.name}.array.withSubObject`];
+            expect(subSchema).toEqual({
+                properties: {
+                    num: {
+                        type: 'number'
+                    }
+                },
+                required: ['num'],
+                type: 'object'
             });
         });
     });
@@ -407,8 +377,9 @@ describe('Test FastestValidator mappers', () => {
         it('should generate correct openapi for type boolean with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
-                type: 'boolean',
-                examples: [true]
+                default: [true],
+                examples: [true],
+                type: 'boolean'
             });
         });
     });
@@ -456,6 +427,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type currency with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '$12,222.2',
                 examples: ['$12,222.2'],
                 format: 'currency',
                 pattern: '(?=.*\\d)^(-?|-?)(([0-9]\\d{0,2}(,\\d{3})*)|0)?(\\.\\d{1,2})?$',
@@ -528,6 +500,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type date with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '1998-01-10T13:00:00.000Z',
                 examples: ['1998-01-10T13:00:00.000Z', 884437200000],
                 format: 'date-time',
                 type: 'string'
@@ -561,6 +534,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type email with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 'email@foobar.com',
                 examples: ['email@foobar.com'],
                 format: 'email',
                 pattern: '^\\S+@\\S+\\.\\S+$',
@@ -646,6 +620,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type equal with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 'test',
                 enum: ['test'],
                 examples: ['test'],
                 type: 'string'
@@ -730,6 +705,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type luhn with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '4242424242424242',
                 examples: ['4242424242424242'],
                 format: 'luhn',
                 pattern: '^(\\d{1,4} ){3}\\d{1,4}$',
@@ -746,6 +722,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type mac', async () => {
             const property = testSchema.properties.normal;
             expect(property).toEqual({
+                examples: ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac',
                 pattern:
                     '^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$',
@@ -755,6 +732,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type mac with shortHand', async () => {
             const property = testSchema.properties.shortHand;
             expect(property).toEqual({
+                examples: ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac',
                 pattern:
                     '^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$',
@@ -764,6 +742,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type mac with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '00:B0:D0:63:C2:26',
                 examples: ['00:B0:D0:63:C2:26'],
                 format: 'mac',
                 pattern:
@@ -792,6 +771,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type multi with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 'test',
                 examples: ['test'],
                 oneOf: [
                     {
@@ -799,6 +779,62 @@ describe('Test FastestValidator mappers', () => {
                     }
                 ]
             });
+        });
+
+        it('should generate openapi for type multi with differentRules', async () => {
+            const property = testSchema.properties.withDifferentRules;
+            expect(property).toEqual({
+                default: 'test',
+                examples: ['test'],
+                oneOf: [
+                    {
+                        type: 'string'
+                    },
+                    {
+                        $ref: '#/components/schemas/tests-mappers.multi.withDifferentRules.0'
+                    }
+                ]
+            });
+
+            const subSchema = OADocument.components.schemas[`${testMappersService.name}.multi.withDifferentRules.0`];
+            expect(subSchema).toEqual({
+                properties: {
+                    num: {
+                        type: 'number'
+                    }
+                },
+                required: ['num'],
+                type: 'object'
+            });
+        });
+
+        it('should generate openapi for type multi with multiple sub schemas', async () => {
+            const property = testSchema.properties.withMultipleSubSchemas;
+            expect(property).toEqual({
+                default: 'test',
+                examples: ['test'],
+                oneOf: [
+                    {
+                        $ref: '#/components/schemas/tests-mappers.multi.withMultipleSubSchemas.0'
+                    },
+                    {
+                        $ref: '#/components/schemas/tests-mappers.multi.withMultipleSubSchemas.1'
+                    }
+                ]
+            });
+
+            const subSchema0 = OADocument.components.schemas[`${testMappersService.name}.multi.withMultipleSubSchemas.0`];
+            const subSchema1 = OADocument.components.schemas[`${testMappersService.name}.multi.withMultipleSubSchemas.1`];
+            expect(subSchema0).toEqual({
+                properties: {
+                    num: {
+                        type: 'number'
+                    }
+                },
+                required: ['num'],
+                type: 'object'
+            });
+            expect(subSchema1).toStrictEqual(subSchema0);
         });
     });
 
@@ -822,6 +858,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type number with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 1,
                 examples: [1],
                 type: 'number'
             });
@@ -904,6 +941,9 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type object with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: {
+                    foo: 'bar'
+                },
                 examples: [
                     {
                         foo: 'bar'
@@ -988,6 +1028,9 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type record with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: {
+                    foo: 'bar'
+                },
                 type: 'object'
             });
         });
@@ -1265,6 +1308,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type tuple with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: [1, 'test'],
                 examples: [[1, 'test']],
                 maxItems: 2,
                 minItems: 2,
@@ -1285,12 +1329,7 @@ describe('Test FastestValidator mappers', () => {
                 items: {
                     oneOf: [
                         {
-                            properties: {
-                                num: {
-                                    type: 'number'
-                                }
-                            },
-                            type: 'object'
+                            $ref: '#/components/schemas/tests-mappers.tuple.withItems.0'
                         },
                         {
                             type: 'string'
@@ -1300,6 +1339,17 @@ describe('Test FastestValidator mappers', () => {
                 maxItems: 2,
                 minItems: 2,
                 type: 'array'
+            });
+
+            const subSchema = OADocument.components.schemas[`${testMappersService.name}.tuple.withItems.0`];
+            expect(subSchema).toEqual({
+                properties: {
+                    num: {
+                        type: 'number'
+                    }
+                },
+                required: ['num'],
+                type: 'object'
             });
         });
     });
@@ -1328,6 +1378,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type url with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: 'https://mysite.com',
                 examples: ['https://mysite.com'],
                 format: 'url',
                 type: 'string'
@@ -1367,6 +1418,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type uuid with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '6a6e3331-4e5f-4c5b-9b78-782d60426cc6',
                 examples: ['6a6e3331-4e5f-4c5b-9b78-782d60426cc6'],
                 format: 'uuid',
                 type: 'string'
@@ -1458,6 +1510,7 @@ describe('Test FastestValidator mappers', () => {
         it('should generate openapi for type objectId with default', async () => {
             const property = testSchema.properties.withDefault;
             expect(property).toEqual({
+                default: '507f1f77bcf86cd799439012',
                 examples: ['507f1f77bcf86cd799439012'],
                 format: 'ObjectId',
                 maxLength: 24,

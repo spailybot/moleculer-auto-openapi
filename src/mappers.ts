@@ -43,6 +43,7 @@ export const getFastestValidatorMappers = ({
 }) => {
     return {
         any: (rule: RuleAny): OA.SchemaObject => ({
+            default: rule.default,
             examples: rule.default ? [rule.default] : undefined
         }),
         array: (rule: RuleArray): OA.SchemaObject => {
@@ -50,6 +51,7 @@ export const getFastestValidatorMappers = ({
                 type: 'array',
                 examples: rule.default ? [rule.default] : undefined,
                 uniqueItems: rule.unique,
+                default: rule.default,
                 items: rule.items ? getSchemaObjectFromRule(rule.items, { enum: rule.enum }) : undefined
             };
 
@@ -65,6 +67,7 @@ export const getFastestValidatorMappers = ({
         },
         boolean: (rule: RuleBoolean): OA.SchemaObject => ({
             type: 'boolean',
+            default: rule.default,
             examples: rule.default ?? [true, false]
         }),
         class: () => undefined,
@@ -88,6 +91,7 @@ export const getFastestValidatorMappers = ({
             return {
                 type: 'string',
                 pattern: pattern,
+                default: rule.default,
                 examples: rule.default ? [rule.default] : undefined,
                 format: 'currency'
             };
@@ -103,6 +107,7 @@ export const getFastestValidatorMappers = ({
 
             return {
                 type: 'string',
+                default: rule.default,
                 format: 'date-time',
                 examples
             };
@@ -117,6 +122,7 @@ export const getFastestValidatorMappers = ({
             return {
                 type: 'string',
                 format: 'email',
+                default: rule.default,
                 pattern: new RegExp(pattern).source,
                 maxLength: rule.max,
                 minLength: rule.min,
@@ -139,6 +145,7 @@ export const getFastestValidatorMappers = ({
 
             return {
                 type,
+                default: rule.default,
                 examples: rule.default ? [rule.default] : undefined,
                 enum: rule.value ? [rule.value] : undefined
             } as OA.ArraySchemaObject | OA.NonArraySchemaObject;
@@ -147,6 +154,7 @@ export const getFastestValidatorMappers = ({
         function: () => undefined,
         luhn: (rule: RuleLuhn): OA.SchemaObject => ({
             type: 'string',
+            default: rule.default,
             pattern: '^(\\d{1,4} ){3}\\d{1,4}$',
             examples: rule.default ? [rule.default] : undefined,
             format: 'luhn'
@@ -156,8 +164,9 @@ export const getFastestValidatorMappers = ({
                 /^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$/i;
             return {
                 type: 'string',
+                default: rule.default,
                 pattern: new RegExp(PATTERN).source,
-                examples: rule.default ? [rule.default] : undefined,
+                examples: rule.default ? [rule.default] : ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac'
             };
         },
@@ -167,6 +176,7 @@ export const getFastestValidatorMappers = ({
                 .filter(Boolean);
             return {
                 oneOf: schemas,
+                default: rule.default,
                 examples: rule.default ? [rule.default] : undefined
             };
         },
@@ -174,6 +184,7 @@ export const getFastestValidatorMappers = ({
             const example = rule.default ?? rule.enum?.[0] ?? rule.min ?? rule.max;
             const schema: OA.NonArraySchemaObject = {
                 type: 'number',
+                default: rule.default,
                 examples: example ? [example] : undefined
             };
 
@@ -205,6 +216,7 @@ export const getFastestValidatorMappers = ({
                 type: 'object',
                 minProperties: rule.minProps,
                 maxProperties: rule.maxProps,
+                default: rule.default,
                 properties: rule.props ?? rule.properties ? getSchemaObjectFromSchema(rule.props ?? rule.properties) : undefined,
                 examples: rule.default ? [rule.default] : undefined
             };
@@ -214,64 +226,66 @@ export const getFastestValidatorMappers = ({
 
             let schema: OA.SchemaObject = {
                 type: 'object',
+                default: fvRule.default,
                 additionalProperties: valueSchema
             };
 
             return schema;
         },
-        string: (rule: RuleString): OA.SchemaObject => {
+        string: (fvRule: RuleString): OA.SchemaObject => {
             let schema: OA.NonArraySchemaObject = {
+                default: fvRule.default,
                 type: 'string'
             };
 
-            if (rule.length) {
-                schema.maxLength = rule.length;
-                schema.minLength = rule.length;
+            if (fvRule.length) {
+                schema.maxLength = fvRule.length;
+                schema.minLength = fvRule.length;
             } else {
-                schema.maxLength = rule.max;
-                schema.minLength = rule.min;
+                schema.maxLength = fvRule.max;
+                schema.minLength = fvRule.min;
             }
 
             let defaultExample: string | undefined;
 
-            if (rule.pattern) {
-                schema.pattern = new RegExp(rule.pattern).source;
-            } else if (rule.contains) {
-                schema.pattern = `.*${rule.contains}.*`;
-                defaultExample = rule.contains;
-            } else if (rule.numeric) {
+            if (fvRule.pattern) {
+                schema.pattern = new RegExp(fvRule.pattern).source;
+            } else if (fvRule.contains) {
+                schema.pattern = `.*${fvRule.contains}.*`;
+                defaultExample = fvRule.contains;
+            } else if (fvRule.numeric) {
                 schema.pattern = '^[0-9]+$';
                 schema.format = 'numeric';
                 defaultExample = '12345';
-            } else if (rule.alpha) {
+            } else if (fvRule.alpha) {
                 schema.pattern = '^[a-zA-Z]+$';
                 schema.format = 'alpha';
                 defaultExample = 'abcdef';
-            } else if (rule.alphanum) {
+            } else if (fvRule.alphanum) {
                 schema.pattern = '^[a-zA-Z0-9]+$';
                 schema.format = 'alphanum';
                 defaultExample = 'abc123';
-            } else if (rule.alphadash) {
+            } else if (fvRule.alphadash) {
                 schema.pattern = '^[a-zA-Z0-9_-]+$';
                 schema.format = 'alphadash';
                 defaultExample = 'abc-123';
-            } else if (rule.singleLine) {
+            } else if (fvRule.singleLine) {
                 schema.pattern = '^[^\\r\\n]*$';
                 schema.format = 'single-line';
                 defaultExample = 'abc 123';
-            } else if (rule.hex) {
+            } else if (fvRule.hex) {
                 schema.pattern = '^([0-9A-Fa-f]{2})+$';
                 schema.format = 'hex';
                 defaultExample = '48656c6c6f20576f726c64';
-            } else if (rule.base64) {
+            } else if (fvRule.base64) {
                 schema.pattern = '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$';
                 schema.format = 'byte';
                 defaultExample = 'aGVsbG8gd29ybGQ='; // "hello world" en base64.
             }
 
-            schema.enum = rule.enum;
+            schema.enum = fvRule.enum;
 
-            const example = rule.default ?? rule.enum?.[0] ?? defaultExample;
+            const example = fvRule.default ?? fvRule.enum?.[0] ?? defaultExample;
 
             if (example) {
                 schema.examples = [example];
@@ -282,6 +296,7 @@ export const getFastestValidatorMappers = ({
         tuple: (rule: RuleTuple): OA.SchemaObject => {
             const baseSchema = getSchemaObjectFromRule({
                 type: 'array',
+                default: rule.default,
                 length: 2
             } as RuleArray) as OA.ArraySchemaObject;
 
@@ -300,6 +315,7 @@ export const getFastestValidatorMappers = ({
         url: (rule: RuleURL): OA.SchemaObject => ({
             type: 'string',
             format: 'url',
+            default: rule.default,
             examples: [rule.default ?? 'https://foobar.com']
         }),
         uuid: (rule: RuleUUID): OA.SchemaObject => {
@@ -333,6 +349,7 @@ export const getFastestValidatorMappers = ({
             return {
                 type: 'string',
                 format: 'uuid',
+                default: rule.default,
                 examples: rule.default ? [rule.default] : [example]
             };
         },
@@ -342,6 +359,7 @@ export const getFastestValidatorMappers = ({
             return {
                 type: 'string',
                 format: 'ObjectId',
+                default: rule.default,
                 minLength: defaultObjectId.length,
                 maxLength: defaultObjectId.length,
                 examples: rule.default ? [rule.default] : [defaultObjectId]

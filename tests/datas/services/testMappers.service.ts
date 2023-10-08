@@ -53,6 +53,13 @@ type tParams = {
     custom: paramsOf<RuleCustomInline>;
 };
 
+const subObject: RuleObject = {
+    type: 'object',
+    properties: {
+        num: 'number'
+    }
+};
+
 const params: tParams = {
     any: {
         normal: {
@@ -108,6 +115,10 @@ const params: tParams = {
         withDefault: {
             type: 'array',
             default: ['test1', 'test2']
+        },
+        withSubObject: {
+            type: 'array',
+            items: subObject
         }
     },
     boolean: {
@@ -287,6 +298,16 @@ const params: tParams = {
         withDefault: {
             type: 'multi',
             rules: ['string'],
+            default: 'test'
+        },
+        withDifferentRules: {
+            type: 'multi',
+            rules: ['string', subObject],
+            default: 'test'
+        },
+        withMultipleSubSchemas: {
+            type: 'multi',
+            rules: [subObject, subObject],
             default: 'test'
         }
     },
@@ -507,15 +528,7 @@ const params: tParams = {
         },
         withItems: {
             type: 'tuple',
-            items: [
-                {
-                    type: 'object',
-                    properties: {
-                        num: 'number'
-                    }
-                },
-                { type: 'string' }
-            ]
+            items: [subObject, { type: 'string' }]
         }
     },
     url: {
@@ -587,7 +600,7 @@ const params: tParams = {
     custom: {
         normal: {
             type: 'custom',
-            check: (value) => true
+            check: () => true
         },
         shortHand: 'custom'
     }
