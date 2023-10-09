@@ -1,26 +1,24 @@
-// Use random ports during tests
 import { ApiService } from './datas/services/api.service.js';
-
-process.env.PORT = '0';
-
 import url from 'url';
 import { ServiceBroker } from 'moleculer';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import ApiGateway from 'moleculer-web';
 import fs from 'fs';
-import Openapi, { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT, openApiVersionsSupported } from '../src/index.js';
+
 import path from 'path';
 import { Validator } from '@seriousme/openapi-schema-validator';
-import { testMappersService } from './datas/services/testMappers.service.js';
+import { testMappersService } from './datas/services/test-mappers.service';
 import { OpenapiService } from './datas/services/openapi.service.js';
 import { SomeService } from './datas/services/some.service.js';
+import { openApiVersionsSupported } from '../src/commons.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/MoleculerOpenAPIGenerator.js';
+import { Readable, Stream } from 'stream';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 describe("Test 'openapi' mixin", () => {
-    // const broker = new ServiceBroker({ logger: false });
     const broker = new ServiceBroker({
+        logger: false,
         cacher: 'memory'
     });
     broker.createService(testMappersService);
@@ -54,7 +52,7 @@ describe("Test 'openapi' mixin", () => {
     it('generate schema json file', async () => {
         expect.assertions(1);
 
-        const json = await broker.call('openapi.generateDocs');
+        const json = await broker.call(`${OpenapiService.name}.generateDocs`);
 
         const expectedJSONPath = path.join(__dirname, 'datas', 'expectedSchema.json');
         const expectedSchema = JSON.parse(fs.readFileSync(expectedJSONPath).toString());
@@ -71,14 +69,14 @@ describe("Test 'openapi' mixin", () => {
         const file = 'swagger-ui-bundle.js.map';
         const swaggerPath = (await import('swagger-ui-dist')).getAbsoluteFSPath();
 
-        const stream = await broker.call('openapi.assets', { file });
+        const stream = await broker.call<Readable, { file: string }>(`${OpenapiService.name}.assets`, { file });
 
         const expected = fs.readFileSync(path.join(swaggerPath, file)).toString();
 
         let buffer = '';
-        // for await (const chunk of stream) {
-        //     buffer += chunk;
-        // }
+        for await (const chunk of stream) {
+            buffer += chunk;
+        }
 
         expect(stream).toBeInstanceOf(fs.ReadStream);
         expect(buffer).toEqual(expected);

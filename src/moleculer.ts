@@ -59,7 +59,7 @@ const Error: OA.SchemaObject = {
 /**
  * RESPONSES
  */
-const ServerError: OA.RequestBodyObject = {
+const ServerError: OA.ResponseObject = {
     // extends: 'Error',
     description: 'Server errors: 500, 501, 400, 404 and etc...',
     content: {
@@ -82,7 +82,7 @@ const ServerError: OA.RequestBodyObject = {
     }
 };
 
-const UnauthorizedError: OA.RequestBodyObject = {
+const UnauthorizedError: OA.ResponseObject = {
     description: 'Need auth',
     content: {
         'application/json': {
@@ -104,7 +104,7 @@ const UnauthorizedError: OA.RequestBodyObject = {
         }
     }
 };
-const ValidationError: OA.RequestBodyObject = {
+const ValidationError: OA.ResponseObject = {
     description: 'Fields invalid',
     content: {
         'application/json': {
@@ -131,7 +131,7 @@ const ValidationError: OA.RequestBodyObject = {
         }
     }
 };
-const ReturnedData: OA.RequestBodyObject = {
+const ReturnedData: OA.ResponseObject = {
     description: '',
     content: {
         'application/json': {
@@ -151,7 +151,7 @@ const ReturnedData: OA.RequestBodyObject = {
         }
     }
 };
-const FileNotExist: OA.RequestBodyObject = {
+const FileNotExist: OA.ResponseObject = {
     description: 'File not exist',
     content: {
         'application/json': {
@@ -173,7 +173,7 @@ const FileNotExist: OA.RequestBodyObject = {
         }
     }
 };
-const FileTooBig: OA.RequestBodyObject = {
+const FileTooBig: OA.ResponseObject = {
     description: 'File too big',
     content: {
         'application/json': {
@@ -210,7 +210,7 @@ export const schemas = {
     Error
 };
 
-export const responses = {
+export const responses: Record<string, OA.ReferenceObject | OA.ResponseObject> = {
     ServerError,
     UnauthorizedError,
     ValidationError,

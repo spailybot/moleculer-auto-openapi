@@ -6,6 +6,7 @@ export const ApiService = {
     name: 'api',
     mixins: [ApiGateway],
     settings: {
+        port: 0,
         routes: [
             {
                 path: '/api',

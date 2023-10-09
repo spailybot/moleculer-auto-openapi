@@ -57,7 +57,8 @@ const subObject: RuleObject = {
     type: 'object',
     properties: {
         num: 'number'
-    }
+    },
+    default: { num: 1 }
 };
 
 const params: tParams = {
@@ -361,6 +362,12 @@ const params: tParams = {
         withDefault: {
             type: 'object',
             default: { foo: 'bar' }
+        },
+        withSubObject: {
+            type: 'object',
+            properties: {
+                sub: subObject
+            }
         },
         withStrict: {
             type: 'object',

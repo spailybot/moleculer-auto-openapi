@@ -1,6 +1,6 @@
 {
-  "name": "moleculer-auto-openapi",
-  "version": "1.1.5",
+  "name": "@spailybot/moleculer-auto-openapi",
+  "version": "1.1.0",
   "description": "Auto generate openapi(swagger) scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
@@ -41,39 +41,38 @@
     "swagger",
     "moleculer"
   ],
-  "author": "Gabdrashitov Rinat <paladin2012gnu@gmail.com>",
+  "author": "SpailyBot <contact@sbot.tv>",
+  "contributors": ["Gabdrashitov Rinat <paladin2012gnu@gmail.com>"],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/grinat/moleculer-auto-openapi/issues"
+    "url": "https://github.com/spailybot/moleculer-auto-openapi/issues"
   },
-  "homepage": "https://github.com/grinat/moleculer-auto-openapi#readme",
-  "dependencies": {
-  },
+  "homepage": "https://github.com/spailybot/moleculer-auto-openapi#readme",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@seriousme/openapi-schema-validator": "^2.1.2",
     "@tsconfig/node-lts": "^18.12.5",
-    "@types/node": "^20.8.2",
+    "@types/node": "^20.8.3",
     "@types/swagger-ui-dist": "^3.30.2",
     "@typescript-eslint/parser": "6.7.4",
     "esbuild": "^0.19.4",
-    "eslint": "8.50.0",
+    "eslint": "8.51.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-prettier": "5.0.0",
-    "fastest-validator": "^1.17.0",
+    "fastest-validator": "github:thib3113/fastest-validator",
     "jest": "^29.7.0",
     "moleculer": "^0.14.31",
     "moleculer-web": "^0.10.6",
     "openapi-types": "^12.1.3",
     "prettier": "3.0.3",
     "rimraf": "^5.0.5",
-    "swagger-ui-dist": "^5.9.0",
+    "swagger-ui-dist": "^5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
     "moleculer": "^0.14.31",
-    "swagger-ui-dist": "^5.9.0"
+    "swagger-ui-dist": "^5"
   },
   "pnpm": {
     "overrides": {

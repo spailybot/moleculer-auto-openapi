@@ -40,10 +40,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {
-                  "login": "",
-                  "pass": ""
-                }
+                "examples": [
+                  {
+                    "login": "",
+                    "pass": ""
+                  }
+                ]
               }
             }
           }
@@ -66,12 +68,14 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "example": {
-                      "id": 1,
-                      "filename": "foo.txt",
-                      "mimetype": "text/plain",
-                      "sizeInBytes": 100
-                    }
+                    "examples": [
+                      {
+                        "id": 1,
+                        "filename": "foo.txt",
+                        "mimetype": "text/plain",
+                        "sizeInBytes": 100
+                      }
+                    ]
                   }
                 }
               }
@@ -165,16 +169,19 @@
         ],
         "parameters": [
           {
-            "name": "roles[]",
             "in": "query",
+            "name": "roles",
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
-                "example": "user",
                 "type": "string",
                 "enum": [
                   "user",
                   "admin"
+                ],
+                "examples": [
+                  "user"
                 ]
               }
             }
@@ -182,99 +189,100 @@
           {
             "in": "query",
             "name": "sex",
+            "required": false,
             "schema": {
               "type": "string",
               "enum": [
                 "male",
                 "female"
               ],
-              "example": "male"
+              "examples": [
+                "male"
+              ]
             }
           },
           {
-            "name": "populate[]",
             "in": "query",
+            "name": "populate",
+            "required": true,
             "schema": {
               "type": "array",
               "items": {
-                "example": "",
                 "type": "string"
-              },
-              "minItems": 2,
-              "maxItems": 2
+              }
             }
           },
           {
-            "name": "fields[]",
             "in": "query",
+            "name": "fields",
+            "required": true,
             "schema": {
               "type": "array",
               "items": {
-                "example": "",
                 "type": "string"
-              },
-              "minItems": 2,
-              "maxItems": 2
+              }
             }
           },
           {
             "in": "query",
             "name": "limit",
+            "required": true,
             "schema": {
-              "example": null,
-              "type": "number",
-              "minLength": 0
+              "type": "number"
             }
           },
           {
             "in": "query",
             "name": "offset",
+            "required": true,
             "schema": {
-              "example": null,
-              "type": "number",
-              "minLength": 0
+              "type": "number"
             }
           },
           {
             "in": "query",
             "name": "sort",
+            "required": true,
             "schema": {
-              "example": "",
               "type": "string"
             }
           },
           {
             "in": "query",
             "name": "search",
+            "required": true,
             "schema": {
+              "default": "find me now",
               "type": "string",
-              "default": "find me now"
+              "examples": [
+                "find me now"
+              ]
             }
           },
           {
-            "name": "searchFields[]",
             "in": "query",
+            "name": "searchFields",
+            "required": true,
             "schema": {
               "type": "array",
               "items": {
-                "example": "",
                 "type": "string"
-              },
-              "minItems": 2,
-              "maxItems": 2
+              }
             }
           },
           {
-            "name": "query[]",
             "in": "query",
+            "name": "query",
+            "required": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "example": "",
-                "type": "string"
-              },
-              "minItems": 2,
-              "maxItems": 2
+              "oneOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -397,6 +405,41 @@
       "Item": {
         "type": "object"
       },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "examples": [
+              "InternalServerError"
+            ],
+            "type": "string",
+            "description": "The name of the error"
+          },
+          "message": {
+            "examples": [
+              "Example"
+            ],
+            "type": "string",
+            "description": "an helping message"
+          },
+          "code": {
+            "type": "number",
+            "description": "the status code of the error (can be different of the HTTP status code)"
+          },
+          "type": {
+            "type": "string",
+            "description": "additional information for the error"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "code"
+        ]
+      },
       "unknown-action": {
         "type": "object",
         "properties": {}
@@ -404,6 +447,90 @@
       "some.upload": {
         "type": "object",
         "properties": {}
+      },
+      "some.update.types": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "typeId": {
+            "type": "number"
+          }
+        },
+        "default": {
+          "id": 1,
+          "typeId": 5
+        }
+      },
+      "some.update.bars": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "fooNum": {
+            "type": "number",
+            "description": "fooNum"
+          }
+        }
+      },
+      "some.update.someObj": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Some obj ID"
+          },
+          "numberId": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "default": {
+          "name": "bar"
+        }
+      },
+      "some.update.shortObject": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "examples": [
+              "https://foobar.com"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "some.update.shortObject2": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "examples": [
+              "https://foobar.com"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
       },
       "some.update": {
         "type": "object",
@@ -536,106 +663,12 @@
           "uuid",
           "url",
           "shortObject"
-        ],
-        "minItems": 1,
-        "maxItems": 2
-      },
-      "some.update.types": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "example": null,
-            "type": "number"
-          },
-          "typeId": {
-            "example": null,
-            "type": "number"
-          }
-        },
-        "default": [
-          {
-            "id": 1,
-            "typeId": 5
-          }
-        ]
-      },
-      "some.update.bars": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "example": null,
-            "type": "number"
-          },
-          "fooNum": {
-            "description": "fooNum",
-            "example": null,
-            "type": "number"
-          }
-        }
-      },
-      "some.update.someObj": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "description": "Some obj ID",
-            "example": null,
-            "type": "number"
-          },
-          "numberId": {
-            "example": null,
-            "type": "number"
-          },
-          "name": {
-            "example": "",
-            "type": "string",
-            "maxLength": 100
-          }
-        },
-        "default": {
-          "name": "bar"
-        }
-      },
-      "some.update.shortObject": {
-        "type": "object",
-        "properties": {
-          "desc": {
-            "example": "",
-            "type": "string",
-            "maxLength": 10000
-          },
-          "url": {
-            "example": "https://example.com",
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "some.update.shortObject2": {
-        "type": "object",
-        "properties": {
-          "desc": {
-            "example": "",
-            "type": "string",
-            "maxLength": 10000
-          },
-          "url": {
-            "example": "https://example.com",
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "required": [
-          "url"
         ]
       },
       "some.go": {
         "type": "object",
         "properties": {
           "line": {
-            "example": null,
             "type": "number"
           }
         },
@@ -647,13 +680,16 @@
         "type": "object",
         "properties": {
           "password": {
-            "example": "",
             "type": "string",
             "minLength": 8,
             "pattern": "^[a-zA-Z0-9]+$"
           },
           "repeatPassword": {
-            "example": "",
+            "type": "string",
+            "minLength": 8,
+            "pattern": "^[a-zA-Z0-9]+$"
+          },
+          "confirmPassword": {
             "type": "string",
             "minLength": 8,
             "pattern": "^[a-zA-Z0-9]+$"
@@ -661,7 +697,8 @@
         },
         "required": [
           "password",
-          "repeatPassword"
+          "repeatPassword",
+          "confirmPassword"
         ]
       }
     },
@@ -672,12 +709,20 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "example": {
-                "name": "MoleculerClientError",
-                "message": "Server error message",
-                "code": 500
-              }
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Error"
+                },
+                {
+                  "examples": [
+                    {
+                      "name": "InternalServerError",
+                      "message": "Internal Server Error",
+                      "code": 500
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -687,12 +732,21 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "example": {
-                "name": "MoleculerClientError",
-                "message": "Unauth error message",
-                "code": 401
-              }
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Error"
+                },
+                {
+                  "type": "object",
+                  "examples": [
+                    {
+                      "name": "UnAuthorizedError",
+                      "message": "Unauthorized",
+                      "code": 401
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -702,26 +756,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "example": {
-                "name": "MoleculerClientError",
-                "message": "Error message",
-                "code": 422,
-                "data": [
-                  {
-                    "name": "fieldName",
-                    "message": "Field invalid"
-                  },
-                  {
-                    "name": "arrayField[0].fieldName",
-                    "message": "Whats wrong"
-                  },
-                  {
-                    "name": "object.fieldName",
-                    "message": "Whats wrong"
-                  }
-                ]
-              }
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Error"
+                },
+                {
+                  "type": "object",
+                  "examples": [
+                    {
+                      "name": "MoleculerClientError",
+                      "message": "Error message",
+                      "code": 422,
+                      "data": [
+                        {
+                          "name": "fieldName",
+                          "message": "Field invalid"
+                        },
+                        {
+                          "name": "arrayField[0].fieldName",
+                          "message": "Whats wrong"
+                        },
+                        {
+                          "name": "object.fieldName",
+                          "message": "Whats wrong"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -751,12 +814,21 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "example": {
-                "name": "MoleculerClientError",
-                "message": "File missing in the request",
-                "code": 400
-              }
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Error"
+                },
+                {
+                  "type": "object",
+                  "examples": [
+                    {
+                      "name": "MoleculerClientError",
+                      "message": "File missing in the request",
+                      "code": 400
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -766,19 +838,28 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "example": {
-                "name": "PayloadTooLarge",
-                "message": "Payload too large",
-                "code": 413,
-                "type": "PAYLOAD_TOO_LARGE",
-                "data": {
-                  "fieldname": "file",
-                  "filename": "4b2005c0b8.png",
-                  "encoding": "7bit",
-                  "mimetype": "image/png"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Error"
+                },
+                {
+                  "type": "object",
+                  "examples": [
+                    {
+                      "name": "PayloadTooLarge",
+                      "message": "Payload too large",
+                      "code": 413,
+                      "type": "PAYLOAD_TOO_LARGE",
+                      "data": {
+                        "fieldname": "file",
+                        "filename": "4b2005c0b8.png",
+                        "encoding": "7bit",
+                        "mimetype": "image/png"
+                      }
+                    }
+                  ]
                 }
-              }
+              ]
             }
           }
         }

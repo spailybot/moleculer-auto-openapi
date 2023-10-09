@@ -1,3 +1,5 @@
+import { RuleArray } from 'fastest-validator';
+
 export const SomeService = {
     name: 'some',
     actions: {
@@ -56,6 +58,7 @@ export const SomeService = {
                     items: {
                         type: 'object',
                         strict: 'remove',
+                        default: { id: 1, typeId: 5 },
                         props: {
                             id: { type: 'number', optional: true },
                             typeId: { type: 'number', optional: true }

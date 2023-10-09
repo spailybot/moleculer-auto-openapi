@@ -1,13 +1,14 @@
 // Use random ports during tests
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/MoleculerOpenAPIGenerator';
+
 process.env.PORT = '0';
 
 import { ServiceBroker } from 'moleculer';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/index.js';
 import type { OpenAPIV3_1 as OA } from 'openapi-types';
 import { ApiService } from './datas/services/api.service.js';
 import { OpenapiService } from './datas/services/openapi.service.js';
-import { testMappersService } from './datas/services/testMappers.service.js';
+import { testMappersService } from './datas/services/test-mappers.service';
 
 describe('Test FastestValidator mappers', () => {
     const broker = new ServiceBroker({ logger: false });
@@ -337,6 +338,9 @@ describe('Test FastestValidator mappers', () => {
 
             const subSchema = OADocument.components.schemas[`${testMappersService.name}.array.withSubObject`];
             expect(subSchema).toEqual({
+                default: {
+                    num: 1
+                },
                 properties: {
                     num: {
                         type: 'number'
@@ -798,6 +802,9 @@ describe('Test FastestValidator mappers', () => {
 
             const subSchema = OADocument.components.schemas[`${testMappersService.name}.multi.withDifferentRules.0`];
             expect(subSchema).toEqual({
+                default: {
+                    num: 1
+                },
                 properties: {
                     num: {
                         type: 'number'
@@ -826,6 +833,9 @@ describe('Test FastestValidator mappers', () => {
             const subSchema0 = OADocument.components.schemas[`${testMappersService.name}.multi.withMultipleSubSchemas.0`];
             const subSchema1 = OADocument.components.schemas[`${testMappersService.name}.multi.withMultipleSubSchemas.1`];
             expect(subSchema0).toEqual({
+                default: {
+                    num: 1
+                },
                 properties: {
                     num: {
                         type: 'number'
@@ -949,6 +959,35 @@ describe('Test FastestValidator mappers', () => {
                         foo: 'bar'
                     }
                 ],
+                type: 'object'
+            });
+        });
+        it('should generate openapi for type object with sub object', async () => {
+            const property = testSchema.properties.withSubObject;
+            expect(property).toEqual({
+                $ref: '#/components/schemas/tests-mappers.object.withSubObject'
+            });
+            const subSchema = OADocument.components.schemas[`${testMappersService.name}.object.withSubObject`];
+            expect(subSchema).toEqual({
+                properties: {
+                    sub: {
+                        $ref: '#/components/schemas/tests-mappers.object.withSubObject.sub'
+                    }
+                },
+                required: ['sub'],
+                type: 'object'
+            });
+            const subSubSchema = OADocument.components.schemas[`${testMappersService.name}.object.withSubObject.sub`];
+            expect(subSubSchema).toEqual({
+                default: {
+                    num: 1
+                },
+                properties: {
+                    num: {
+                        type: 'number'
+                    }
+                },
+                required: ['num'],
                 type: 'object'
             });
         });
@@ -1343,6 +1382,9 @@ describe('Test FastestValidator mappers', () => {
 
             const subSchema = OADocument.components.schemas[`${testMappersService.name}.tuple.withItems.0`];
             expect(subSchema).toEqual({
+                default: {
+                    num: 1
+                },
                 properties: {
                     num: {
                         type: 'number'
