@@ -1,7 +1,6 @@
 import { AliasRouteSchemaOpenApi, ApiRouteSchema } from '../types/types.js';
-import { Alias, aliasNoRest } from './Alias.js';
+import { Alias } from './Alias.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../types/moleculer-web.js';
-import { foundAlias } from '../MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { Route } from './Route.js';
 import { LoggerInstance } from 'moleculer';
 import { HTTP_METHODS, isRawHttpMethodFromMWeb, JOKER_METHOD, REST_METHOD } from '../commons.js';
@@ -24,7 +23,7 @@ export class AliasCreator {
                     return;
                 }
 
-                return this.getSubAliases(aliasInformations).map((alias) => new Alias(name, alias, this.route));
+                return this.getSubAliases(aliasInformations).map((alias) => new Alias(alias, this.route));
             })
             .filter(Boolean);
     }
@@ -99,9 +98,9 @@ export class AliasCreator {
         return res;
     }
 
-    private getSubAliases(alias: AliasRouteSchema): Array<aliasNoRest> {
+    private getSubAliases(alias: AliasRouteSchema): Array<AliasRouteSchemaOpenApi> {
         if (alias.method !== REST_METHOD) {
-            return [alias as aliasNoRest];
+            return [alias];
         }
 
         const actionName = alias.action;

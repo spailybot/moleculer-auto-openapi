@@ -18,6 +18,7 @@ import {
 } from '../commons.js';
 import { ApiRouteSchema } from 'moleculer-web';
 import { Route } from '../objects/Route.js';
+import { Alias } from '../objects/Alias.js';
 
 export type foundRoute = {
     actionType?: string;
@@ -71,29 +72,23 @@ export class MoleculerWebRoutesParser {
 
                 const routeAlias = route?.searchAlias(alias);
                 if (!routeAlias) {
-                    if (route && route.autoAliases !== true) {
+                    if (route && !route.autoAliases) {
                         this.logger.error(`fail to get alias configuration for path "${alias.fullPath}"`);
                         return;
                     }
 
-                    return ((alias.methods === JOKER_METHOD ? HTTP_METHODS_ARRAY : [alias.methods]) ?? []).map((m) => ({
-                        actionType: routeAlias?.type,
-                        path: alias.fullPath,
-                        method: m.toLowerCase() as foundRoute['method'],
-                        action: alias.actionName,
-                        openapi: route?.openapi
-                    }));
+                    return new Alias(
+                        {
+                            path: alias.path,
+                            method: alias.methods,
+                            action: alias.actionName,
+                            openapi: route?.openapi
+                        },
+                        route
+                    ).getAllAliases();
                 }
 
-                // TODO manage JOKER method here
-
-                return {
-                    actionType: routeAlias?.type,
-                    path: alias.fullPath,
-                    method: alias.methods.toLowerCase() as foundRoute['method'],
-                    action: alias.actionName,
-                    openapi: routeAlias?.openapi ?? route?.openapi
-                };
+                return routeAlias.getAllAliases();
             })
             .filter(Boolean);
 
