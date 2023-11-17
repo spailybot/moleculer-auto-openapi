@@ -1,6 +1,6 @@
 {
   "name": "@spailybot/moleculer-auto-openapi",
-  "version": "1.1.0",
+  "version": "0.0.3",
   "description": "Auto generate openapi(swagger) scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
@@ -19,6 +19,9 @@
     "lint:fix": "npm lint -- --fix",
     "ci:eslint": "npm run lint -- -f json -o ./coverage/eslint-report.json"
   },
+  "files": [
+    "lib"
+  ],
   "exports": {
     ".": {
       "default": "./lib/index.cjs",
@@ -34,15 +37,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/grinat/moleculer-auto-openapi.git"
+    "url": "git+https://github.com/spailybot/moleculer-auto-openapi.git"
   },
   "keywords": [
     "openapi",
     "swagger",
-    "moleculer"
+    "moleculer",
+    "moleculer-web"
   ],
   "author": "SpailyBot <contact@sbot.tv>",
-  "contributors": ["Gabdrashitov Rinat <paladin2012gnu@gmail.com>"],
+  "contributors": [
+    "Gabdrashitov Rinat <paladin2012gnu@gmail.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/spailybot/moleculer-auto-openapi/issues"
@@ -50,23 +56,25 @@
   "homepage": "https://github.com/spailybot/moleculer-auto-openapi#readme",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@seriousme/openapi-schema-validator": "^2.1.2",
+    "@seriousme/openapi-schema-validator": "^2.1.3",
     "@tsconfig/node-lts": "^18.12.5",
-    "@types/node": "^20.8.3",
-    "@types/swagger-ui-dist": "^3.30.2",
-    "@typescript-eslint/parser": "6.7.4",
-    "esbuild": "^0.19.4",
-    "eslint": "8.51.0",
+    "@types/body-parser": "^1.19.5",
+    "@types/node": "^20.9.0",
+    "@types/qs": "^6.9.10",
+    "@types/swagger-ui-dist": "^3.30.4",
+    "@typescript-eslint/parser": "6.10.0",
+    "esbuild": "^0.19.5",
+    "eslint": "8.53.0",
     "eslint-config-prettier": "9.0.0",
-    "eslint-plugin-prettier": "5.0.0",
+    "eslint-plugin-prettier": "5.0.1",
     "fastest-validator": "github:thib3113/fastest-validator",
     "jest": "^29.7.0",
-    "moleculer": "^0.14.31",
-    "moleculer-web": "^0.10.6",
+    "moleculer": "^0.14.32",
+    "moleculer-web": "^0.10.7",
     "openapi-types": "^12.1.3",
     "prettier": "3.0.3",
     "rimraf": "^5.0.5",
-    "swagger-ui-dist": "^5",
+    "swagger-ui-dist": "^5.9.3",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },

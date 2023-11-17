@@ -1,16 +1,34 @@
 import * as moleculerWeb from 'moleculer-web';
+import { ServiceSchema } from 'moleculer';
+import type { ApiSettingsSchemaOpenApi } from '../../../src/types/types.js';
 
 const ApiGateway = moleculerWeb.default;
 
 export const ApiService = {
     name: 'api',
     mixins: [ApiGateway],
+    // version: 1,
     settings: {
         port: 0,
+        path: '/api',
         routes: [
             {
-                path: '/api',
+                path: '/test-aliases',
                 aliases: {
+                    health: '$node.health',
+                    custom(req, res) {
+                        res.writeHead(201);
+                        res.end();
+                    },
+                    'GET multipleMethods': {
+                        action: '$node.health',
+                        method: 'POST'
+                    },
+                    'POST multipleTypes': {
+                        action: 'multipart:$node.health',
+                        type: 'stream',
+                        method: 'POST'
+                    },
                     'POST login-custom-function': {
                         handler(_, res) {
                             res.end();
@@ -29,12 +47,24 @@ export const ApiService = {
                                 }
                             }
                         }
-                    }
+                    },
+                    other: [
+                        function (req, res, next) {
+                            this.logger.info('Middleware 1');
+                            next();
+                        },
+                        function (req, res, next) {
+                            this.logger.info('Middleware 2');
+                            next();
+                        }
+                    ],
+                    'REST posts': 'posts'
                 }
             },
             {
-                path: '/api',
+                path: '/base',
                 aliases: {
+                    'FILE /': 'some.upload',
                     'PUT upload': 'multipart:some.upload',
                     'PATCH update/:id': 'some.update',
                     'GET find': {
@@ -48,15 +78,54 @@ export const ApiService = {
                 }
             },
             {
-                path: '/api',
+                path: '/openapi',
                 whitelist: ['openapi.*'],
                 autoAliases: true
             },
             {
-                path: '/api',
+                path: '/auto-aliases-version',
+                whitelist: ['v2.math.*'],
+                autoAliases: true
+            },
+            {
+                path: '/tests',
                 whitelist: ['tests-mappers.*'],
                 autoAliases: true
+            },
+            {
+                openapi: {
+                    tags: ['routeTag']
+                },
+                path: '/tests-openapi',
+                aliases: {
+                    'GET addTag': {
+                        openapi: {
+                            tags: ['aliasTagAddTag']
+                        },
+                        action: 'tests-openapi.addTag'
+                    },
+                    'GET resetTags': {
+                        openapi: {
+                            tags: ['aliasTagResetTags']
+                        },
+                        action: 'tests-openapi.resetTags'
+                    },
+                    'GET multipleTags': {
+                        openapi: {
+                            tags: ['aliasTagMultipleTags']
+                        },
+                        action: 'tests-openapi.multipleTags'
+                    },
+                    'GET responses': {
+                        openapi: {},
+                        action: 'tests-openapi.responses'
+                    },
+                    'GET response': {
+                        openapi: {},
+                        action: 'tests-openapi.response'
+                    }
+                }
             }
         ]
     }
-};
+} as ServiceSchema<ApiSettingsSchemaOpenApi>;

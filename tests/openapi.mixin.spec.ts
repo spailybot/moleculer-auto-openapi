@@ -1,35 +1,56 @@
 import { ApiService } from './datas/services/api.service.js';
-import url from 'url';
-import { ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import fs from 'fs';
+import * as url from 'url';
+import { Service, ServiceBroker } from 'moleculer';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import * as fs from 'fs';
 
-import path from 'path';
+import * as path from 'path';
 import { Validator } from '@seriousme/openapi-schema-validator';
-import { testMappersService } from './datas/services/test-mappers.service';
+import { testMappersService } from './datas/services/test-mappers.service.js';
 import { OpenapiService } from './datas/services/openapi.service.js';
 import { SomeService } from './datas/services/some.service.js';
-import { openApiVersionsSupported } from '../src/commons.js';
+import { getServiceName, openApiVersionsSupported } from '../src/commons.js';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/MoleculerOpenAPIGenerator.js';
-import { Readable, Stream } from 'stream';
+import { Readable } from 'stream';
+import { MathService } from './datas/services/math.service.js';
+import { PostsService } from './datas/services/posts.service.js';
+import { testOpenApiService } from './datas/services/test-openapi.service.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
+const testServices = [
+    testMappersService,
+    SomeService,
+    OpenapiService,
+    ApiService,
+    MathService,
+    PostsService,
+    testOpenApiService
+] as unknown as Array<Service>;
+
 describe("Test 'openapi' mixin", () => {
     const broker = new ServiceBroker({
-        logger: false,
+        // logger: false,
         cacher: 'memory'
     });
-    broker.createService(testMappersService);
-    broker.createService(SomeService);
-    broker.createService(OpenapiService);
-    broker.createService(ApiService);
+
+    testServices.forEach((svc) => broker.createService(svc));
 
     beforeAll(async () => {
         await broker.start();
 
-        await broker.waitForServices([testMappersService.name, OpenapiService.name, ApiService.name]);
+        await broker.waitForServices(testServices.map((svc) => getServiceName(svc)));
+        await new Promise<void>((resolve) => {
+            broker.createService({
+                name: 'apiwaiter',
+                events: {
+                    '$api.aliases.regenerated'() {
+                        resolve();
+                    }
+                }
+            });
+        });
     });
 
     afterAll(() => broker.stop());
@@ -63,6 +84,17 @@ describe("Test 'openapi' mixin", () => {
         // check json https://editor.swagger.io/
         //console.log(JSON.stringify(json, null, ""));
         expect(json).toMatchObject(expectedSchema);
+    });
+
+    describe('openApiMerging', () => {
+        let json;
+        beforeEach(async () => {
+            json = await broker.call(`${OpenapiService.name}.generateDocs`);
+        });
+
+        it('should aaa', async () => {
+            console.log(json);
+        });
     });
 
     it('Asset is returned as a stream', async () => {

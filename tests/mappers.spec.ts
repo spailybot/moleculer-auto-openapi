@@ -1,6 +1,4 @@
 // Use random ports during tests
-import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/MoleculerOpenAPIGenerator';
-
 process.env.PORT = '0';
 
 import { ServiceBroker } from 'moleculer';
@@ -8,10 +6,12 @@ import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import type { OpenAPIV3_1 as OA } from 'openapi-types';
 import { ApiService } from './datas/services/api.service.js';
 import { OpenapiService } from './datas/services/openapi.service.js';
-import { testMappersService } from './datas/services/test-mappers.service';
+import { testMappersService } from './datas/services/test-mappers.service.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../src/MoleculerOpenAPIGenerator.js';
 
 describe('Test FastestValidator mappers', () => {
-    const broker = new ServiceBroker({ logger: false });
+    const broker = new ServiceBroker();
+    // const broker = new ServiceBroker({ logger: false });
     broker.createService(testMappersService);
     broker.createService(OpenapiService);
     broker.createService(ApiService);
@@ -20,7 +20,7 @@ describe('Test FastestValidator mappers', () => {
     beforeAll(async () => {
         await broker.start();
 
-        await broker.waitForServices([testMappersService.name, OpenapiService.name, ApiService.name]);
+        await broker.waitForServices([testMappersService.name, OpenapiService.name, `${ApiService.name}`]);
         await new Promise<void>((resolve) => {
             broker.createService({
                 name: 'apiwaiter',

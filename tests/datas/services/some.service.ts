@@ -1,5 +1,3 @@
-import { RuleArray } from 'fastest-validator';
-
 export const SomeService = {
     name: 'some',
     actions: {
@@ -113,6 +111,7 @@ export const SomeService = {
          * Action from moleculer-db mixin
          */
         find: {
+            openapi: {},
             cache: {
                 keys: ['populate', 'fields', 'limit', 'offset', 'sort', 'search', 'searchFields', 'query']
             },

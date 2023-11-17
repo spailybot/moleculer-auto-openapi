@@ -1,3 +1,13 @@
+# FORK
+
+This is a fork of moleculer-auto-openapi . Documentation need to be rewritten !
+
+TODO
+
+- check multipart upload => bad content type
+- allow to add custom mappers
+
+
 # moleculer-auto-openapi
 Auto generate openapi(swagger) scheme for molecular.
 Scheme generated based on action validation params, routes on all avalaibled services and paths in ApiGateway.

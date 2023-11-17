@@ -25,9 +25,9 @@ let makeAllPackagesExternalPlugin = {
 const globalConfig = {
     entryPoints: ['src/index.ts'],
     bundle: true,
-    sourcemap: true,
-    minify: false,
-    external: ['crowdsec-client-scenarios'],
+    sourcemap: false,
+    minify: true,
+    external: [],
     plugins: [makeAllPackagesExternalPlugin]
 };
 

@@ -1,4 +1,4 @@
-import { Mappers, ObjectRules, RuleToSchemaFunction, SchemaToRules } from './types.js';
+import { Mappers, ObjectRules, RuleToSchemaFunction, SchemaToRules } from './types/types.js';
 import {
     RuleAny,
     RuleArray,
@@ -34,13 +34,12 @@ const getOpenApiType = (obj: unknown): OA.NonArraySchemaObjectType | OA.ArraySch
     return type as (typeof OATypes)[number];
 };
 
-export const getFastestValidatorMappers = ({
-    getSchemaObjectFromRule,
-    getSchemaObjectFromSchema
-}: {
+export type MappersOptions = {
     getSchemaObjectFromRule: RuleToSchemaFunction;
     getSchemaObjectFromSchema: SchemaToRules;
-}) => {
+};
+
+export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaObjectFromSchema }: MappersOptions) => {
     return {
         any: (rule: RuleAny): OA.SchemaObject => ({
             default: rule.default,

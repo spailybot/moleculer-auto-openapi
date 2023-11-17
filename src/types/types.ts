@@ -27,8 +27,9 @@ import type {
     ValidationSchema
 } from 'fastest-validator';
 import { OpenAPIV3 as OA3, OpenAPIV3_1 as OA3_1, OpenAPIV3_1 as OA } from 'openapi-types';
-import { ApiRouteSchema } from 'moleculer-web';
-import { openApiVersionsSupported } from './commons.js';
+import { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
+import { openApiVersionsSupported } from '../commons.js';
+import { AliasRouteSchema } from './moleculer-web.js';
 
 export type tSystemParams = {
     description?: string;
@@ -94,10 +95,48 @@ export type ObjectRules = ValidationSchema & Record<string, ValidationRule>;
 
 export type ValidatorType = ValidatorDefault.default;
 
-export interface ApiRouteSchemaOpenApi extends ApiRouteSchema {
-    //TODO
-    openapi: any;
+export type actionOpenApiResponse = Omit<OA.ResponseObject, 'content'> & { content?: OA.MediaTypeObject; type?: string };
+
+export interface ActionOpenApi {
+    tags?: Array<string>;
+    components?: OA.ComponentsObject;
+    responses?: OA.ComponentsObject['responses'];
+    response?: OA.MediaTypeObject | actionOpenApiResponse;
+    description?: string;
 }
+
+export interface ApiSettingsSchemaOpenApi extends ApiSettingsSchema {
+    routes?: Array<ApiRouteSchema>;
+    openapi?: OA.Document;
+}
+
+//TODO
+export interface AliasRouteOpenApi extends ApiRouteOpenApi {}
+
+export interface AliasRouteSchemaOpenApi extends AliasRouteSchema {
+    openapi?: AliasRouteOpenApi;
+}
+
+//TODO
+export interface ApiRouteOpenApi {
+    tags?: Array<string>;
+    components?: OA.ComponentsObject;
+    responses?: OA.ComponentsObject['responses'];
+}
+
+declare module 'moleculer' {
+    interface ActionSchema {
+        openapi?: ActionOpenApi;
+    }
+}
+
+declare module 'moleculer-web' {
+    interface ApiRouteSchema {
+        openapi?: ApiRouteOpenApi;
+    }
+}
+
+export type cleanAlias = string | Array<string> | AliasRouteSchema;
 
 export type openApiMixinSettings = {
     onlyLocal: boolean;
@@ -135,4 +174,12 @@ export type openApiMixinSettings = {
      * @default true
      */
     returnAssetsAsStream: boolean;
+    /**
+     * set the default response content-type, used by "response", can be overridden with parameter "response.type" on action/route level
+     *
+     * @default application/json
+     */
+    defaultResponseContentType: string;
 };
+
+export { ApiRouteSchema };

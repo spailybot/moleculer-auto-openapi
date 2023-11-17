@@ -1,7 +1,7 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "@tsconfig/node-lts",
-    "include": ["src"],
+    "include": ["src", "tests"],
     "compilerOptions": {
         "outDir": "./lib",
         "esModuleInterop": true,
@@ -12,7 +12,7 @@
         "strict": false,
         "typeRoots": ["./node_modules/@types"]
     },
-    "exclude": ["node_modules", "tests", "build"],
+    "exclude": ["node_modules", "build"],
     "ts-node": {
         "esm": true,
         "experimentalSpecifierResolution": "node"
