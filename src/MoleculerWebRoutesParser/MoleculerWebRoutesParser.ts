@@ -1,22 +1,7 @@
-import { ActionOpenApi, AliasRouteSchemaOpenApi, ApiSettingsSchemaOpenApi } from '../types/types.js';
-import {
-    AliasRouteSchema,
-    ApiSchemaAlias,
-    MOLECULER_WEB_LIST_ALIASES_INPUT,
-    MOLECULER_WEB_LIST_ALIASES_OUTPUT,
-    routeAlias
-} from '../types/moleculer-web.js';
+import { ActionOpenApi, AliasRouteSchemaOpenApi, ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../types/types.js';
+import { MOLECULER_WEB_LIST_ALIASES_INPUT, MOLECULER_WEB_LIST_ALIASES_OUTPUT, routeAlias } from '../types/moleculer-web.js';
 import { ActionSchema, Context, LoggerInstance, Service } from 'moleculer';
-import {
-    getServiceName,
-    HTTP_METHODS,
-    HTTP_METHODS_ARRAY,
-    JOKER_METHOD,
-    methodIsHttpMethod,
-    rawHttpMethod,
-    REST_METHOD
-} from '../commons.js';
-import { ApiRouteSchema } from 'moleculer-web';
+import { getServiceName, rawHttpMethod } from '../commons.js';
 import { Route } from '../objects/Route.js';
 import { Alias } from '../objects/Alias.js';
 
@@ -40,31 +25,43 @@ export type foundAlias = {
 };
 
 export class MoleculerWebRoutesParser {
-    constructor(
-        private readonly logger: LoggerInstance,
-        private readonly unresolvedActionName: string
-    ) {}
+    constructor(private readonly logger: LoggerInstance) {}
 
     public async parse(
         ctx: Context,
         service: Service<ApiSettingsSchemaOpenApi>,
-        skipUnresolvedActions: boolean
-    ): Promise<Array<foundRoute>> {
-        // const pathsFounds: Array<foundRoute> = [];
-
+        skipUnresolvedActions: boolean,
+        services: Array<Service>
+    ): Promise<Array<Alias>> {
+        const actionsMap = new Map<string, { service: Service; action: ActionSchema }>();
         const routes = new Map<string, Route>();
+
+        services.forEach((svc) =>
+            Object.values(svc.actions).forEach((action) => {
+                actionsMap.set(action.name, {
+                    service: svc,
+                    action
+                });
+            })
+        );
 
         const serviceName = getServiceName(service);
 
         (service.settings?.routes || []).forEach((routeSchema) => {
-            const route = new Route(this.logger, routeSchema, service.settings?.path, skipUnresolvedActions);
+            const route = new Route(
+                this.logger,
+                routeSchema,
+                service.settings?.path,
+                skipUnresolvedActions,
+                ctx.service as Service<OpenApiMixinSettings>
+            );
 
             routes.set(route.path, route);
         });
 
         const autoAliases = await this.fetchAliasesForService(ctx, serviceName);
 
-        const foundRoutes = (autoAliases ?? [])
+        return (autoAliases ?? [])
             .flatMap((alias: routeAlias) => {
                 this.logger.debug(`checking alias ${alias} for path ${alias.fullPath}`);
 
@@ -85,16 +82,27 @@ export class MoleculerWebRoutesParser {
                             openapi: route?.openapi
                         },
                         route
-                    ).getAllAliases();
+                    );
                 }
 
-                return routeAlias.getAllAliases();
+                return routeAlias;
             })
-            .filter(Boolean);
+            .filter(Boolean)
+            .map((alias) => {
+                if (!alias.action) {
+                    return alias;
+                }
 
-        console.log(foundRoutes);
+                const action = actionsMap.get(alias.action);
+                if (!action) {
+                    this.logger.warn(`fail to get details about action "${alias.action}"`);
+                    return alias;
+                }
 
-        return foundRoutes;
+                alias.actionSchema = action.action;
+
+                return alias;
+            });
 
         // return (autoAliases ?? [])
         //     .flatMap((alias: routeAlias): Array<foundRoute> | foundRoute | undefined => {
@@ -201,185 +209,4 @@ export class MoleculerWebRoutesParser {
             grouping: false
         });
     }
-
-    private extractAliasSubInformations(infos: ApiSchemaAlias, skipUnresolvedActions: boolean): foundAlias | undefined {
-        const isAliasRouteSchema = (v: unknown): v is AliasRouteSchemaOpenApi =>
-            v && (['action', 'handler'] as Array<keyof AliasRouteSchema>).some((property) => !!(v as AliasRouteSchema)[property]);
-
-        if (isAliasRouteSchema(infos)) {
-            return {
-                openapi: infos.openapi,
-                actionType: infos.type,
-                action: infos.action,
-                only: infos.only,
-                method: infos.method,
-                except: infos.except
-            };
-        } else if (Array.isArray(infos)) {
-            const cleansInfos = infos.map((info) => this.extractAliasSubInformations(info, skipUnresolvedActions)).filter(Boolean);
-            const tmpAction = cleansInfos[cleansInfos.length - 1];
-
-            if (!cleansInfos?.length && skipUnresolvedActions) {
-                return;
-            }
-
-            return {
-                action: tmpAction.action ?? null,
-                actionType: tmpAction.actionType,
-                openapi: tmpAction.openapi,
-                only: tmpAction.only,
-                method: tmpAction.method,
-                except: tmpAction.except
-            };
-        } else if (typeof infos !== 'string') {
-            if (skipUnresolvedActions) {
-                return;
-            }
-            return {
-                action: null
-            };
-        } else {
-            return {
-                action: infos
-            };
-        }
-    }
-
-    private extractAliasInformation(infos: ApiSchemaAlias, skipUnresolvedActions: boolean): foundAlias {
-        const res = this.extractAliasSubInformations(infos, skipUnresolvedActions);
-
-        if (!res) {
-            return;
-        }
-
-        // support actions like multipart:import.proceedFile
-        if (!res.actionType && res.action?.includes(':')) {
-            const [actionType, action] = res.action.split(':');
-            res.actionType = actionType;
-            res.action = action;
-        }
-
-        return res;
-    }
-
-    // /**
-    //  * Generate aliases for REST.
-    //  *
-    //  * @param {String} path
-    //  * @param {*} action
-    //  *
-    //  * @returns Array<Alias>
-    //  */
-    // private generateRESTAliases(path: string, action: string) {
-    //     const p = path.split(/\s+/);
-    //     const pathName = p[1];
-    //     const pathNameWithoutEndingSlash = pathName.endsWith('/') ? pathName.slice(0, -1) : pathName;
-    //     const aliases = {
-    //         list: `GET ${pathName}`,
-    //         get: `GET ${pathNameWithoutEndingSlash}/:id`,
-    //         create: `POST ${pathName}`,
-    //         update: `PUT ${pathNameWithoutEndingSlash}/:id`,
-    //         patch: `PATCH ${pathNameWithoutEndingSlash}/:id`,
-    //         remove: `DELETE ${pathNameWithoutEndingSlash}/:id`
-    //     };
-    //     let actions = ['list', 'get', 'create', 'update', 'patch', 'remove'];
-    //
-    //     if (typeof action !== 'string' && (action.only || action.except)) {
-    //         if (action.only) {
-    //             actions = actions.filter((item) => action.only.includes(item));
-    //         }
-    //
-    //         if (action.except) {
-    //             actions = actions.filter((item) => !action.except.includes(item));
-    //         }
-    //
-    //         action = action.action;
-    //     }
-    //
-    //     console.log(action);
-    //     // return actions.map(item => this.createAlias(route, aliases[item], `${action}.${item}`));
-    // }
-
-    // private extendAliases(aliases: Record<string, ApiRouteSchemaOpenApi['aliases'][string]>): Record<string, AliasRouteSchemaOpenApi> {
-    private extendAliases(aliases: Record<string, ApiRouteSchema['aliases'][string]>, skipUnresolvedActions: boolean): Array<foundAlias> {
-        return Object.entries(aliases ?? {})
-            .flatMap(([k, alias]) => {
-                const aliasInformation = this.extractAliasInformation(alias, skipUnresolvedActions);
-
-                return this.getMethods(k, aliasInformation) ?? [];
-            })
-            .filter(Boolean);
-    }
-
-    private _getMethods(tmpMethod: string = ''): Array<HTTP_METHODS | typeof REST_METHOD> | undefined {
-        const method = tmpMethod.toLowerCase();
-        if (method === JOKER_METHOD) {
-            return HTTP_METHODS_ARRAY;
-        }
-        if (method === REST_METHOD || methodIsHttpMethod(method)) {
-            return [method];
-        }
-
-        this.logger.warn(`unknown http method "${method}" . Skip !`);
-        return;
-    }
-
-    private getMethods(aliasKey: string, aliasInformations: foundAlias): Array<foundAlias> | undefined {
-        const splitAlias = aliasKey.split(' ');
-        if (splitAlias.length > 2) {
-            this.logger.warn(`fail to parse alias "${aliasKey}", skip`);
-            return;
-        }
-
-        if (!aliasInformations.method && splitAlias.length === 1) {
-            return HTTP_METHODS_ARRAY.map((m) => ({ ...aliasInformations, method: m }));
-        }
-
-        const methods = this._getMethods(aliasInformations.method ?? splitAlias[0]);
-
-        if (!methods) {
-            return undefined;
-        }
-
-        return methods.flatMap((m) => {
-            return this.getAliasesFromREST(m, aliasInformations);
-        });
-    }
-
-    private getAliasesFromREST(
-        method: HTTP_METHODS | typeof REST_METHOD,
-        alias: foundAlias
-    ): Array<{
-        method: HTTP_METHODS;
-        action: string;
-    }> {
-        if (method !== REST_METHOD) {
-            return [
-                {
-                    method,
-                    action: alias.action
-                }
-            ];
-        }
-
-        const actionName = alias.action;
-        const actions: Record<string, { method: HTTP_METHODS; action: string }> = {
-            list: { method: HTTP_METHODS.GET, action: `${actionName}.list` },
-            get: { method: HTTP_METHODS.GET, action: `${actionName}.get` },
-            create: { method: HTTP_METHODS.POST, action: `${actionName}.create` },
-            update: { method: HTTP_METHODS.PUT, action: `${actionName}.update` },
-            patch: { method: HTTP_METHODS.PATCH, action: `${actionName}.patch` },
-            remove: { method: HTTP_METHODS.DELETE, action: `${actionName}.remove` }
-        };
-
-        return Object.entries(actions)
-            .filter(([key]) => (alias.only ? alias.only.includes(key) : true) && (alias.except ? !alias.except.includes(key) : true))
-            .map(([, v]) => v);
-    }
-
-    // private searchAlias(alias: routeAlias, aliases: Array<foundAlias> = []): foundAlias | undefined {
-    //     return aliases.find(
-    //         (a) => a.method?.toLowerCase() === alias.methods?.toLowerCase() && a.action?.toLowerCase() === alias.actionName?.toLowerCase()
-    //     );
-    // }
 }

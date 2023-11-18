@@ -32,6 +32,8 @@ export const multiOAProperties = ['oneOf', 'allOf', 'anyOf'];
 export type rawHttpMethod = HTTP_METHODS | typeof JOKER_METHOD;
 export type rawHttpMethodFromMWeb = HTTP_METHODS | typeof JOKER_METHOD | typeof REST_METHOD;
 
+export const DEFAULT_CONTENT_TYPE = 'application/json';
+
 export const getServiceName = (svc: Service): string => {
     if (svc.fullName) {
         return svc.fullName;
@@ -42,21 +44,6 @@ export const getServiceName = (svc: Service): string => {
     }
 
     return svc.name;
-};
-
-export const mergeObjects = (orig = {}, toMerge = {}): object => {
-    return Object.keys(toMerge).reduce(
-        (result, key) => {
-            return {
-                ...result,
-                [key]: {
-                    ...(result[key] || {}),
-                    ...toMerge[key]
-                }
-            };
-        },
-        { ...orig }
-    );
 };
 
 export const matchAll = (regex: RegExp, str: string): Array<Array<string>> => {

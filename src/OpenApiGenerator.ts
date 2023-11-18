@@ -5,8 +5,7 @@ import { Mappers, ObjectRules, tSystemParams, ValidatorType } from './types/type
 import { EOAExtensions, HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, matchAll, multiOAProperties, normalizePath } from './commons.js';
 import { getFastestValidatorMappers } from './mappers.js';
 import { LoggerInstance } from 'moleculer';
-import { foundRouteWithFilledAction } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
-import path from 'path';
+import { Alias } from './objects/Alias.js';
 
 export class OpenApiGenerator {
     private components: OA3_1.ComponentsObject = {
@@ -41,29 +40,29 @@ export class OpenApiGenerator {
         this.document = baseDocument;
     }
 
-    generate(routes: Array<foundRouteWithFilledAction>): OA3_1.Document {
+    generate(routes: Array<Alias>): OA3_1.Document {
         const document: OA3_1.Document = { ...this.document };
 
         const cachePathActions = new Map<string, string>();
 
-        routes.forEach((route) => {
+        routes.forEach((alias) => {
             // convert /:table to /{table}
-            const openapiPath: string = this.formatParamUrl(normalizePath(route.path));
+            const openapiPath: string = this.formatParamUrl(normalizePath(alias.path));
             const currentPath: OA3_1.PathItemObject = document.paths[openapiPath] ?? {};
 
-            // const isJokerMethod = route.method === JOKER_METHOD;
-            const isJokerMethod = false;
+            const isJokerMethod = alias.method === JOKER_METHOD;
 
-            const methods: Array<HTTP_METHODS> = isJokerMethod ? HTTP_METHODS_ARRAY : [route.method as HTTP_METHODS];
-            const { parameters, requestBody } = this.extractParameters(openapiPath, route) ?? {};
+            const methods: Array<HTTP_METHODS> = isJokerMethod ? HTTP_METHODS_ARRAY : [alias.method as HTTP_METHODS];
+            const { parameters, requestBody } = this.extractParameters(openapiPath, alias) ?? {};
 
             if (isJokerMethod) {
                 // TODO set parameters here
-                currentPath.description = route.openapi?.description;
+                currentPath.description = alias.actionSchema?.openapi?.description;
                 currentPath.parameters = parameters;
             }
 
-            methods.forEach((method) => {
+            alias.getPaths().forEach((pathAction) => {
+                const method = pathAction.method;
                 const cacheKeyName = `${openapiPath}.${method}`;
 
                 if (currentPath[method]) {
@@ -74,16 +73,16 @@ export class OpenApiGenerator {
                     return;
                 }
 
-                cachePathActions.set(cacheKeyName, route.action?.name);
+                cachePathActions.set(cacheKeyName, pathAction.action?.name);
 
                 const openApiMethod: OA3_1.OperationObject = {
-                    tags: route.openapi?.tags,
-                    responses: route.openapi?.responses,
+                    tags: pathAction.openapi?.tags,
+                    responses: pathAction.openapi?.responses,
                     parameters
                 };
 
                 if (!isJokerMethod) {
-                    openApiMethod.description = route.openapi?.description;
+                    openApiMethod.description = pathAction.openapi?.description;
                 }
 
                 (currentPath[method] as OA3_1.OperationObject) = openApiMethod;
@@ -201,15 +200,15 @@ export class OpenApiGenerator {
         return document;
     }
 
-    private extractParameters(path: string, route: foundRouteWithFilledAction): Pick<OA3_1.OperationObject, 'parameters' | 'requestBody'> {
+    private extractParameters(path: string, alias: Alias): Pick<OA3_1.OperationObject, 'parameters' | 'requestBody'> {
         const result: Pick<OA3_1.OperationObject, 'parameters' | 'requestBody'> = {
             parameters: this.extractParamsFromUrl(path)
         };
 
-        if (route.action?.params) {
+        if (alias.actionSchema?.params) {
             this.createSchemaFromParams(
-                route.action.name,
-                route.action.params,
+                alias.actionSchema.name,
+                alias.actionSchema.params,
                 result.parameters.map((params: OA3_1.ParameterObject) => params.name)
             );
         }

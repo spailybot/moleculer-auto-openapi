@@ -1,20 +1,18 @@
 import type { Context, LoggerInstance, Service, ServiceBroker } from 'moleculer';
 import Moleculer from 'moleculer';
-import type { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import type { Mappers, ObjectRules, openApiMixinSettings, tSystemParams, ValidatorType } from './types/types.js';
+import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { OpenApiMixinSettings, ValidatorType } from './types/types.js';
 import { ApiSettingsSchemaOpenApi } from './types/types.js';
-import type { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
-import { ROOT_PROPERTY, UNRESOLVED_ACTION_NAME } from './constants.js';
+import { UNRESOLVED_ACTION_NAME } from './constants.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
-import { EOAExtensions, HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, openApiVersionsSupported } from './commons.js';
-import { getFastestValidatorMappers } from './mappers.js';
+import { DEFAULT_CONTENT_TYPE, openApiVersionsSupported } from './commons.js';
 import { ApiSettingsSchema } from 'moleculer-web';
-import { foundRouteWithFilledAction, MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
-import { OpenApiMerger } from './OpenApiMerger.js';
-import MoleculerError = Moleculer.Errors.MoleculerError;
+import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { OpenApiGenerator } from './OpenApiGenerator.js';
+import { Alias } from './objects/Alias.js';
+import MoleculerError = Moleculer.Errors.MoleculerError;
 
-export const defaultSettings: openApiMixinSettings = {
+export const defaultSettings: OpenApiMixinSettings = {
     onlyLocal: false, // build schema from only local services
     schemaPath: '/api/openapi/openapi.json',
     uiPath: '/api/openapi/ui',
@@ -61,7 +59,7 @@ export const defaultSettings: openApiMixinSettings = {
     clearCacheOnRoutesGenerated: true,
     summaryTemplate: '{{summary}}\n            ({{action}}){{autoAlias}}',
     returnAssetsAsStream: true,
-    defaultResponseContentType: 'application/json'
+    defaultResponseContentType: DEFAULT_CONTENT_TYPE
 };
 
 export type OA_GENERATE_DOCS_INPUT = {
@@ -72,11 +70,11 @@ export type OA_GENERATE_DOCS_OUTPUT = OA3_1.Document;
 export class MoleculerOpenAPIGenerator {
     private readonly broker: ServiceBroker;
 
-    private readonly settings: openApiMixinSettings;
+    private readonly settings: OpenApiMixinSettings;
     private readonly logger: LoggerInstance;
     private validator: ValidatorType;
 
-    constructor(broker: ServiceBroker, settings: openApiMixinSettings) {
+    constructor(broker: ServiceBroker, settings: OpenApiMixinSettings) {
         this.broker = broker;
         const validator = this.broker.validator as unknown as { validator: any };
         if (validator.constructor.name != 'FastestValidator' && validator.validator) {
@@ -120,27 +118,22 @@ export class MoleculerOpenAPIGenerator {
         }
     }
 
-    private async collectRoutes(ctx: Context, services: Array<Service<ApiSettingsSchema>>): Promise<Array<foundRouteWithFilledAction>> {
+    private async getAliases(ctx: Context, services: Array<Service<ApiSettingsSchema>>): Promise<Array<Alias>> {
         //only moleculer-web service
         const apiServices = services.filter((service) => service?.settings?.routes) as Array<
-            Service<ApiSettingsSchemaOpenApi & Partial<openApiMixinSettings>>
+            Service<ApiSettingsSchemaOpenApi & Partial<OpenApiMixinSettings>>
         >;
 
         if (!apiServices?.length) {
             throw new MoleculerError('fail to identify service hosting moleculer-web');
         }
 
-        const routesParser = new MoleculerWebRoutesParser(this.logger, UNRESOLVED_ACTION_NAME);
+        const routesParser = new MoleculerWebRoutesParser(this.logger);
 
         try {
             return (
                 await Promise.all(
-                    apiServices.map(async (svc) =>
-                        new OpenApiMerger(
-                            this.logger,
-                            svc.settings.defaultResponseContentType ?? this.settings.defaultResponseContentType
-                        ).mapServicesActions(await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions), services)
-                    )
+                    apiServices.map(async (svc) => await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions, services))
                 )
             ).flat();
         } catch (e) {
@@ -628,13 +621,13 @@ export class MoleculerOpenAPIGenerator {
 
         const services = await this.fetchServicesWithActions(ctx);
 
-        let routes = await this.collectRoutes(ctx, services);
+        let aliases = await this.getAliases(ctx, services);
 
         // this.attachParamsAndOpenapiFromEveryActionToRoutes(routes, services);
         //
         // routes = Object.fromEntries(Object.entries(routes).filter(([name, r]) => r.openapi !== false));
         //
-        return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(routes);
+        return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(aliases);
         // this.routesToOpenApi(routes, doc);
         //
         // return doc;

@@ -1,6 +1,9 @@
-import { AliasRouteOpenApi, AliasRouteSchemaOpenApi, ApiRouteOpenApi } from '../types/types.js';
+import { AliasRouteSchemaOpenApi } from '../types/types.js';
 import { Route } from './Route.js';
-import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
+import { HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
+import { ActionSchema } from 'moleculer';
+import { PathAction } from './PathAction.js';
+import { OpenApiMerger } from '../OpenApiMerger.js';
 
 export class Alias {
     get path(): string {
@@ -17,14 +20,15 @@ export class Alias {
         if (!isRawHttpMethod(value)) {
             throw new Error(`"${value}" is not a valid method`);
         }
-        this._method = value;
+        this._method = value.toLowerCase() as rawHttpMethod;
     }
 
-    private readonly route: Route;
+    public readonly route: Route;
     public type: string;
     private _method: rawHttpMethod;
     private _path: string;
     public action: string;
+    public actionSchema: ActionSchema;
     public openapi: AliasRouteSchemaOpenApi['openapi'];
 
     constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
@@ -33,9 +37,7 @@ export class Alias {
         this.method = infos.method;
         this.path = infos.path;
         this.action = infos.action;
-        this.openapi = this.mergeOpenApiWithRoute(infos.openapi, route.openapi);
-
-        console.log(infos);
+        this.openapi = OpenApiMerger.mergeAliasAndRouteOpenApi(infos.openapi, route.openapi);
     }
 
     toJSON(): AliasRouteSchemaOpenApi {
@@ -48,24 +50,9 @@ export class Alias {
         };
     }
 
-    public getAllAliases(): Array<Alias & { method: HTTP_METHODS }> {
+    public getPaths(): Array<PathAction> {
         return ((this.method === JOKER_METHOD ? HTTP_METHODS_ARRAY : [this.method]) ?? []).map(
-            (m) =>
-                new Alias(
-                    {
-                        ...this.toJSON(),
-                        method: m
-                    },
-                    this.route
-                ) as Alias & { method: HTTP_METHODS }
+            (m) => new PathAction(this, m, this.actionSchema)
         );
-    }
-
-    // TODO
-    private mergeOpenApiWithRoute(aliasOpenApi: AliasRouteOpenApi = {}, routeOpenApi: ApiRouteOpenApi = {}): AliasRouteOpenApi {
-        return {
-            ...routeOpenApi,
-            ...aliasOpenApi
-        };
     }
 }

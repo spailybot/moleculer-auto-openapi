@@ -26,7 +26,7 @@ import type {
     ValidationRuleObject,
     ValidationSchema
 } from 'fastest-validator';
-import { OpenAPIV3 as OA3, OpenAPIV3_1 as OA3_1, OpenAPIV3_1 as OA } from 'openapi-types';
+import { OpenAPIV3 as OA3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
 import { openApiVersionsSupported } from '../commons.js';
 import { AliasRouteSchema } from './moleculer-web.js';
@@ -82,32 +82,37 @@ export type ValidationRuleMapping = {
         : never;
 };
 
-export type Mapper<Rule extends RuleCustom> = (rule: Rule, schema?: ObjectRules) => OA.SchemaObject;
+export type Mapper<Rule extends RuleCustom> = (rule: Rule, schema?: ObjectRules) => OA3_1.SchemaObject;
 
 export type Mappers = {
     [K in keyof ValidationRuleMapping]: Mapper<ValidationRuleMapping[K]>;
 };
 
-export type RuleToSchemaFunction = (pRule: ValidationRule, parentProperties?: Partial<ValidationRuleObject>) => OA.SchemaObject | undefined;
-export type SchemaToRules = (schema: ValidationSchema) => Record<string, OA.SchemaObject>;
+export type RuleToSchemaFunction = (
+    pRule: ValidationRule,
+    parentProperties?: Partial<ValidationRuleObject>
+) => OA3_1.SchemaObject | undefined;
+export type SchemaToRules = (schema: ValidationSchema) => Record<string, OA3_1.SchemaObject>;
 
 export type ObjectRules = ValidationSchema & Record<string, ValidationRule>;
 
 export type ValidatorType = ValidatorDefault.default;
 
-export type actionOpenApiResponse = Omit<OA.ResponseObject, 'content'> & { content?: OA.MediaTypeObject; type?: string };
+export type actionOpenApiResponse = Omit<OA3_1.ResponseObject, 'content'> & { content?: OA3_1.MediaTypeObject; type?: string };
 
 export interface ActionOpenApi {
     tags?: Array<string>;
-    components?: OA.ComponentsObject;
-    responses?: OA.ComponentsObject['responses'];
-    response?: OA.MediaTypeObject | actionOpenApiResponse;
-    description?: string;
+    components?: OA3_1.ComponentsObject;
+    responses?: OA3_1.ComponentsObject['responses'];
+    response?: OA3_1.MediaTypeObject | actionOpenApiResponse;
+    description?: OA3_1.PathItemObject['description'];
+    summary?: OA3_1.PathItemObject['summary'];
+    servers?: OA3_1.PathItemObject['servers'];
 }
 
 export interface ApiSettingsSchemaOpenApi extends ApiSettingsSchema {
     routes?: Array<ApiRouteSchema>;
-    openapi?: OA.Document;
+    openapi?: OA3_1.Document;
 }
 
 //TODO
@@ -120,8 +125,8 @@ export interface AliasRouteSchemaOpenApi extends AliasRouteSchema {
 //TODO
 export interface ApiRouteOpenApi {
     tags?: Array<string>;
-    components?: OA.ComponentsObject;
-    responses?: OA.ComponentsObject['responses'];
+    components?: OA3_1.ComponentsObject;
+    responses?: OA3_1.ComponentsObject['responses'];
 }
 
 declare module 'moleculer' {
@@ -138,7 +143,7 @@ declare module 'moleculer-web' {
 
 export type cleanAlias = string | Array<string> | AliasRouteSchema;
 
-export type openApiMixinSettings = {
+export type OpenApiMixinSettings = {
     onlyLocal: boolean;
     schemaPath: string;
     uiPath: string;

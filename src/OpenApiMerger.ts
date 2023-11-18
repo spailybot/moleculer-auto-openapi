@@ -1,81 +1,61 @@
-import { ActionSchema, LoggerInstance, Service } from 'moleculer';
+import { ActionSchema } from 'moleculer';
 import { ActionOpenApi, actionOpenApiResponse, AliasRouteSchemaOpenApi } from './types/types.js';
 import { OpenAPIV3_1 as OA, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { foundRoute, foundRouteWithFilledAction } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
+import { ApiRouteSchema } from 'moleculer-web';
 
 export class OpenApiMerger {
-    constructor(
-        private readonly logger: LoggerInstance,
-        private readonly defaultContentType: string
-    ) {}
+    public static mergeAliasAndRouteOpenApi(
+        aliasOpenApi: AliasRouteSchemaOpenApi['openapi'] = {},
+        routeOpenApi: ApiRouteSchema['openapi'] = {}
+    ) {
+        const tags = this.mergeTags(aliasOpenApi.tags, routeOpenApi.tags);
+        aliasOpenApi.components = this.mergeActionAndRouteComponents(aliasOpenApi.components, routeOpenApi.components);
 
-    public mapServicesActions(routes: Array<foundRoute>, services: Array<Service>): Array<foundRouteWithFilledAction> {
-        const actionsMap = new Map<string, { service: Service; action: ActionSchema }>();
-        services.forEach((svc) =>
-            Object.values(svc.actions).forEach((action) => {
-                actionsMap.set(action.name, {
-                    service: svc,
-                    action
-                });
-            })
-        );
-
-        return routes.map((route): foundRouteWithFilledAction => {
-            const newRoute: foundRouteWithFilledAction = {
-                ...route,
-                action: null
-            };
-
-            if (!route.action) {
-                return newRoute;
-            }
-
-            const action = actionsMap.get(route.action);
-            if (!action) {
-                this.logger.warn(`fail to get details about action "${route.action}"`);
-                return newRoute;
-            }
-
-            newRoute.action = action.action;
-            //use openapi from action, or from openapi
-            newRoute.openapi = this.mergeActionAndRouteOpenApi(action.action.openapi, newRoute.openapi);
-
-            return newRoute;
-        });
+        return {
+            ...routeOpenApi,
+            ...aliasOpenApi,
+            tags
+        };
     }
 
-    private mergeActionAndRouteOpenApi(
+    public static mergeActionAndAliasOpenApi(
         actionOpenApi: ActionSchema['openapi'] = {},
-        routeOpenApi: AliasRouteSchemaOpenApi['openapi'] = {}
+        aliasOpenApi: AliasRouteSchemaOpenApi['openapi'] = {},
+        defaultContentType: string
     ): ActionOpenApi {
-        let tags = routeOpenApi?.tags || [];
-        if (actionOpenApi?.tags?.length) {
-            //allow to set null as first parameter of tags to avoid getting them from route openapi
-            if (actionOpenApi?.tags?.[0] === null) {
-                tags = [];
-            }
-
-            tags = [...tags, ...actionOpenApi.tags].filter(Boolean);
-        }
-
-        const responses = this.generateResponses(actionOpenApi);
+        const tags = this.mergeTags(actionOpenApi.tags, aliasOpenApi.tags);
+        const responses = this.generateResponses(actionOpenApi, defaultContentType);
 
         actionOpenApi.components = this.mergeActionAndRouteComponents(
             {
                 ...actionOpenApi.components,
                 responses
             },
-            routeOpenApi.components
+            aliasOpenApi.components
         );
 
         return {
-            ...routeOpenApi,
+            ...aliasOpenApi,
             ...actionOpenApi,
             tags
         };
     }
 
-    private generateResponses(actionOpenApi: ActionOpenApi) {
+    private static mergeTags(addition: Array<string | null> = [], baseTags: Array<string> = []) {
+        let tags = baseTags || [];
+        if (addition?.length) {
+            //allow to set null as first parameter of tags to avoid getting them from route openapi
+            if (addition?.[0] === null) {
+                tags = [];
+            }
+
+            tags = [...tags, ...addition].filter(Boolean);
+        }
+
+        return tags;
+    }
+
+    private static generateResponses(actionOpenApi: ActionOpenApi, defaultContentType: string) {
         const responses = {
             ...actionOpenApi.components?.responses,
             ...actionOpenApi.responses
@@ -87,7 +67,7 @@ export class OpenApiMerger {
             };
             if ((actionOpenApi.response as actionOpenApiResponse).description === undefined) {
                 response.content = {
-                    [this.defaultContentType]: actionOpenApi.response as OA.MediaTypeObject
+                    [defaultContentType]: actionOpenApi.response as OA.MediaTypeObject
                 };
             } else {
                 const actionResponse = actionOpenApi.response as actionOpenApiResponse;
@@ -95,7 +75,7 @@ export class OpenApiMerger {
                 response.headers = actionResponse.headers;
                 response.links = actionResponse.links;
                 response.content = {
-                    [actionResponse.type ?? this.defaultContentType]: actionResponse.content
+                    [actionResponse.type ?? defaultContentType]: actionResponse.content
                 };
             }
 
@@ -108,7 +88,10 @@ export class OpenApiMerger {
         return responses;
     }
 
-    private mergeActionAndRouteComponents(actionComponents: OA3_1.ComponentsObject = {}, routeComponents: OA3_1.ComponentsObject = {}) {
+    private static mergeActionAndRouteComponents(
+        actionComponents: OA3_1.ComponentsObject = {},
+        routeComponents: OA3_1.ComponentsObject = {}
+    ) {
         return Object.keys(routeComponents).reduce(
             (mergedObject, key) => {
                 mergedObject[key] = {
