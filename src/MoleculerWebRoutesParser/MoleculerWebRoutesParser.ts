@@ -1,28 +1,9 @@
-import { ActionOpenApi, AliasRouteSchemaOpenApi, ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../types/types.js';
+import { ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../types/types.js';
 import { MOLECULER_WEB_LIST_ALIASES_INPUT, MOLECULER_WEB_LIST_ALIASES_OUTPUT, routeAlias } from '../types/moleculer-web.js';
 import { ActionSchema, Context, LoggerInstance, Service } from 'moleculer';
-import { getServiceName, rawHttpMethod } from '../commons.js';
+import { getServiceName } from '../commons.js';
 import { Route } from '../objects/Route.js';
 import { Alias } from '../objects/Alias.js';
-
-export type foundRoute = {
-    actionType?: string;
-    path: string;
-    method: rawHttpMethod;
-    action: string;
-    openapi?: ActionOpenApi;
-};
-
-export type foundRouteWithFilledAction = Omit<foundRoute, 'action'> & { action: ActionSchema | null };
-
-export type foundAlias = {
-    only?: Array<string>;
-    method?: string;
-    except?: Array<string>;
-    action?: string | null;
-    actionType?: string;
-    openapi?: AliasRouteSchemaOpenApi['openapi'];
-};
 
 export class MoleculerWebRoutesParser {
     constructor(private readonly logger: LoggerInstance) {}
