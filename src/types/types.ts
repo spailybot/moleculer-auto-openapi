@@ -1,5 +1,5 @@
 import type {
-    default as ValidatorDefault,
+    default as FastestValidatorDefault,
     RuleAny,
     RuleArray,
     RuleBoolean,
@@ -96,7 +96,7 @@ export type SchemaToRules = (schema: ValidationSchema) => Record<string, OA3_1.S
 
 export type ObjectRules = ValidationSchema & Record<string, ValidationRule>;
 
-export type ValidatorType = ValidatorDefault.default;
+export type FastestValidatorType = FastestValidatorDefault.default;
 
 export type actionOpenApiResponse = Omit<OA3_1.ResponseObject, 'content'> & { content?: OA3_1.MediaTypeObject; type?: string };
 
@@ -105,9 +105,11 @@ export interface ActionOpenApi {
     components?: OA3_1.ComponentsObject;
     responses?: OA3_1.ComponentsObject['responses'];
     response?: OA3_1.MediaTypeObject | actionOpenApiResponse;
-    description?: OA3_1.PathItemObject['description'];
-    summary?: OA3_1.PathItemObject['summary'];
-    servers?: OA3_1.PathItemObject['servers'];
+    description?: OA3_1.OperationObject['description'];
+    externalDocs?: OA3_1.OperationObject['externalDocs'];
+    operationId?: OA3_1.OperationObject['operationId'];
+    summary?: OA3_1.OperationObject['summary'];
+    servers?: OA3_1.OperationObject['servers'];
 }
 
 export interface ApiSettingsSchemaOpenApi extends ApiSettingsSchema {
@@ -138,6 +140,20 @@ declare module 'moleculer' {
 declare module 'moleculer-web' {
     interface ApiRouteSchema {
         openapi?: ApiRouteOpenApi;
+    }
+}
+
+export interface FVOASchemaMetaKeys {}
+export interface FVOARuleMetaKeys {
+    in: 'body' | 'query';
+}
+
+declare module 'fastest-validator' {
+    interface ValidationSchemaMetaKeys {
+        $$oa?: FVOASchemaMetaKeys;
+    }
+    interface RuleCustom {
+        $$oa?: FVOARuleMetaKeys;
     }
 }
 
@@ -185,6 +201,12 @@ export type OpenApiMixinSettings = {
      * @default application/json
      */
     defaultResponseContentType: string;
+    /**
+     * the name of the field holding the file (only important in documentation, change it if it collides with one of your fields)
+     *
+     * @default file
+     */
+    multiPartFileFieldName: string;
 };
 
 export { ApiRouteSchema };

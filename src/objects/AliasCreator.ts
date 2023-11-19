@@ -3,7 +3,7 @@ import { Alias } from './Alias.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../types/moleculer-web.js';
 import { Route } from './Route.js';
 import { LoggerInstance } from 'moleculer';
-import { HTTP_METHODS, isRawHttpMethodFromMWeb, JOKER_METHOD, REST_METHOD } from '../commons.js';
+import { HTTP_METHODS, isRawHttpMethodFromMWeb, JOKER_METHOD, OA_NAME_REGEXP, REST_METHOD } from '../commons.js';
 
 export class AliasCreator {
     constructor(
@@ -20,6 +20,15 @@ export class AliasCreator {
 
                 if (!aliasInformations) {
                     this.logger.warn(`alias "${name}" from route "${this.route.path}" is skipped`);
+                    return;
+                }
+
+                if (aliasInformations.action && !aliasInformations.action.match(OA_NAME_REGEXP)) {
+                    this.logger.error(
+                        `alias "${name}" from route "${this.route.path}" can't be added ton openapi . because the name "${
+                            aliasInformations.action
+                        }" need to match pattern ${OA_NAME_REGEXP.toString()}`
+                    );
                     return;
                 }
 
@@ -67,20 +76,20 @@ export class AliasCreator {
             return;
         }
 
-        const splittedName = name.split(/\s+/);
-        if (splittedName.length === 1) {
-            res.path = res.path ?? splittedName[0];
+        const splitName = name.split(/\s+/);
+        if (splitName.length === 1) {
+            res.path = res.path ?? splitName[0];
         }
 
-        if (splittedName.length > 1) {
-            res.path = res.path ?? splittedName[1];
-            res.method = res.method ?? splittedName[0];
+        if (splitName.length > 1) {
+            res.path = res.path ?? splitName[1];
+            res.method = res.method ?? splitName[0];
         }
 
         // support actions like multipart:import.proceedFile
         if (!res.actionType && res.action?.includes(':')) {
             const [actionType, action] = res.action.split(':');
-            res.actionType = actionType;
+            res.type = actionType;
             res.action = action;
         }
 

@@ -32,7 +32,23 @@ export const multiOAProperties = ['oneOf', 'allOf', 'anyOf'];
 export type rawHttpMethod = HTTP_METHODS | typeof JOKER_METHOD;
 export type rawHttpMethodFromMWeb = HTTP_METHODS | typeof JOKER_METHOD | typeof REST_METHOD;
 
+export const ALLOWING_BODY_METHODS: Array<HTTP_METHODS> = [HTTP_METHODS.PUT, HTTP_METHODS.POST, HTTP_METHODS.PATCH];
+export const DISALLOWING_BODY_METHODS: Array<HTTP_METHODS> = Object.values(HTTP_METHODS).filter(
+    (method) => !ALLOWING_BODY_METHODS.includes(method)
+);
+
 export const DEFAULT_CONTENT_TYPE = 'application/json';
+export const DEFAULT_MULTI_PART_FIELD_NAME = 'file';
+
+export const OA_NAME_REGEXP = /^[a-zA-Z0-9._-]+$/;
+
+export const BODY_PARSERS_CONTENT_TYPE = {
+    json: ['application/json'],
+    urlencoded: ['application/x-www-form-urlencoded'],
+    text: ['text/plain'],
+    multipart: ['multipart/form-data'],
+    stream: ['application/octet-stream']
+};
 
 export const getServiceName = (svc: Service): string => {
     if (svc.fullName) {

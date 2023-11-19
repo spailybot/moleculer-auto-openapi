@@ -1,7 +1,7 @@
 import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
 import { ROOT_PROPERTY } from './constants.js';
-import { Mappers, ObjectRules, tSystemParams, ValidatorType } from './types/types.js';
+import { Mappers, ObjectRules, tSystemParams, FastestValidatorType } from './types/types.js';
 import { EOAExtensions, HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, matchAll, multiOAProperties, normalizePath } from './commons.js';
 import { getFastestValidatorMappers } from './mappers.js';
 import { LoggerInstance } from 'moleculer';
@@ -22,12 +22,12 @@ export class OpenApiGenerator {
     };
     private readonly document: OA3_1.Document;
 
-    private readonly validator: ValidatorType;
+    private readonly validator: FastestValidatorType;
     private readonly mappers: Mappers;
 
     constructor(
         private readonly logger: LoggerInstance,
-        validator: ValidatorType,
+        validator: FastestValidatorType,
         baseDocument: OA3_1.Document
     ) {
         this.validator = validator;
@@ -52,7 +52,6 @@ export class OpenApiGenerator {
 
             const isJokerMethod = alias.method === JOKER_METHOD;
 
-            const methods: Array<HTTP_METHODS> = isJokerMethod ? HTTP_METHODS_ARRAY : [alias.method as HTTP_METHODS];
             const { parameters, requestBody } = this.extractParameters(openapiPath, alias) ?? {};
 
             if (isJokerMethod) {

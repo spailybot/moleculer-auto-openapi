@@ -1,9 +1,10 @@
 import { AliasRouteSchemaOpenApi } from '../types/types.js';
 import { Route } from './Route.js';
-import { HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
+import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
 import { ActionSchema } from 'moleculer';
 import { PathAction } from './PathAction.js';
 import { OpenApiMerger } from '../OpenApiMerger.js';
+import { ValidationSchema } from 'fastest-validator';
 
 export class Alias {
     get path(): string {
@@ -28,7 +29,7 @@ export class Alias {
     private _method: rawHttpMethod;
     private _path: string;
     public action: string;
-    public actionSchema: ActionSchema;
+    public actionSchema: ActionSchema & { params?: ValidationSchema };
     public openapi: AliasRouteSchemaOpenApi['openapi'];
 
     constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
@@ -38,6 +39,14 @@ export class Alias {
         this.path = infos.path;
         this.action = infos.action;
         this.openapi = OpenApiMerger.mergeAliasAndRouteOpenApi(infos.openapi, route.openapi);
+    }
+
+    public isJokerAlias(): boolean {
+        return this.method === JOKER_METHOD;
+    }
+
+    public getMethods(): Array<HTTP_METHODS> {
+        return (this.method === JOKER_METHOD ? HTTP_METHODS_ARRAY : [this.method]) ?? [];
     }
 
     toJSON(): AliasRouteSchemaOpenApi {
@@ -51,8 +60,6 @@ export class Alias {
     }
 
     public getPaths(): Array<PathAction> {
-        return ((this.method === JOKER_METHOD ? HTTP_METHODS_ARRAY : [this.method]) ?? []).map(
-            (m) => new PathAction(this, m, this.actionSchema)
-        );
+        return this.getMethods().map((m) => new PathAction(this, m, this.actionSchema));
     }
 }

@@ -21,7 +21,7 @@ const testsParams: Record<string, ActionOpenApi> = {
                             type: 'array',
                             items: {
                                 type: 'object',
-                                example: { id: 1, filename: 'foo.txt', mimetype: 'text/plain', sizeInBytes: 100 }
+                                examples: [{ id: 1, filename: 'foo.txt', mimetype: 'text/plain', sizeInBytes: 100 }]
                             }
                         }
                     }

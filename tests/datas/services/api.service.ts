@@ -75,6 +75,12 @@ export const ApiService = {
                     },
                     'POST go': 'some.go',
                     'POST some-login': 'some.login'
+                },
+                bodyParsers: {
+                    json: true,
+                    urlencoded: true,
+                    text: true,
+                    raw: true
                 }
             },
             {

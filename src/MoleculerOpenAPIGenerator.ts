@@ -1,16 +1,17 @@
 import type { Context, LoggerInstance, Service, ServiceBroker } from 'moleculer';
 import Moleculer from 'moleculer';
 import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import type { OpenApiMixinSettings, ValidatorType } from './types/types.js';
+import type { OpenApiMixinSettings, FastestValidatorType } from './types/types.js';
 import { ApiSettingsSchemaOpenApi } from './types/types.js';
 import { UNRESOLVED_ACTION_NAME } from './constants.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
-import { DEFAULT_CONTENT_TYPE, openApiVersionsSupported } from './commons.js';
+import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, openApiVersionsSupported } from './commons.js';
 import { ApiSettingsSchema } from 'moleculer-web';
 import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { OpenApiGenerator } from './OpenApiGenerator.js';
 import { Alias } from './objects/Alias.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
+import { OpenApiGenerator2 } from './OpenApiGenerator2.js';
 
 export const defaultSettings: OpenApiMixinSettings = {
     onlyLocal: false, // build schema from only local services
@@ -59,7 +60,8 @@ export const defaultSettings: OpenApiMixinSettings = {
     clearCacheOnRoutesGenerated: true,
     summaryTemplate: '{{summary}}\n            ({{action}}){{autoAlias}}',
     returnAssetsAsStream: true,
-    defaultResponseContentType: DEFAULT_CONTENT_TYPE
+    defaultResponseContentType: DEFAULT_CONTENT_TYPE,
+    multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME
 };
 
 export type OA_GENERATE_DOCS_INPUT = {
@@ -72,7 +74,7 @@ export class MoleculerOpenAPIGenerator {
 
     private readonly settings: OpenApiMixinSettings;
     private readonly logger: LoggerInstance;
-    private validator: ValidatorType;
+    private validator: FastestValidatorType;
 
     constructor(broker: ServiceBroker, settings: OpenApiMixinSettings) {
         this.broker = broker;
@@ -627,7 +629,7 @@ export class MoleculerOpenAPIGenerator {
         //
         // routes = Object.fromEntries(Object.entries(routes).filter(([name, r]) => r.openapi !== false));
         //
-        return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(aliases);
+        return new OpenApiGenerator2(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(aliases);
         // this.routesToOpenApi(routes, doc);
         //
         // return doc;

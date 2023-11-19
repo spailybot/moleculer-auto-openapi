@@ -113,7 +113,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         },
         email: (rule: RuleEmail): OA.SchemaObject => {
             const PRECISE_PATTERN =
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             const BASIC_PATTERN = /^\S+@\S+\.\S+$/;
 
             const pattern = rule.mode == 'precise' ? PRECISE_PATTERN : BASIC_PATTERN;
@@ -160,7 +160,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         }),
         mac: (rule: RuleMac): OA.SchemaObject => {
             const PATTERN =
-                /^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$/i;
+                /^((([a-f0-9][a-f0-9]+-){5}|([a-f0-9][a-f0-9]+:){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$/i;
             return {
                 type: 'string',
                 default: rule.default,
@@ -170,6 +170,10 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             };
         },
         multi: (rule: RuleMulti): OA.SchemaObject => {
+            if (!Array.isArray(rule.rules)) {
+                return undefined;
+            }
+
             const schemas: OA.SchemaObject[] = rule.rules
                 .map((rule: ValidationRuleObject | string) => getSchemaObjectFromRule(rule))
                 .filter(Boolean);
@@ -211,12 +215,15 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return schema;
         },
         object: (rule: RuleObject): OA.SchemaObject => {
+            const props = rule.props ?? rule.properties;
+            const properties = props ? getSchemaObjectFromSchema(props) : undefined;
+
             return {
                 type: 'object',
                 minProperties: rule.minProps,
                 maxProperties: rule.maxProps,
                 default: rule.default,
-                properties: rule.props ?? rule.properties ? getSchemaObjectFromSchema(rule.props ?? rule.properties) : undefined,
+                properties,
                 examples: rule.default ? [rule.default] : undefined
             };
         },
