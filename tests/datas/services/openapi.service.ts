@@ -1,4 +1,5 @@
 import Openapi from '../../../src/index.js';
+import type { OpenApiMixinSettings } from '../../../src/index.js';
 
 export const OpenapiService = {
     name: 'openapi',
@@ -9,6 +10,7 @@ export const OpenapiService = {
                 description: 'Foo',
                 title: 'Bar'
             }
-        }
-    }
+        },
+        skipUnresolvedActions: false
+    } as OpenApiMixinSettings
 };

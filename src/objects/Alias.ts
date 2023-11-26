@@ -1,12 +1,13 @@
 import { AliasRouteSchemaOpenApi } from '../types/types.js';
 import { Route } from './Route.js';
 import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
-import { ActionSchema } from 'moleculer';
+import { ActionSchema, Service } from 'moleculer';
 import { PathAction } from './PathAction.js';
-import { OpenApiMerger } from '../OpenApiMerger.js';
+import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
 
 export class Alias {
+    public readonly fullPath: string;
     get path(): string {
         return this._path;
     }
@@ -24,21 +25,23 @@ export class Alias {
         this._method = value.toLowerCase() as rawHttpMethod;
     }
 
-    public readonly route: Route;
+    public readonly route?: Route;
     public type: string;
     private _method: rawHttpMethod;
     private _path: string;
     public action: string;
     public actionSchema: ActionSchema & { params?: ValidationSchema };
+    public service: Service;
     public openapi: AliasRouteSchemaOpenApi['openapi'];
 
-    constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
+    constructor(infos: AliasRouteSchemaOpenApi, route?: Route) {
         this.route = route;
         this.type = infos.type;
         this.method = infos.method;
         this.path = infos.path;
+        this.fullPath = path.join(route?.path ?? '/', infos.path ?? '/');
         this.action = infos.action;
-        this.openapi = OpenApiMerger.mergeAliasAndRouteOpenApi(infos.openapi, route.openapi);
+        this.openapi = infos.openapi;
     }
 
     public isJokerAlias(): boolean {

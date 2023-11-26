@@ -1,8 +1,6 @@
 import { Alias } from './Alias.js';
-import { DEFAULT_CONTENT_TYPE, HTTP_METHODS } from '../commons.js';
-import { ActionOpenApi } from '../types/types.js';
+import { HTTP_METHODS } from '../commons.js';
 import { ActionSchema } from 'moleculer';
-import { OpenApiMerger } from '../OpenApiMerger.js';
 
 export class PathAction {
     public actionType?: string;
@@ -10,7 +8,10 @@ export class PathAction {
     public method: HTTP_METHODS;
     public action?: ActionSchema;
     public actionName: string;
-    public openapi?: ActionOpenApi;
+
+    public get fullPath(): string {
+        return this.alias.fullPath;
+    }
 
     private alias: Alias;
 
@@ -27,11 +28,5 @@ export class PathAction {
 
     public setAction(action: ActionSchema): void {
         this.action = action;
-        //use openapi from action, or from openapi
-        this.openapi = OpenApiMerger.mergeActionAndAliasOpenApi(
-            this.action.openapi,
-            this.alias?.openapi,
-            this.alias.route.service.settings.defaultResponseContentType ?? DEFAULT_CONTENT_TYPE
-        );
     }
 }

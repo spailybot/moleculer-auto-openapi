@@ -1,9 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import { LoggerInstance, Service } from 'moleculer';
 import { Route } from '../src/objects/Route.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../src/types/moleculer-web.js';
 import { AliasCreator } from '../src/objects/AliasCreator.js';
-import { OpenApiMixinSettings } from '../src/types/types.js';
+import { OpenApiMixinSettings } from '../src/index.js';
 
 describe('AliasCreator', () => {
     const logger = {
@@ -111,6 +111,7 @@ describe('AliasCreator', () => {
     };
 
     const service = {} as Service<OpenApiMixinSettings>;
+    const fakeService = {} as Service;
 
     describe('with skipUnResolved true', () => {
         it.each<[string, ApiSchemaAlias, Array<AliasRouteSchema>]>(Object.entries(aliases).map(([k, v]) => [k, v, aliasesResult[k]]))(
@@ -121,8 +122,7 @@ describe('AliasCreator', () => {
                     {
                         path: '/'
                     },
-                    '',
-                    true,
+                    fakeService,
                     service
                 );
 
@@ -142,9 +142,9 @@ describe('AliasCreator', () => {
                     {
                         path: '/'
                     },
-                    '',
-                    true,
-                    service
+                    fakeService,
+                    service,
+                    false
                 );
 
                 const aliases = new AliasCreator(logger, route, { [aliasName]: alias }, false).getAliases();

@@ -1,6 +1,6 @@
 {
   "name": "@spailybot/moleculer-auto-openapi",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Auto generate openapi(swagger) scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
@@ -17,7 +17,8 @@
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint -f unix \"src/**\"",
     "lint:fix": "npm lint -- --fix",
-    "ci:eslint": "npm run lint -- -f json -o ./coverage/eslint-report.json"
+    "ci:eslint": "npm run lint -- -f json -o ./coverage/eslint-report.json",
+    "generate:documentation": "typedoc"
   },
   "files": [
     "lib"
@@ -76,6 +77,7 @@
     "rimraf": "^5.0.5",
     "swagger-ui-dist": "^5.10.0",
     "ts-jest": "^29.1.1",
+    "typedoc": "^0.25.3",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {

@@ -1,11 +1,37 @@
-import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
-import { ROOT_PROPERTY } from './constants.js';
-import { Mappers, ObjectRules, tSystemParams, FastestValidatorType } from './types/types.js';
-import { EOAExtensions, HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, matchAll, multiOAProperties, normalizePath } from './commons.js';
-import { getFastestValidatorMappers } from './mappers.js';
+import { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import { ValidationRule, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
+import {
+    commonOpenApi,
+    FastestValidatorType,
+    openApiServiceOpenApi,
+    OptionalOrFalse,
+    SubOptionalOrFalse,
+    tSystemParams
+} from './types/types.js';
+import {
+    ALLOWING_BODY_METHODS,
+    BODY_PARSERS_CONTENT_TYPE,
+    DEFAULT_CONTENT_TYPE,
+    DEFAULT_MULTI_PART_FIELD_NAME,
+    DEFAULT_SUMMARY_TEMPLATE,
+    EOAExtensions,
+    getAlphabeticSorter,
+    HTTP_METHODS,
+    matchAll,
+    multiOAProperties,
+    normalizePath,
+    openApiVersionsSupported
+} from './commons.js';
 import { LoggerInstance } from 'moleculer';
 import { Alias } from './objects/Alias.js';
+import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
+import { UNRESOLVED_ACTION_NAME } from './constants.js';
+import { OpenApiMerger } from './OpenApiMerger.js';
+
+type parametersExtracted = {
+    parameters?: Array<OA3_1.ParameterObject>;
+    requestBody?: OA3_1.OperationObject['requestBody'];
+};
 
 export class OpenApiGenerator {
     private components: OA3_1.ComponentsObject = {
@@ -20,49 +46,62 @@ export class OpenApiGenerator {
         callbacks: {},
         pathItems: {}
     };
-    private readonly document: OA3_1.Document;
-
-    private readonly validator: FastestValidatorType;
-    private readonly mappers: Mappers;
+    private readonly document: openApiServiceOpenApi;
+    private converter: FastestValidatorConverter;
 
     constructor(
         private readonly logger: LoggerInstance,
         validator: FastestValidatorType,
-        baseDocument: OA3_1.Document
+        baseDocument: openApiServiceOpenApi
     ) {
-        this.validator = validator;
-
-        this.mappers = getFastestValidatorMappers({
-            getSchemaObjectFromSchema: (...args) => this.getSchemaObjectFromSchema(...args),
-            getSchemaObjectFromRule: (...args) => this.getSchemaObjectFromRule(...args)
-        });
+        this.converter = new FastestValidatorConverter(validator);
 
         this.document = baseDocument;
     }
 
-    generate(routes: Array<Alias>): OA3_1.Document {
-        const document: OA3_1.Document = { ...this.document };
+    public generate(openApiVersion: openApiVersionsSupported, aliases: Array<Alias>): OA3_1.Document {
+        if ((this.document as { openapi?: string }).openapi) {
+            this.logger.warn(`setting manually the openapi version is not supported`);
+            delete (this.document as { openapi?: string }).openapi;
+        }
+
+        const document: OA3_1.Document = {
+            openapi: `${openApiVersion}.0`,
+            ...this.document,
+            tags: [],
+            info: {
+                title: 'moleculer-web API',
+                ...this.document.info
+            },
+            components: this.cleanComponents(this.document.components)
+        };
+
+        //delete responses that end in the document
+        if ((document as commonOpenApi).responses) {
+            delete (document as commonOpenApi).responses;
+        }
 
         const cachePathActions = new Map<string, string>();
 
-        routes.forEach((alias) => {
-            // convert /:table to /{table}
-            const openapiPath: string = this.formatParamUrl(normalizePath(alias.path));
+        aliases.sort(getAlphabeticSorter('path'));
+
+        aliases.forEach((alias) => {
+            const route = alias.route;
+            const { apiService, openApiService } = route;
+
+            const openapiPath: string = this.formatParamUrl(normalizePath(alias.fullPath));
             const currentPath: OA3_1.PathItemObject = document.paths[openapiPath] ?? {};
 
-            const isJokerMethod = alias.method === JOKER_METHOD;
-
-            const { parameters, requestBody } = this.extractParameters(openapiPath, alias) ?? {};
-
-            if (isJokerMethod) {
-                // TODO set parameters here
+            if (alias.isJokerAlias()) {
                 currentPath.description = alias.actionSchema?.openapi?.description;
-                currentPath.parameters = parameters;
+                currentPath.summary = alias.actionSchema?.openapi?.summary;
             }
 
             alias.getPaths().forEach((pathAction) => {
                 const method = pathAction.method;
                 const cacheKeyName = `${openapiPath}.${method}`;
+
+                const { parameters, requestBody } = this.extractParameters(method, openapiPath, alias) ?? {};
 
                 if (currentPath[method]) {
                     const actionFromCache = cachePathActions.get(cacheKeyName);
@@ -74,119 +113,46 @@ export class OpenApiGenerator {
 
                 cachePathActions.set(cacheKeyName, pathAction.action?.name);
 
+                const openApi = OpenApiMerger.merge(document, openApiService, apiService, route, alias, pathAction.action);
+
                 const openApiMethod: OA3_1.OperationObject = {
-                    tags: pathAction.openapi?.tags,
-                    responses: pathAction.openapi?.responses,
-                    parameters
+                    summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
+                    description: !alias.isJokerAlias() ? openApi?.description : undefined,
+                    operationId: openApi?.operationId,
+                    externalDocs: openApi?.externalDocs,
+                    tags: openApi?.tags,
+                    parameters,
+                    requestBody,
+                    responses: openApi?.responses
                 };
 
-                if (!isJokerMethod) {
-                    openApiMethod.description = pathAction.openapi?.description;
+                const templateVariables = {
+                    summary: openApi?.summary,
+                    action: alias.action ?? UNRESOLVED_ACTION_NAME,
+                    autoAlias: alias.route.autoAliases ? '[autoAlias]' : ''
+                };
+
+                const summaryTemplate = alias.route?.openApiService?.settings?.summaryTemplate;
+                if (typeof summaryTemplate === 'string' || summaryTemplate === undefined) {
+                    openApiMethod.summary = Object.entries(templateVariables)
+                        .reduce((previous, [k, v]) => {
+                            return previous.replace(new RegExp(`{{${k}}}`, 'g'), v ?? '');
+                        }, summaryTemplate ?? DEFAULT_SUMMARY_TEMPLATE)
+                        .trim();
                 }
 
                 (currentPath[method] as OA3_1.OperationObject) = openApiMethod;
             });
-
-            // const [queryParams, addedQueryParams] = this.extractParamsFromUrl(openapiPath);
-            //
-            // const currentPath = doc.paths[openapiPath] || {};
-            //
-            // if (currentPath[method]) {
-            //     continue;
-            // }
-            //
-            // // Path Item Object
-            // // https://github.com/OAI/OpenAPI-Specification/blob/b748a884fa4571ffb6dd6ed9a4d20e38e41a878c/versions/3.0.3.md#path-item-object-example
-            // let currentPathMethod: (typeof currentPath)[OA3_1.HttpMethods] & { components?: OA3_1.ComponentsObject } = {
-            //     summary: '',
-            //     tags: [service],
-            //     // rawParams: params,
-            //     parameters: [...queryParams],
-            //     responses: {
-            //         // attach common responses
-            //         ...this.settings.commonPathItemObjectResponses
-            //     }
-            // };
-            //
-            // const schemaName = action;
-            // if (method === 'get' || method === 'delete') {
-            //     currentPathMethod.parameters.push(...this.moleculerParamsToQuery(params, addedQueryParams));
-            // } else {
-            //     if (openapi?.requestBody) {
-            //         currentPathMethod.requestBody = openapi.requestBody;
-            //     } else {
-            //         this.createSchemaFromParams(doc, schemaName, params, addedQueryParams);
-            //         currentPathMethod.requestBody = {
-            //             content: {
-            //                 'application/json': {
-            //                     schema: {
-            //                         $ref: `#/components/schemas/${schemaName}`
-            //                     }
-            //                 }
-            //             }
-            //         };
-            //     }
-            // }
-            //
-            // if (this.settings.requestBodyAndResponseBodyAreSameOnMethods.includes(method)) {
-            //     currentPathMethod.responses[200] = {
-            //         description: this.settings.requestBodyAndResponseBodyAreSameDescription,
-            //         ...currentPathMethod.requestBody
-            //     };
-            // }
-            //
-            // // if multipart/stream convert fo formData/binary
-            // if (actionType === 'multipart' || actionType === 'stream') {
-            //     currentPathMethod = {
-            //         ...currentPathMethod,
-            //         parameters: [...queryParams],
-            //         requestBody: this.getFileContentRequestBodyScheme(openapiPath, method, actionType) as OA3_1.RequestBodyObject &
-            //             OpenAPIV3.RequestBodyObject
-            //     };
-            // }
-            //
-            // // merge values from action
-            // // @ts-ignore
-            // currentPathMethod = this.mergePathItemObjects(currentPathMethod, openapi);
-            //
-            // // merge values which exist in web-api service
-            // // in routes or custom function
-            // // @ts-ignore
-            // currentPathMethod = this.mergePathItemObjects(currentPathMethod, path.openapi);
-            //
-            // // add tags to root of scheme
-            // if (currentPathMethod.tags) {
-            //     currentPathMethod.tags.forEach((name) => {
-            //         this.addTagToDoc(doc, name);
-            //     });
-            // }
-            //
-            // // add components to root of scheme
-            // if (currentPathMethod.components) {
-            //     doc.components = this.mergeObjects(doc.components, currentPathMethod.components);
-            //     delete currentPathMethod.components;
-            // }
-            //
-            // const templateVariables = {
-            //     summary: currentPathMethod.summary,
-            //     action,
-            //     autoAlias: path.autoAliases ? '[autoAlias]' : ''
-            // };
-            //
-            // currentPathMethod.summary = Object.entries(templateVariables)
-            //     .reduce((previous, [k, v]) => {
-            //         return previous.replace(new RegExp(`{{${k}}}`, 'g'), v);
-            //     }, this.settings.summaryTemplate)
-            //     .trim();
-            //
-            // currentPath[method] = currentPathMethod as (typeof currentPath)[OA3_1.HttpMethods];
-            // doc.paths[openapiPath] = currentPath;
 
             document.paths[openapiPath] = currentPath;
         });
 
         document.components = Object.keys(this.components).reduce(
             (acc, key) => {
+                if (!Object.keys(this.components?.[key]).length) {
+                    return acc;
+                }
+
                 return {
                     ...acc,
                     [key]: { ...document.components[key], ...this.components[key] }
@@ -195,38 +161,228 @@ export class OpenApiGenerator {
             { ...document.components }
         );
 
-        //TODO
-        return document;
+        return this.removeExtensions(document);
     }
 
-    private extractParameters(path: string, alias: Alias): Pick<OA3_1.OperationObject, 'parameters' | 'requestBody'> {
-        const result: Pick<OA3_1.OperationObject, 'parameters' | 'requestBody'> = {
-            parameters: this.extractParamsFromUrl(path)
+    private extractParameters(method: HTTP_METHODS, path: string, alias: Alias): parametersExtracted {
+        const pathParameters = alias.openapi?.pathParameters
+            ? alias.openapi.pathParameters.map((param) => ({
+                  ...param,
+                  in: 'path'
+              }))
+            : this.extractParamsFromUrl(path);
+
+        const result: parametersExtracted = {
+            parameters: [...pathParameters]
         };
 
-        if (alias.actionSchema?.params) {
-            this.createSchemaFromParams(
-                alias.actionSchema.name,
-                alias.actionSchema.params,
-                result.parameters.map((params: OA3_1.ParameterObject) => params.name)
-            );
+        const excluded = pathParameters.map((params: OA3_1.ParameterObject) => params.name);
+
+        if (['multipart', 'stream'].includes(alias.type)) {
+            result.requestBody = alias.openapi?.requestBody ? alias.openapi?.requestBody : this.generateFileUploadBody(alias, excluded);
+
+            return result;
+        } else if (alias.openapi?.queryParameters || alias.openapi?.requestBody || (alias.actionSchema?.params && alias.action)) {
+            const actionParams = alias?.actionSchema?.params ?? {};
+            const metas = this.converter.getMetas(actionParams);
+            const openApiMetas = metas?.$$oa ?? {};
+
+            //query
+            if (!alias.openapi?.queryParameters) {
+                const queryParameters = this.getParameters(method, actionParams, false);
+                Object.entries(queryParameters).forEach(([k, v]) => {
+                    const schema = this.converter.getSchemaObjectFromRule(v) as OpenAPIV3.SchemaObject;
+
+                    if (!schema) {
+                        return undefined;
+                    }
+
+                    const component = this.getComponent(schema);
+
+                    result.parameters.push({
+                        name: k,
+                        in: 'query',
+                        required: component[EOAExtensions.optional] !== true,
+                        schema
+                    });
+                });
+            } else {
+                result.parameters = alias.openapi.queryParameters.map((param) => ({ ...param, in: 'query' }));
+            }
+
+            //body
+            if (!alias.openapi?.requestBody) {
+                const bodyParameters = this.getParameters(method, actionParams, true);
+                if (Object.keys(bodyParameters).length > 0) {
+                    const currentBodyParameters = {
+                        ...metas,
+                        ...bodyParameters
+                    };
+
+                    const schema = this.createRequestBodyFromParams(alias.action, currentBodyParameters, excluded);
+
+                    const tmpContentTypes: Array<string> = Object.entries(alias.route?.bodyParsers || {})
+                        .filter(([, v]) => Boolean(v))
+                        .flatMap(([parser]) => BODY_PARSERS_CONTENT_TYPE[parser] ?? []);
+
+                    // TODO specify input content type ? + allow to specify one ? allow to force one ?
+                    const contentTypes = (tmpContentTypes?.length
+                        ? tmpContentTypes
+                        : [alias.route?.openApiService?.settings?.defaultResponseContentType]) ?? [DEFAULT_CONTENT_TYPE];
+
+                    let required = false;
+                    if (this.isReferenceObject(schema)) {
+                        const schemaRef = this.getComponentByRef(schema.$ref);
+
+                        if (!schemaRef) {
+                            throw new Error(`fail to get schema from path ${schema.$ref}`);
+                        }
+
+                        required = schemaRef.required?.length > 0;
+                    }
+
+                    result.requestBody = {
+                        description: openApiMetas.description,
+                        summary: openApiMetas.summary,
+                        required,
+                        content: Object.fromEntries(
+                            contentTypes.map((contentType) => [contentType, { schema }]) as Array<[string, OA3_1.MediaTypeObject]>
+                        )
+                    };
+                }
+            } else {
+                result.requestBody = alias.openapi.requestBody;
+            }
         }
-        return undefined;
+        return result;
     }
 
-    createSchemaFromParams(
+    private getParameters(method: HTTP_METHODS, params: ValidationSchema, body: boolean): Record<string, ValidationRule> {
+        const defaultInBody = ALLOWING_BODY_METHODS.includes(method);
+        return Object.fromEntries(
+            Object.entries(this.converter.getValidationRules(params))
+                .map(([k, param]: [string, ValidationRule | undefined | any]): [string, ValidationRule] => {
+                    const openApiInParameter = (param as ValidationRuleObject)?.$$oa?.in;
+                    const inBody = openApiInParameter ? openApiInParameter === 'body' : defaultInBody;
+
+                    if (inBody !== body) {
+                        return;
+                    }
+
+                    return [k, param];
+                })
+                .filter(Boolean)
+        );
+    }
+
+    /**
+     * file upload use a specific way to works, so we need to handle it here
+     *
+     * @link https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
+     */
+    private generateFileUploadBody(alias: Alias, excluded: Array<string>): OA3_1.RequestBodyObject {
+        const typeBodyParser = alias.type ? BODY_PARSERS_CONTENT_TYPE[alias.type] : undefined;
+
+        const schema: OA3_1.MediaTypeObject['schema'] = {};
+
+        const binarySchema: { type: OA3_1.NonArraySchemaObjectType; format: string } = {
+            type: 'string',
+            format: 'binary'
+        };
+
+        if (alias.type === 'stream') {
+            schema.type = binarySchema.type;
+            schema.format = binarySchema.format;
+        } else {
+            if (alias.actionSchema?.params?.$$root === true) {
+                throw new Error('$$root parameters is not supported on multipart');
+            }
+
+            const fileField = alias.route.openApiService?.settings?.multiPartFileFieldName ?? DEFAULT_MULTI_PART_FIELD_NAME;
+            schema.allOf = [
+                {
+                    type: 'object',
+                    properties: {
+                        [fileField]: {
+                            oneOf: [
+                                binarySchema,
+                                {
+                                    type: 'array',
+                                    items: binarySchema
+                                }
+                            ]
+                        }
+                    }
+                }
+            ];
+
+            if (alias.action && alias.actionSchema?.params) {
+                //merge schema with field "file"
+                const paramsSchema = this.createRequestBodyFromParams(alias.action, alias.actionSchema.params ?? {}, excluded);
+                schema.allOf.push(paramsSchema);
+            }
+        }
+
+        return {
+            content: {
+                [typeBodyParser]: {
+                    schema
+                }
+            }
+        } as OA3_1.RequestBodyObject;
+    }
+
+    private isReferenceObject(component: any): component is OA3_1.ReferenceObject {
+        return !!(component as OA3_1.ReferenceObject)?.$ref;
+    }
+
+    private getComponent(component: OA3_1.ReferenceObject | OA3_1.SchemaObject): OA3_1.SchemaObject {
+        if (!this.isReferenceObject(component)) {
+            return component;
+        }
+
+        const refComponent = this.getComponentByRef(component.$ref);
+        if (!refComponent) {
+            throw new Error(`fail to get component "${component.$ref}`);
+        }
+        return refComponent;
+    }
+
+    private getComponentByRef(path: string): OA3_1.SchemaObject | undefined {
+        const pathSegments = path.split('/').filter((segment) => segment !== ''); // Séparer le chemin en segments
+
+        //bad path format
+        if (
+            pathSegments.length < 4 ||
+            pathSegments[0] !== '#' ||
+            pathSegments[1] !== 'components' ||
+            !Object.keys(this.components).includes(pathSegments[2])
+        ) {
+            return undefined;
+        }
+
+        return pathSegments.slice(2).reduce((currentObject, segment) => {
+            return currentObject && currentObject.hasOwnProperty(segment) ? currentObject[segment] : undefined;
+        }, this.components);
+    }
+
+    createRequestBodyFromParams(
         rootSchemeName: string,
-        obj: ValidationRule | ValidationSchema,
+        obj: ValidationSchema,
         exclude: Array<string> = [],
         parentNode: { default?: any } = {}
-    ) {
-        const rootRules = this.isValidationSchema(obj)
-            ? this.getSchemaObjectFromSchema(obj)
-            : { [rootSchemeName]: this.getSchemaObjectFromRule(obj) };
+    ): OA3_1.SchemaObject | OA3_1.ReferenceObject {
+        if (obj.$$root === true) {
+            return this.converter.getSchemaObjectFromRootSchema(obj);
+        }
 
-        const rules = Object.fromEntries(Object.entries(rootRules).filter(([name, rule]) => !exclude.includes(name) && rule));
+        const rootRules = this.converter.getSchemaObjectFromSchema(obj);
 
-        this._createSchemaComponentFromObject(rootSchemeName, rules, parentNode);
+        const rules: Record<string, OA3_1.SchemaObject> = Object.fromEntries(
+            Object.entries(rootRules).filter(([name, rule]) => !exclude.includes(name) && rule)
+        );
+
+        return this._createSchemaComponentFromObject(rootSchemeName, rules, parentNode);
     }
 
     /**
@@ -235,23 +391,13 @@ export class OpenApiGenerator {
      * @returns {[]}
      */
     extractParamsFromUrl(url = ''): Array<OA3_1.ParameterObject> {
-        const params: Array<OA3_1.ParameterObject> = [];
-
-        const matches = [...matchAll(/{(\w+)}/g, url).flat()];
-        for (const match of matches) {
-            const [, name] = match;
-
-            params.push({ name, in: 'path', required: true, schema: { type: 'string' } });
-        }
-
-        return params;
+        return [...matchAll(/{(\w+)}/g, url).flat()].map((name) => ({
+            name,
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+        })) as Array<OA3_1.ParameterObject>;
     }
-
-    //TODO seems useless
-    private isValidationSchema(schema: any): schema is ValidationSchema {
-        return schema?.$$root !== true;
-    }
-
     /**
      * Convert moleculer params to openapi definitions(components schemas)
      * @param schemeName
@@ -260,26 +406,9 @@ export class OpenApiGenerator {
      */
     _createSchemaComponentFromObject(
         schemeName: string,
-        obj: Record<string, OA3_1.SchemaObject> | { [ROOT_PROPERTY]: OA3_1.SchemaObject },
+        obj: Record<string, OA3_1.SchemaObject>,
         customProperties: { default?: any } = {}
-    ) {
-        //TODO not tested
-        if (obj[ROOT_PROPERTY]) {
-            const rootObj = obj[ROOT_PROPERTY];
-            const systemParams: tSystemParams = this.extractSystemParams(rootObj as Record<string, unknown>);
-
-            const schema: OA3_1.SchemaObject = {
-                ...rootObj
-            };
-
-            if (systemParams.description) {
-                schema.description = systemParams.description;
-            }
-
-            this.components.schemas[schemeName] = schema;
-            return;
-        }
-
+    ): OA3_1.ReferenceObject {
         const required: Array<string> = [];
         const properties = Object.fromEntries(
             Object.entries(obj).map(([fieldName, rule]) => {
@@ -292,20 +421,16 @@ export class OpenApiGenerator {
             })
         );
 
-        // Schema model
-        // https://github.com/OAI/OpenAPI-Specification/blob/b748a884fa4571ffb6dd6ed9a4d20e38e41a878c/versions/3.0.3.md#models-with-polymorphism-support
         this.components.schemas[schemeName] = {
             type: 'object',
             properties,
             required: required.length > 0 ? required : undefined,
             default: customProperties.default
         };
-    }
 
-    private removeExtensions(rule: OA3_1.SchemaObject): void {
-        Object.values(EOAExtensions).forEach((extension) => {
-            delete rule[extension];
-        });
+        return {
+            $ref: `#/components/schemas/${schemeName}`
+        };
     }
 
     /**
@@ -332,15 +457,12 @@ export class OpenApiGenerator {
         const systemParams: tSystemParams = this.extractSystemParams(rule as Record<string, unknown>);
 
         rule.description = systemParams.description;
-        //delete extensions
-        this.removeExtensions(rule);
 
         if (rule.type == 'object' && rule.properties) {
             // create child schema per object
-            this._createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default });
             return {
                 description: rule.description,
-                $ref: `#/components/schemas/${nextSchemeName}`
+                ...this._createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default })
             };
         }
 
@@ -364,11 +486,8 @@ export class OpenApiGenerator {
                     }
 
                     const schemeName = `${nextSchemeName}.${i++}`;
-                    this._createSchemaPartFromRule(schemeName, schema);
 
-                    return {
-                        $ref: `#/components/schemas/${schemeName}`
-                    };
+                    return this._createSchemaPartFromRule(schemeName, schema);
                 });
             });
         }
@@ -383,68 +502,36 @@ export class OpenApiGenerator {
         };
     }
 
-    private getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OA3_1.SchemaObject> {
-        if (schema.$$root !== true) {
-            return Object.fromEntries(
-                Object.entries(schema)
-                    .filter(([k]) => !k.startsWith('$$'))
-                    .map(([k, v]) => [k, this.getSchemaObjectFromRule(v, undefined, schema)])
-            );
+    private removeExtensions<T>(obj: T): T {
+        if (Array.isArray(obj)) {
+            return obj.map((item) => this.removeExtensions(item)) as T;
         }
 
-        delete schema.$$root;
+        if (typeof obj === 'object') {
+            Object.values(EOAExtensions).forEach((extension) => {
+                delete obj[extension];
+            });
 
-        return { [ROOT_PROPERTY]: this.getSchemaObjectFromRule(schema as ValidationRule) };
+            return Object.fromEntries(
+                Object.entries(obj).map(([k, v]) => {
+                    return [k, this.removeExtensions(v)];
+                })
+            ) as T;
+        }
+
+        return obj;
     }
 
-    private getSchemaObjectFromRule(
-        pRule: ValidationRule,
-        parentProperties?: Partial<ValidationRuleObject>,
-        parentSchema?: ObjectRules
-    ): OA3_1.SchemaObject | undefined {
-        if (!this.validator || !this.mappers?.string) {
-            throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
-        }
-
-        //extract known params extensions
-        const extensions = (
-            [
-                {
-                    property: '$$t',
-                    extension: EOAExtensions.description
-                }
-            ] as Array<{ property: string; extension: EOAExtensions }>
-        ).map(({ property, extension }) => {
-            const currentRule = pRule as Record<string, string>;
-            const value = (pRule as Record<string, string>)?.[property];
-
-            delete currentRule?.[property];
-
-            return [extension, value];
-        });
-
-        const baseRule = this.validator.getRuleFromSchema(pRule)?.schema as ValidationRuleObject;
-        const rule = {
-            ...parentProperties,
-            ...baseRule
-        };
-
-        const typeMapper: (rule: unknown, parentSchema: unknown) => OA3_1.SchemaObject =
-            this.mappers[rule.type as ValidationRuleName] || this.mappers.string; // Utilise le mapper pour string par défaut
-        const schema = typeMapper(rule, parentSchema);
-
-        if (!schema) {
-            return undefined;
-        }
-
-        if (rule.optional) {
-            schema[EOAExtensions.optional] = true;
-        }
-
-        extensions.forEach(([k, v]) => {
-            schema[k] = v;
-        });
-
-        return schema;
+    private cleanComponents(components: SubOptionalOrFalse<OA3_1.ComponentsObject> = {}): OA3_1.ComponentsObject {
+        return Object.fromEntries(
+            Object.entries(components).map(([k, v]: [string, OptionalOrFalse<OA3_1.ComponentsObject>]) => [
+                k,
+                Object.fromEntries(
+                    Object.entries(v)
+                        .map(([key, value]) => (value === false ? undefined : [key, value]))
+                        .filter(Boolean)
+                )
+            ])
+        );
     }
 }

@@ -7,10 +7,13 @@ TODO
 - check multipart upload => bad content type
 - allow to add custom mappers
 
+# typescript
+this package rely on the library `openapi-types` feel free to install it in your devDependencies to better typing;
+
 
 # moleculer-auto-openapi
 Auto generate openapi(swagger) scheme for molecular.
-Scheme generated based on action validation params, routes on all avalaibled services and paths in ApiGateway.
+Scheme generated based on action validation params, routes on all available services and paths in ApiGateway.
 
 ## Install
 ```shell script

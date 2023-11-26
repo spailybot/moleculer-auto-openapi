@@ -3,8 +3,9 @@ import { getFastestValidatorMappers } from '../mappers.js';
 import { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema, ValidationSchemaMetaKeys } from 'fastest-validator';
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { EOAExtensions } from '../commons.js';
+import { IConverter } from './IConverter.js';
 
-export class FastestValidatorConverter {
+export class FastestValidatorConverter implements IConverter {
     private readonly mappers: Mappers;
 
     constructor(private readonly validator: FastestValidatorType) {

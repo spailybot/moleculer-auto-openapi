@@ -1,0 +1,22 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "includeVersion": true,
+  "githubPages": true,
+  "externalSymbolLinkMappings": {
+    "openapi-types": {
+      "OpenAPIV3_1.Document": "https://spec.openapis.org/oas/v3.1.0#openapi-object",
+      "OpenAPIV3_1.ResponseObject":  "https://spec.openapis.org/oas/v3.1.0#response-object",
+      "OpenAPIV3_1.TagObject": "https://spec.openapis.org/oas/v3.1.0#tag-object",
+      "OpenAPIV3.ExternalDocumentationObject": "https://spec.openapis.org/oas/v3.1.0#external-documentation-object",
+      "OpenAPIV3_1.RequestBodyObject": "https://spec.openapis.org/oas/v3.1.0#request-body-object",
+      "OpenAPIV3.ParameterObject": "https://spec.openapis.org/oas/v3.1.0#parameter-object",
+      "OpenAPIV3_1.ServerObject":  "https://spec.openapis.org/oas/v3.1.0#server-object",
+      "OpenAPIV3_1.ComponentsObject": "https://spec.openapis.org/oas/v3.1.0#components-object",
+      "OpenAPIV3_1.ResponsesObject":  "https://spec.openapis.org/oas/v3.1.0#responses-object",
+      "OpenAPIV3_1.SchemaObject": "https://spec.openapis.org/oas/v3.1.0#schema-object",
+      "OpenAPIV3_1.MediaTypeObject":  "https://spec.openapis.org/oas/v3.1.0#media-type-object",
+      "OpenAPIV3_1.InfoObject": "https://spec.openapis.org/oas/v3.1.0#info-object"
+    }
+  }
+}

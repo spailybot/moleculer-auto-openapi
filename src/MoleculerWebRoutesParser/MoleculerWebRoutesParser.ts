@@ -1,7 +1,7 @@
 import { ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../types/types.js';
 import { MOLECULER_WEB_LIST_ALIASES_INPUT, MOLECULER_WEB_LIST_ALIASES_OUTPUT, routeAlias } from '../types/moleculer-web.js';
 import { ActionSchema, Context, LoggerInstance, Service } from 'moleculer';
-import { getServiceName } from '../commons.js';
+import { getServiceName, normalizePath } from '../commons.js';
 import { Route } from '../objects/Route.js';
 import { Alias } from '../objects/Alias.js';
 
@@ -17,6 +17,8 @@ export class MoleculerWebRoutesParser {
         const actionsMap = new Map<string, { service: Service; action: ActionSchema }>();
         const routes = new Map<string, Route>();
 
+        // TODO map the current OA server (moleculer service), to route, to add the "server" field
+
         services.forEach((svc) =>
             Object.values(svc.actions).forEach((action) => {
                 actionsMap.set(action.name, {
@@ -29,13 +31,7 @@ export class MoleculerWebRoutesParser {
         const serviceName = getServiceName(service);
 
         (service.settings?.routes || []).forEach((routeSchema) => {
-            const route = new Route(
-                this.logger,
-                routeSchema,
-                service.settings?.path,
-                skipUnresolvedActions,
-                ctx.service as Service<OpenApiMixinSettings>
-            );
+            const route = new Route(this.logger, routeSchema, service, ctx.service as Service<OpenApiMixinSettings>, skipUnresolvedActions);
 
             routes.set(route.path, route);
         });
@@ -46,7 +42,7 @@ export class MoleculerWebRoutesParser {
             .flatMap((alias: routeAlias) => {
                 this.logger.debug(`checking alias ${alias} for path ${alias.fullPath}`);
 
-                const route = routes.get(alias.routePath);
+                const route = routes.get(normalizePath(alias.routePath));
 
                 const routeAlias = route?.searchAlias(alias);
                 if (!routeAlias) {
@@ -81,107 +77,10 @@ export class MoleculerWebRoutesParser {
                 }
 
                 alias.actionSchema = action.action;
+                alias.service = action.service;
 
                 return alias;
             });
-
-        // return (autoAliases ?? [])
-        //     .flatMap((alias: routeAlias): Array<foundRoute> | foundRoute | undefined => {
-        //         this.logger.debug(`checking alias ${alias} for path ${alias.fullPath}`);
-        //
-        //         const route = routes.get(alias.routePath);
-        //
-        //         const routeAlias = this.searchAlias(alias, route?.aliases);
-        //         if (!routeAlias) {
-        //             if (route.autoAliases !== true) {
-        //                 this.logger.error(`fail to get alias configuration for path "${alias.fullPath}"`);
-        //                 return undefined;
-        //             }
-        //
-        //             return ((alias.methods === JOKER_METHOD ? HTTP_METHODS_ARRAY : [alias.methods]) ?? []).map((m) => ({
-        //                 actionType: routeAlias?.actionType,
-        //                 path: alias.fullPath,
-        //                 method: m.toLowerCase() as foundRoute['method'],
-        //                 action: alias.actionName,
-        //                 openapi: routeAlias?.openapi ?? route?.openapi
-        //             }));
-        //         }
-        //
-        //         if (!methodIsHttpMethod(alias.methods ?? routeAlias.method)) {
-        //             debugger;
-        //         }
-        //
-        //         return {
-        //             actionType: routeAlias?.actionType,
-        //             path: alias.fullPath,
-        //             method: alias.methods.toLowerCase() as foundRoute['method'],
-        //             action: alias.actionName,
-        //             openapi: routeAlias?.openapi ?? route?.openapi
-        //         };
-        //     })
-        //     .filter(Boolean) as Array<foundRoute>;
-        //
-        // // TODO seems useless to read manually routes ? better to just call listAliases ?
-        // // test on original openapi doesn't works ... they generate openapi, but m-web doesn't handle this endpoints ...
-        //
-        // (service.settings.routes || []).forEach((route) => {
-        //     Object.entries(route.aliases || {}).map(([alias, infos]) => {
-        //         this.logger.debug(`checking alias ${alias} on route ${route.name ?? '<unamed>'} ${route.path}`);
-        //         const aliasFound = this.extractAliasInformation(infos, skipUnresolvedActions);
-        //
-        //         if (!aliasFound) {
-        //             this.logger.debug(`no result after extractions`);
-        //             return;
-        //         }
-        //
-        //         const routePath = path.join(service.settings.path ?? '/', route.path ?? '/');
-        //
-        //         const fullPathAndMethods = this.getFullPathAndMethods(routePath, alias);
-        //
-        //         if (!fullPathAndMethods) {
-        //             this.logger.debug(`no result extracting full path and methods`);
-        //             return;
-        //         }
-        //
-        //         const { openapi, actionType } = aliasFound;
-        //         generatePathsWithCustomMethods(fullPathAndMethods.path, fullPathAndMethods.method, aliasFound).forEach(
-        //             ({ path, method, action }) => {
-        //                 pathsFounds.push({
-        //                     path,
-        //                     method,
-        //                     openapi,
-        //                     action,
-        //                     actionType
-        //                 });
-        //             }
-        //         );
-        //     });
-        // });
-        //
-        // if (service.settings.routes?.some((route) => route.autoAliases)) {
-        //     const serviceName = getServiceName(service);
-        //     const autoAliases = await this.fetchAliasesForService(ctx, serviceName);
-        //
-        //     autoAliases.map((alias) => {
-        //         const method = alias.methods?.toLowerCase() as foundRoute['method'];
-        //
-        //         if (method !== JOKER_METHOD && method !== REST_METHOD && !methodIsHttpMethod(method)) {
-        //             this.logger.warn(`${alias.actionName}: unknown HTTP method ${method} skip`);
-        //             return;
-        //         }
-        //         generatePathsWithCustomMethods(alias.fullPath, method, {
-        //             action: alias.actionName
-        //         }).forEach(({ path, method, action }) => {
-        //             pathsFounds.push({
-        //                 path,
-        //                 method,
-        //                 action
-        //             });
-        //         });
-        //     });
-        // }
-
-        // return pathsFounds;
     }
 
     private fetchAliasesForService(ctx: Context, service: string) {

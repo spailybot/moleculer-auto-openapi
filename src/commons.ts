@@ -39,6 +39,7 @@ export const DISALLOWING_BODY_METHODS: Array<HTTP_METHODS> = Object.values(HTTP_
 
 export const DEFAULT_CONTENT_TYPE = 'application/json';
 export const DEFAULT_MULTI_PART_FIELD_NAME = 'file';
+export const DEFAULT_SUMMARY_TEMPLATE = '{{summary}}\n            ({{action}}){{autoAlias}}';
 
 export const OA_NAME_REGEXP = /^[a-zA-Z0-9._-]+$/;
 
@@ -92,3 +93,13 @@ export const isRawHttpMethodFromMWeb = (value: string): value is rawHttpMethodFr
 export const isRawHttpMethod = (value: string): value is rawHttpMethod => {
     return value === JOKER_METHOD || methodIsHttpMethod(value);
 };
+
+export function getAlphabeticSorter(): (a: string, b: string) => number;
+export function getAlphabeticSorter(key: string): (a: Record<string, any>, b: Record<string, any>) => number;
+export function getAlphabeticSorter(key?: string) {
+    if (!key) {
+        return (a: string, b: string) => a.localeCompare(b, 'en', { sensitivity: 'base' });
+    }
+
+    return (a: Record<string, any>, b: Record<string, any>): number => a[key]?.localeCompare(b[key], 'en', { sensitivity: 'base' }) ?? -1;
+}

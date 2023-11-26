@@ -1,17 +1,16 @@
 import type { Context, LoggerInstance, Service, ServiceBroker } from 'moleculer';
 import Moleculer from 'moleculer';
 import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import type { OpenApiMixinSettings, FastestValidatorType } from './types/types.js';
+import type { FastestValidatorType, OpenApiMixinSettings } from './types/types.js';
 import { ApiSettingsSchemaOpenApi } from './types/types.js';
 import { UNRESOLVED_ACTION_NAME } from './constants.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
 import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, openApiVersionsSupported } from './commons.js';
 import { ApiSettingsSchema } from 'moleculer-web';
 import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
-import { OpenApiGenerator } from './OpenApiGenerator.js';
 import { Alias } from './objects/Alias.js';
+import { OpenApiGenerator } from './OpenApiGenerator.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
-import { OpenApiGenerator2 } from './OpenApiGenerator2.js';
 
 export const defaultSettings: OpenApiMixinSettings = {
     onlyLocal: false, // build schema from only local services
@@ -19,29 +18,29 @@ export const defaultSettings: OpenApiMixinSettings = {
     uiPath: '/api/openapi/ui',
     // set //unpkg.com/swagger-ui-dist@3.38.0 for fetch assets from unpkg
     assetsPath: '/openapi/assets',
-    commonPathItemObjectResponses: {
-        200: {
-            $ref: '#/components/responses/ReturnedData'
-        },
-        401: {
-            $ref: '#/components/responses/UnauthorizedError'
-        },
-        422: {
-            $ref: '#/components/responses/ValidationError'
-        },
-        default: {
-            $ref: '#/components/responses/ServerError'
-        }
-    },
-    requestBodyAndResponseBodyAreSameOnMethods: [
-        /* 'post',
-        'patch',
-        'put', */
-    ],
-    requestBodyAndResponseBodyAreSameDescription:
-        'The answer may vary slightly from what is indicated here. Contain id and/or other additional attributes.',
+    // commonPathItemObjectResponses: {
+    //     200: {
+    //         $ref: '#/components/responses/ReturnedData'
+    //     },
+    //     401: {
+    //         $ref: '#/components/responses/UnauthorizedError'
+    //     },
+    //     422: {
+    //         $ref: '#/components/responses/ValidationError'
+    //     },
+    //     default: {
+    //         $ref: '#/components/responses/ServerError'
+    //     }
+    // },
+    //TODO ?
+    // requestBodyAndResponseBodyAreSameOnMethods: [
+    //     /* 'post',
+    //     'patch',
+    //     'put', */
+    // ],
+    // requestBodyAndResponseBodyAreSameDescription:
+    //     'The answer may vary slightly from what is indicated here. Contain id and/or other additional attributes.',
     openapi: {
-        openapi: '3.1.0',
         info: {
             description: '',
             version: '0.0.1',
@@ -53,6 +52,20 @@ export const defaultSettings: OpenApiMixinSettings = {
             schemas: moleculerOpenAPITypes.schemas,
             securitySchemes: {},
             responses: moleculerOpenAPITypes.responses
+        },
+        responses: {
+            200: {
+                $ref: '#/components/responses/ReturnedData'
+            },
+            401: {
+                $ref: '#/components/responses/UnauthorizedError'
+            },
+            422: {
+                $ref: '#/components/responses/ValidationError'
+            },
+            default: {
+                $ref: '#/components/responses/ServerError'
+            }
         }
     },
     cacheOpenApi: true,
@@ -65,6 +78,10 @@ export const defaultSettings: OpenApiMixinSettings = {
 };
 
 export type OA_GENERATE_DOCS_INPUT = {
+    /**
+     * maybe a future option ?
+     * @hidden
+     */
     version?: openApiVersionsSupported;
 };
 export type OA_GENERATE_DOCS_OUTPUT = OA3_1.Document;
@@ -97,27 +114,6 @@ export class MoleculerOpenAPIGenerator {
             withActions: true,
             onlyLocal: this.settings.onlyLocal
         });
-    }
-
-    private fetchAliasesForService(ctx: Context, service: string) {
-        return this.broker.call(`${service}.listAliases`);
-    }
-
-    attachParamsAndOpenapiFromEveryActionToRoutes(routes, nodes) {
-        for (const routeAction in routes) {
-            for (const node of nodes) {
-                for (const nodeAction in node.actions) {
-                    if (routeAction === nodeAction) {
-                        const actionProps = node.actions[nodeAction];
-
-                        routes[routeAction].params = actionProps.params || {};
-                        //read openAPI here
-                        routes[routeAction].openapi = actionProps.openapi ?? null;
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     private async getAliases(ctx: Context, services: Array<Service<ApiSettingsSchema>>): Promise<Array<Alias>> {
@@ -619,7 +615,9 @@ export class MoleculerOpenAPIGenerator {
     }
 
     public async generateSchema(ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
-        const doc: OA3_1.Document = JSON.parse(JSON.stringify(this.settings.openapi));
+        //TODO allow to pass version from ctx ?
+        // const { version } = ctx.params;
+        const version = '3.1';
 
         const services = await this.fetchServicesWithActions(ctx);
 
@@ -629,7 +627,10 @@ export class MoleculerOpenAPIGenerator {
         //
         // routes = Object.fromEntries(Object.entries(routes).filter(([name, r]) => r.openapi !== false));
         //
-        return new OpenApiGenerator2(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(aliases);
+        return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(
+            version,
+            aliases
+        );
         // this.routesToOpenApi(routes, doc);
         //
         // return doc;

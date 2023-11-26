@@ -1,869 +1,812 @@
 {
-  "info": {
-    "description": "Foo",
-    "title": "Bar",
-    "version": "0.0.1"
-  },
-  "openapi": "3.1.0",
-  "tags": [
-    {
-      "name": "auth"
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Bar",
+        "description": "Foo",
+        "version": "0.0.1"
     },
-    {
-      "name": "some"
-    }
-  ],
-  "paths": {
-    "/api/login-custom-function": {
-      "post": {
-        "summary": "Login\n            (unknown-action)",
-        "tags": [
-          "auth"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/ReturnedData"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
+    "tags": [
+        {
+            "name": "auth"
         },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "examples": [
-                  {
-                    "login": "",
-                    "pass": ""
-                  }
-                ]
-              }
-            }
-          }
+        {
+            "name": "some"
         }
-      }
-    },
-    "/api/upload": {
-      "put": {
-        "summary": "(some.upload)",
-        "tags": [
-          "some"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "examples": [
-                      {
-                        "id": 1,
-                        "filename": "foo.txt",
-                        "mimetype": "text/plain",
-                        "sizeInBytes": 100
-                      }
-                    ]
-                  }
+    ],
+    "paths": {
+        "/api/find": {
+            "get": {
+                "summary": "Some find summary\n            (some.find)",
+                "tags": ["some"],
+                "parameters": [
+                    {
+                        "name": "roles",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["user", "admin"],
+                                "examples": ["user"]
+                            }
+                        }
+                    },
+                    {
+                        "name": "sex",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["male", "female"],
+                            "examples": ["male"]
+                        }
+                    },
+                    {
+                        "name": "populate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "default": "find me now",
+                            "type": "string",
+                            "examples": ["find me now"]
+                        }
+                    },
+                    {
+                        "name": "searchFields",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "object"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ReturnedData"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
                 }
-              }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/FileNotExist"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "413": {
-            "$ref": "#/components/responses/FileTooBig"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
         },
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
+        "/api/go": {
+            "post": {
+                "summary": "(some.go)",
+                "tags": ["some"],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/some.go"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "line": "number",
+                                            "text": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/api/login-custom-function": {
+            "post": {
+                "summary": "Login\n            (unknown-action)",
+                "tags": ["auth"],
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "login": "",
+                                    "pass": ""
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ReturnedData"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/api/some-login": {
+            "post": {
+                "summary": "(some.login)",
+                "tags": ["some"],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/some.login"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ReturnedData"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/api/update/{id}": {
+            "patch": {
+                "summary": "Foo bar baz\n            (some.update)",
+                "tags": ["some"],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/some.update"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ReturnedData"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/api/upload": {
+            "put": {
+                "summary": "(some.upload)",
+                "tags": ["some"],
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "file": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string",
+                                                        "format": "binary"
+                                                    },
+                                                    {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "format": "binary"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "examples": [
+                                            {
+                                                "id": 1,
+                                                "filename": "foo.txt",
+                                                "mimetype": "text/plain",
+                                                "sizeInBytes": 100
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/FileNotExist"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "413": {
+                        "$ref": "#/components/responses/FileTooBig"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "DbMixinList": {
                 "type": "object",
                 "properties": {
-                  "file": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
-                    }
-                  },
-                  "someField": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/update/{id}": {
-      "patch": {
-        "summary": "Foo bar baz\n            (some.update)",
-        "tags": [
-          "some"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/ReturnedData"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/some.update"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/find": {
-      "get": {
-        "summary": "Some find summary\n            (some.find)",
-        "tags": [
-          "some"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "roles",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "user",
-                  "admin"
-                ],
-                "examples": [
-                  "user"
-                ]
-              }
-            }
-          },
-          {
-            "in": "query",
-            "name": "sex",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "male",
-                "female"
-              ],
-              "examples": [
-                "male"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "populate",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "required": true,
-            "schema": {
-              "default": "find me now",
-              "type": "string",
-              "examples": [
-                "find me now"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "searchFields",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "in": "query",
-            "name": "query",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "object"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/ReturnedData"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/api/go": {
-      "post": {
-        "summary": "(some.go)",
-        "tags": [
-          "some"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "examples": [
-                    {
-                      "line": "number",
-                      "text": "string"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/some.go"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/some-login": {
-      "post": {
-        "summary": "(some.login)",
-        "tags": [
-          "some"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/ReturnedData"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "default": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/some.login"
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "DbMixinList": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
-          "totalCount": {
-            "type": "number"
-          }
-        }
-      },
-      "DbMixinFindList": {
-        "type": "array",
-        "items": {
-          "type": "object"
-        }
-      },
-      "Item": {
-        "type": "object"
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "examples": [
-              "InternalServerError"
-            ],
-            "type": "string",
-            "description": "The name of the error"
-          },
-          "message": {
-            "examples": [
-              "Example"
-            ],
-            "type": "string",
-            "description": "an helping message"
-          },
-          "code": {
-            "type": "number",
-            "description": "the status code of the error (can be different of the HTTP status code)"
-          },
-          "type": {
-            "type": "string",
-            "description": "additional information for the error"
-          },
-          "data": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "name",
-          "message",
-          "code"
-        ]
-      },
-      "unknown-action": {
-        "type": "object",
-        "properties": {}
-      },
-      "some.upload": {
-        "type": "object",
-        "properties": {}
-      },
-      "some.update.types": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "typeId": {
-            "type": "number"
-          }
-        },
-        "default": {
-          "id": 1,
-          "typeId": 5
-        }
-      },
-      "some.update.bars": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "fooNum": {
-            "type": "number",
-            "description": "fooNum"
-          }
-        }
-      },
-      "some.update.someObj": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "Some obj ID"
-          },
-          "numberId": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 100
-          }
-        },
-        "default": {
-          "name": "bar"
-        }
-      },
-      "some.update.shortObject": {
-        "type": "object",
-        "properties": {
-          "desc": {
-            "type": "string",
-            "maxLength": 10000
-          },
-          "url": {
-            "type": "string",
-            "format": "url",
-            "examples": [
-              "https://foobar.com"
-            ]
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "some.update.shortObject2": {
-        "type": "object",
-        "properties": {
-          "desc": {
-            "type": "string",
-            "maxLength": 10000
-          },
-          "url": {
-            "type": "string",
-            "format": "url",
-            "examples": [
-              "https://foobar.com"
-            ]
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "some.update": {
-        "type": "object",
-        "properties": {
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "user",
-                "admin"
-              ],
-              "examples": [
-                "user"
-              ]
-            }
-          },
-          "sex": {
-            "type": "string",
-            "enum": [
-              "male",
-              "female"
-            ],
-            "examples": [
-              "male"
-            ]
-          },
-          "numberBy": {
-            "type": "number"
-          },
-          "someNum": {
-            "type": "number",
-            "description": "Is some num"
-          },
-          "types": {
-            "type": "array",
-            "examples": [
-              [
-                {
-                  "id": 1,
-                  "typeId": 5
-                }
-              ]
-            ],
-            "default": [
-              {
-                "id": 1,
-                "typeId": 5
-              }
-            ],
-            "items": {
-              "$ref": "#/components/schemas/some.update.types"
-            },
-            "maxItems": 1,
-            "minItems": 1,
-            "description": "Types arr"
-          },
-          "bars": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/some.update.bars"
-            },
-            "maxItems": 2,
-            "minItems": 1,
-            "description": "Bars arr"
-          },
-          "someObj": {
-            "description": "Some obj",
-            "$ref": "#/components/schemas/some.update.someObj"
-          },
-          "someBool": {
-            "type": "boolean",
-            "examples": [
-              true,
-              false
-            ]
-          },
-          "desc": {
-            "type": "string",
-            "maxLength": 10,
-            "minLength": 4
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "pattern": "^\\S+@\\S+\\.\\S+$",
-            "examples": [
-              "foo@bar.com"
-            ]
-          },
-          "date": {
-            "type": "string",
-            "default": "1998-01-10T13:00:00.000Z",
-            "format": "date-time",
-            "examples": [
-              "1998-01-10T13:00:00.000Z",
-              884437200000
-            ]
-          },
-          "uuid": {
-            "type": "string",
-            "format": "uuid",
-            "examples": [
-              "10ba038e-48da-487b-96e8-8d3b99b6d18a"
-            ]
-          },
-          "url": {
-            "type": "string",
-            "format": "url",
-            "examples": [
-              "https://foobar.com"
-            ]
-          },
-          "shortObject": {
-            "$ref": "#/components/schemas/some.update.shortObject"
-          },
-          "shortObject2": {
-            "$ref": "#/components/schemas/some.update.shortObject2"
-          }
-        },
-        "required": [
-          "roles",
-          "sex",
-          "numberBy",
-          "someNum",
-          "types",
-          "bars",
-          "someObj",
-          "email",
-          "uuid",
-          "url",
-          "shortObject"
-        ]
-      },
-      "some.go": {
-        "type": "object",
-        "properties": {
-          "line": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "line"
-        ]
-      },
-      "some.login": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string",
-            "minLength": 8,
-            "pattern": "^[a-zA-Z0-9]+$"
-          },
-          "repeatPassword": {
-            "type": "string",
-            "minLength": 8,
-            "pattern": "^[a-zA-Z0-9]+$"
-          },
-          "confirmPassword": {
-            "type": "string",
-            "minLength": 8,
-            "pattern": "^[a-zA-Z0-9]+$"
-          }
-        },
-        "required": [
-          "password",
-          "repeatPassword",
-          "confirmPassword"
-        ]
-      }
-    },
-    "securitySchemes": {},
-    "responses": {
-      "ServerError": {
-        "description": "Server errors: 500, 501, 400, 404 and etc...",
-        "content": {
-          "application/json": {
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Error"
-                },
-                {
-                  "examples": [
-                    {
-                      "name": "InternalServerError",
-                      "message": "Internal Server Error",
-                      "code": 500
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      },
-      "UnauthorizedError": {
-        "description": "Need auth",
-        "content": {
-          "application/json": {
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Error"
-                },
-                {
-                  "type": "object",
-                  "examples": [
-                    {
-                      "name": "UnAuthorizedError",
-                      "message": "Unauthorized",
-                      "code": 401
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      },
-      "ValidationError": {
-        "description": "Fields invalid",
-        "content": {
-          "application/json": {
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Error"
-                },
-                {
-                  "type": "object",
-                  "examples": [
-                    {
-                      "name": "MoleculerClientError",
-                      "message": "Error message",
-                      "code": 422,
-                      "data": [
-                        {
-                          "name": "fieldName",
-                          "message": "Field invalid"
-                        },
-                        {
-                          "name": "arrayField[0].fieldName",
-                          "message": "Whats wrong"
-                        },
-                        {
-                          "name": "object.fieldName",
-                          "message": "Whats wrong"
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
                         }
-                      ]
+                    },
+                    "totalCount": {
+                        "type": "number"
                     }
-                  ]
                 }
-              ]
-            }
-          }
-        }
-      },
-      "ReturnedData": {
-        "description": "",
-        "content": {
-          "application/json": {
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/DbMixinList"
-                },
-                {
-                  "$ref": "#/components/schemas/DbMixinFindList"
-                },
-                {
-                  "$ref": "#/components/schemas/Item"
+            },
+            "DbMixinFindList": {
+                "type": "array",
+                "items": {
+                    "type": "object"
                 }
-              ]
-            }
-          }
-        }
-      },
-      "FileNotExist": {
-        "description": "File not exist",
-        "content": {
-          "application/json": {
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Error"
-                },
-                {
-                  "type": "object",
-                  "examples": [
-                    {
-                      "name": "MoleculerClientError",
-                      "message": "File missing in the request",
-                      "code": 400
+            },
+            "Item": {
+                "type": "object"
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "examples": ["InternalServerError"],
+                        "type": "string",
+                        "description": "The name of the error"
+                    },
+                    "message": {
+                        "examples": ["Example"],
+                        "type": "string",
+                        "description": "an helping message"
+                    },
+                    "code": {
+                        "type": "number",
+                        "description": "the status code of the error (can be different of the HTTP status code)"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "additional information for the error"
+                    },
+                    "data": {
+                        "type": "object"
                     }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      },
-      "FileTooBig": {
-        "description": "File too big",
-        "content": {
-          "application/json": {
-            "schema": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Error"
                 },
-                {
-                  "type": "object",
-                  "examples": [
-                    {
-                      "name": "PayloadTooLarge",
-                      "message": "Payload too large",
-                      "code": 413,
-                      "type": "PAYLOAD_TOO_LARGE",
-                      "data": {
-                        "fieldname": "file",
-                        "filename": "4b2005c0b8.png",
-                        "encoding": "7bit",
-                        "mimetype": "image/png"
-                      }
+                "required": ["name", "message", "code"]
+            },
+            "some.go": {
+                "type": "object",
+                "properties": {
+                    "line": {
+                        "type": "number"
                     }
-                  ]
+                },
+                "required": ["line"]
+            },
+            "some.login": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "minLength": 8,
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    },
+                    "repeatPassword": {
+                        "type": "string",
+                        "minLength": 8,
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    },
+                    "confirmPassword": {
+                        "type": "string",
+                        "minLength": 8,
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    }
+                },
+                "required": ["password", "repeatPassword", "confirmPassword"]
+            },
+            "some.update.types": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "typeId": {
+                        "type": "number"
+                    }
+                },
+                "default": {
+                    "id": 1,
+                    "typeId": 5
                 }
-              ]
+            },
+            "some.update.bars": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "fooNum": {
+                        "type": "number",
+                        "description": "fooNum"
+                    }
+                }
+            },
+            "some.update.someObj": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "description": "Some obj ID"
+                    },
+                    "numberId": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "default": {
+                    "name": "bar"
+                }
+            },
+            "some.update.shortObject": {
+                "type": "object",
+                "properties": {
+                    "desc": {
+                        "type": "string",
+                        "maxLength": 10000
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url",
+                        "examples": ["https://foobar.com"]
+                    }
+                },
+                "required": ["url"]
+            },
+            "some.update.shortObject2": {
+                "type": "object",
+                "properties": {
+                    "desc": {
+                        "type": "string",
+                        "maxLength": 10000
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url",
+                        "examples": ["https://foobar.com"]
+                    }
+                },
+                "required": ["url"]
+            },
+            "some.update": {
+                "type": "object",
+                "properties": {
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": ["user", "admin"],
+                            "examples": ["user"]
+                        }
+                    },
+                    "sex": {
+                        "type": "string",
+                        "enum": ["male", "female"],
+                        "examples": ["male"]
+                    },
+                    "numberBy": {
+                        "type": "number"
+                    },
+                    "someNum": {
+                        "type": "number",
+                        "description": "Is some num"
+                    },
+                    "types": {
+                        "type": "array",
+                        "examples": [
+                            [
+                                {
+                                    "id": 1,
+                                    "typeId": 5
+                                }
+                            ]
+                        ],
+                        "default": [
+                            {
+                                "id": 1,
+                                "typeId": 5
+                            }
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/some.update.types"
+                        },
+                        "maxItems": 1,
+                        "minItems": 1,
+                        "description": "Types arr"
+                    },
+                    "bars": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/some.update.bars"
+                        },
+                        "maxItems": 2,
+                        "minItems": 1,
+                        "description": "Bars arr"
+                    },
+                    "someObj": {
+                        "description": "Some obj",
+                        "$ref": "#/components/schemas/some.update.someObj"
+                    },
+                    "someBool": {
+                        "type": "boolean",
+                        "examples": [true, false]
+                    },
+                    "desc": {
+                        "type": "string",
+                        "maxLength": 10,
+                        "minLength": 4
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "pattern": "^\\S+@\\S+\\.\\S+$",
+                        "examples": ["foo@bar.com"]
+                    },
+                    "date": {
+                        "type": "string",
+                        "default": "1998-01-10T13:00:00.000Z",
+                        "format": "date-time",
+                        "examples": ["1998-01-10T13:00:00.000Z", 884437200000]
+                    },
+                    "uuid": {
+                        "type": "string",
+                        "format": "uuid",
+                        "examples": ["10ba038e-48da-487b-96e8-8d3b99b6d18a"]
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url",
+                        "examples": ["https://foobar.com"]
+                    },
+                    "shortObject": {
+                        "$ref": "#/components/schemas/some.update.shortObject"
+                    },
+                    "shortObject2": {
+                        "$ref": "#/components/schemas/some.update.shortObject2"
+                    }
+                },
+                "required": ["roles", "sex", "numberBy", "someNum", "types", "bars", "someObj", "email", "uuid", "url", "shortObject"]
             }
-          }
+        },
+        "securitySchemes": {},
+        "responses": {
+            "ServerError": {
+                "description": "Server errors: 500, 501, 400, 404 and etc...",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                {
+                                    "examples": [
+                                        {
+                                            "name": "InternalServerError",
+                                            "message": "Internal Server Error",
+                                            "code": 500
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "UnauthorizedError": {
+                "description": "Need auth",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "name": "UnAuthorizedError",
+                                            "message": "Unauthorized",
+                                            "code": 401
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "description": "Fields invalid",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "name": "MoleculerClientError",
+                                            "message": "Error message",
+                                            "code": 422,
+                                            "data": [
+                                                {
+                                                    "name": "fieldName",
+                                                    "message": "Field invalid"
+                                                },
+                                                {
+                                                    "name": "arrayField[0].fieldName",
+                                                    "message": "Whats wrong"
+                                                },
+                                                {
+                                                    "name": "object.fieldName",
+                                                    "message": "Whats wrong"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "ReturnedData": {
+                "description": "",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/components/schemas/DbMixinList"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/DbMixinFindList"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/Item"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "FileNotExist": {
+                "description": "File not exist",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "name": "MoleculerClientError",
+                                            "message": "File missing in the request",
+                                            "code": 400
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "FileTooBig": {
+                "description": "File too big",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "name": "PayloadTooLarge",
+                                            "message": "Payload too large",
+                                            "code": 413,
+                                            "type": "PAYLOAD_TOO_LARGE",
+                                            "data": {
+                                                "fieldname": "file",
+                                                "filename": "4b2005c0b8.png",
+                                                "encoding": "7bit",
+                                                "mimetype": "image/png"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }
