@@ -1,4 +1,6 @@
-export const SomeService = {
+import { ServiceSchema } from 'moleculer';
+
+export const SomeService: ServiceSchema = {
     name: 'some',
     actions: {
         upload: {
@@ -47,10 +49,10 @@ export const SomeService = {
                 sex: { type: 'enum', values: ['male', 'female'], default: 'female' },
                 id: { type: 'number', convert: true, default: 5 },
                 numberBy: 'number',
-                someNum: { $$t: 'Is some num', type: 'number', convert: true },
+                someNum: { $$oa: { description: 'Is some num' }, type: 'number', convert: true },
                 types: {
+                    $$oa: { description: 'Types arr' },
                     type: 'array',
-                    $$t: 'Types arr',
                     default: [{ id: 1, typeId: 5 }],
                     length: 1,
                     items: {
@@ -64,8 +66,8 @@ export const SomeService = {
                     }
                 },
                 bars: {
+                    $$oa: { description: 'Bars arr' },
                     type: 'array',
-                    $$t: 'Bars arr',
                     min: 1,
                     max: 2,
                     items: {
@@ -73,17 +75,17 @@ export const SomeService = {
                         strict: 'remove',
                         props: {
                             id: { type: 'number', optional: true },
-                            fooNum: { $$t: 'fooNum', type: 'number', optional: true }
+                            fooNum: { $$oa: { description: 'fooNum' }, type: 'number', optional: true }
                         }
                     }
                 },
                 someObj: {
-                    $$t: 'Some obj',
+                    $$oa: { description: 'Some obj' },
                     default: { name: 'bar' },
                     type: 'object',
                     strict: 'remove',
                     props: {
-                        id: { $$t: 'Some obj ID', type: 'number', optional: true },
+                        id: { $$oa: { description: 'Some obj ID' }, type: 'number', optional: true },
                         numberId: { type: 'number', optional: true },
                         name: { type: 'string', optional: true, max: 100 }
                     }
@@ -168,6 +170,10 @@ export const SomeService = {
                 repeatPassword: { type: 'string', min: 8, pattern: '^[a-zA-Z0-9]+$' },
                 confirmPassword: { type: 'equal', field: 'password' }
             },
+            handler() {}
+        },
+        false: {
+            openapi: false,
             handler() {}
         }
     }

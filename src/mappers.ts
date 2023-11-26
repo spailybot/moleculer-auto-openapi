@@ -1,4 +1,4 @@
-import { Mappers, ObjectRules, RuleToSchemaFunction, SchemaToRules } from './types/types.js';
+import { Mappers, ObjectRules, RuleToSchemaFunction, SchemaToRules } from './types/index.js';
 import {
     RuleAny,
     RuleArray,

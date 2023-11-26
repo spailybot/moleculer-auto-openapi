@@ -7,13 +7,15 @@ import {
 import { defaultOpenApiVersion } from './commons.js';
 import { Context, Service, ServiceSchema } from 'moleculer';
 import fs from 'fs';
-import { OpenApiMixinSettings } from './types/types.js';
+import { OpenApiMixinSettings } from './types/index.js';
 import { getAbsoluteFSPath } from 'swagger-ui-dist';
+import { ExcludeRequiredProps } from './types/utils.js';
+import { RuleString } from 'fastest-validator';
 
 const swaggerUiAssetPath = getAbsoluteFSPath();
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
 
-export const mixin: ServiceSchema<OpenApiMixinSettings> = {
+export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSettings>> & Partial<OpenApiMixinSettings>> = {
     name: `openapi`,
     settings: defaultSettings,
     events: {
@@ -124,15 +126,17 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
                 }
             },
             handler(this: openApiService, ctx: Context<{ file: string }, { $responseType: string }>) {
-                if (ctx.params.file.indexOf('.css') > -1) {
+                const { file } = ctx.params;
+
+                if (file.indexOf('.css') > -1) {
                     ctx.meta.$responseType = 'text/css';
-                } else if (ctx.params.file.indexOf('.js') > -1) {
+                } else if (file.indexOf('.js') > -1) {
                     ctx.meta.$responseType = 'text/javascript';
                 } else {
                     ctx.meta.$responseType = 'application/octet-stream';
                 }
 
-                const filePath = `${swaggerUiAssetPath}/${ctx.params.file}`;
+                const filePath = `${swaggerUiAssetPath}/${file}`;
                 if (this.settings.returnAssetsAsStream) {
                     return fs.createReadStream(filePath);
                 } else {
@@ -146,9 +150,15 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
                 description: 'You can provide any schema file in query param'
             },
             params: {
-                url: { $$t: 'Schema url', type: 'string', optional: true }
+                url: {
+                    $$oa: {
+                        summary: 'Schema url'
+                    },
+                    type: 'string',
+                    optional: true
+                } as RuleString
             },
-            handler(this: openApiService, ctx: Context<{ url: string }, { $responseType: string }>): string {
+            async handler(this: openApiService, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
 
                 return `
@@ -205,9 +215,9 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
         }
     },
     created() {
-        this.generator = new MoleculerOpenAPIGenerator(this.broker, this.settings);
+        this.generator = new MoleculerOpenAPIGenerator(this.broker, this.settings as OpenApiMixinSettings);
     },
     async started() {
-        this.getGenerator().started();
+        this.logger.info(`📜 OpenAPI Docs server is available`);
     }
 };

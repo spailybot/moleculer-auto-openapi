@@ -1,5 +1,5 @@
 import { ServiceSchema } from 'moleculer';
-import { ActionOpenApi } from '../../../src/types/types.js';
+import { ActionOpenApi } from '../../../src/types/index.js';
 
 const testsParams: Record<string, ActionOpenApi> = {
     addTag: {

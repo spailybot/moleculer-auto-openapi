@@ -1,13 +1,6 @@
 import { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ValidationRule, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
-import {
-    commonOpenApi,
-    FastestValidatorType,
-    openApiServiceOpenApi,
-    OptionalOrFalse,
-    SubOptionalOrFalse,
-    tSystemParams
-} from './types/types.js';
+import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, tSystemParams } from './types/index.js';
 import {
     ALLOWING_BODY_METHODS,
     BODY_PARSERS_CONTENT_TYPE,
@@ -27,6 +20,7 @@ import { Alias } from './objects/Alias.js';
 import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
 import { UNRESOLVED_ACTION_NAME } from './constants.js';
 import { OpenApiMerger } from './OpenApiMerger.js';
+import { OptionalOrFalse, SubOptionalOrFalse } from './types/utils.js';
 
 type parametersExtracted = {
     parameters?: Array<OA3_1.ParameterObject>;
@@ -457,6 +451,8 @@ export class OpenApiGenerator {
         const systemParams: tSystemParams = this.extractSystemParams(rule as Record<string, unknown>);
 
         rule.description = systemParams.description;
+        rule.title = systemParams.summary;
+        rule.deprecated = systemParams.deprecated;
 
         if (rule.type == 'object' && rule.properties) {
             // create child schema per object
@@ -498,7 +494,9 @@ export class OpenApiGenerator {
     private extractSystemParams(obj: Record<string, unknown> = {}): tSystemParams {
         return {
             optional: obj?.[EOAExtensions.optional] as boolean,
-            description: obj?.[EOAExtensions.description] as string
+            description: obj?.[EOAExtensions.description] as string,
+            summary: obj?.[EOAExtensions.summary] as string,
+            deprecated: obj?.[EOAExtensions.deprecated] as boolean
         };
     }
 

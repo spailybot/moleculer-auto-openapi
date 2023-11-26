@@ -1,4 +1,4 @@
-import { ApiRouteOpenApi, ApiRouteSchema, ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../types/types.js';
+import { ApiRouteOpenApi, ApiSettingsSchemaOpenApi, definedApiRouteSchema, OpenApiMixinSettings } from '../types/index.js';
 import { Alias } from './Alias.js';
 import { normalizePath } from '../commons.js';
 import path from 'path/posix';
@@ -17,7 +17,7 @@ export class Route {
 
     constructor(
         private readonly logger: LoggerInstance,
-        route: ApiRouteSchema,
+        route: definedApiRouteSchema,
         apiService: Service<ApiSettingsSchemaOpenApi>,
         openApiService: Service<OpenApiMixinSettings>,
         private readonly skipUnresolvedActions: boolean = true

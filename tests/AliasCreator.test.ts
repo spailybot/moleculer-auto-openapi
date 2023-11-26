@@ -3,7 +3,7 @@ import { LoggerInstance, Service } from 'moleculer';
 import { Route } from '../src/objects/Route.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../src/types/moleculer-web.js';
 import { AliasCreator } from '../src/objects/AliasCreator.js';
-import { OpenApiMixinSettings } from '../src/index.js';
+import { ApiSettingsSchemaOpenApi, OpenApiMixinSettings } from '../src/index.js';
 
 describe('AliasCreator', () => {
     const logger = {
@@ -111,7 +111,7 @@ describe('AliasCreator', () => {
     };
 
     const service = {} as Service<OpenApiMixinSettings>;
-    const fakeService = {} as Service;
+    const fakeService = {} as Service<ApiSettingsSchemaOpenApi>;
 
     describe('with skipUnResolved true', () => {
         it.each<[string, ApiSchemaAlias, Array<AliasRouteSchema>]>(Object.entries(aliases).map(([k, v]) => [k, v, aliasesResult[k]]))(

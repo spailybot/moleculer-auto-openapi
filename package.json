@@ -1,6 +1,6 @@
 {
   "name": "@spailybot/moleculer-auto-openapi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Auto generate openapi(swagger) scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
@@ -12,7 +12,7 @@
     "preversion": "git update-index --really-refresh && git diff-index --quiet HEAD || (echo git is not clean && exit 1)",
     "postversion": "pnpm run generate-tag",
     "generate-tag": "git commit -am \"bump version of ${npm_package_name} to v${npm_package_version}\" && git tag -a ${npm_package_name}/v${npm_package_version} -m \"${npm_package_name}/v${npm_package_version}\"",
-    "ts-types": "tsc --emitDeclarationOnly --outDir lib/types",
+    "ts-types": "tsc -p tsconfig.build.json --emitDeclarationOnly --outDir lib/types",
     "build": "rimraf lib && node esbuild.mjs && npm run ts-types",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint -f unix \"src/**\"",
@@ -21,7 +21,8 @@
     "generate:documentation": "typedoc"
   },
   "files": [
-    "lib"
+    "lib",
+    "index.d.ts"
   ],
   "exports": {
     ".": {
@@ -34,6 +35,9 @@
         "types": "./lib/index.d.cts",
         "default": "./lib/index.cjs"
       }
+    },
+    "./types": {
+      "types": "./index.d.ts"
     }
   },
   "repository": {
@@ -64,6 +68,7 @@
     "@types/qs": "^6.9.10",
     "@types/swagger-ui-dist": "^3.30.4",
     "@typescript-eslint/parser": "6.10.0",
+    "axios": "^1.6.2",
     "esbuild": "^0.19.6",
     "eslint": "8.53.0",
     "eslint-config-prettier": "9.0.0",

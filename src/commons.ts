@@ -3,7 +3,9 @@ import path from 'path/posix';
 
 export enum EOAExtensions {
     optional = 'x-fastest-optional',
-    description = 'x-fastest-description'
+    description = 'x-fastest-description',
+    summary = 'x-fastest-summary',
+    deprecated = 'x-fastest-deprecated'
 }
 
 export enum HTTP_METHODS {

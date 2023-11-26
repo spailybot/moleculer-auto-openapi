@@ -4,11 +4,25 @@ This is a fork of moleculer-auto-openapi . Documentation need to be rewritten !
 
 TODO
 
-- check multipart upload => bad content type
-- allow to add custom mappers
+[] - check multipart upload => bad content type
+[] - allow to add custom mappers
+[] - tests merges
 
 # typescript
 this package rely on the library `openapi-types` feel free to install it in your devDependencies to better typing;
+
+### Typing on other nodes
+To get only typings, you can include `"@spailybot/moleculer-auto-openapi/index.d.ts"` in your project .
+
+an example
+````json
+{
+  "typeAcquisition": {
+    "enable": true,
+    "include": ["./node_modules/@spailybot/moleculer-auto-openapi/index.d.ts"]
+  }
+}
+````
 
 
 # moleculer-auto-openapi

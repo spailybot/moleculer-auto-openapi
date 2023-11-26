@@ -1,7 +1,7 @@
-import { AliasRouteSchemaOpenApi } from '../types/types.js';
+import { AliasRouteSchemaOpenApi, definedActionSchema, definedAliasRouteSchemaOpenApi } from '../types/index.js';
 import { Route } from './Route.js';
 import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
-import { ActionSchema, Service } from 'moleculer';
+import { Service } from 'moleculer';
 import { PathAction } from './PathAction.js';
 import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
@@ -25,23 +25,28 @@ export class Alias {
         this._method = value.toLowerCase() as rawHttpMethod;
     }
 
-    public readonly route?: Route;
+    public readonly route: Route;
     public type: string;
     private _method: rawHttpMethod;
     private _path: string;
     public action: string;
-    public actionSchema: ActionSchema & { params?: ValidationSchema };
+    public actionSchema: definedActionSchema & { params?: ValidationSchema };
     public service: Service;
-    public openapi: AliasRouteSchemaOpenApi['openapi'];
+    public openapi: definedAliasRouteSchemaOpenApi['openapi'];
+    public skipped: boolean = false;
 
-    constructor(infos: AliasRouteSchemaOpenApi, route?: Route) {
+    constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
         this.route = route;
         this.type = infos.type;
         this.method = infos.method;
         this.path = infos.path;
         this.fullPath = path.join(route?.path ?? '/', infos.path ?? '/');
         this.action = infos.action;
-        this.openapi = infos.openapi;
+        if (infos.openapi === false) {
+            this.skipped = true;
+        } else {
+            this.openapi = infos.openapi;
+        }
     }
 
     public isJokerAlias(): boolean {

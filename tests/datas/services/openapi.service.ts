@@ -11,6 +11,6 @@ export const OpenapiService = {
                 title: 'Bar'
             }
         },
-        skipUnresolvedActions: false
+        skipUnresolvedActions: true
     } as OpenApiMixinSettings
 };

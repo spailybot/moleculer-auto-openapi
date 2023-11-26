@@ -1,4 +1,4 @@
-import { FastestValidatorType, Mappers, ObjectRules } from '../types/types.js';
+import { FastestValidatorType, FVOARuleMetaKeys, Mappers, ObjectRules } from '../types/index.js';
 import { getFastestValidatorMappers } from '../mappers.js';
 import { ValidationRule, ValidationRuleName, ValidationRuleObject, ValidationSchema, ValidationSchemaMetaKeys } from 'fastest-validator';
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
@@ -55,21 +55,31 @@ export class FastestValidatorConverter implements IConverter {
         }
 
         //extract known params extensions
-        const extensions = (
-            [
-                {
-                    property: '$$t',
-                    extension: EOAExtensions.description
-                }
-            ] as Array<{ property: string; extension: EOAExtensions }>
-        ).map(({ property, extension }) => {
-            const currentRule = pRule as Record<string, string>;
-            const value = (pRule as Record<string, string>)?.[property];
+        const extensions: Array<[string, string | boolean]> =
+            Array.isArray(pRule) || typeof pRule !== 'object' || !pRule.$$oa
+                ? []
+                : (
+                      [
+                          {
+                              property: 'description',
+                              extension: EOAExtensions.description
+                          },
+                          {
+                              property: 'summary',
+                              extension: EOAExtensions.summary
+                          },
+                          {
+                              property: 'deprecated',
+                              extension: EOAExtensions.deprecated
+                          }
+                      ] as Array<{ property: keyof FVOARuleMetaKeys; extension: EOAExtensions }>
+                  ).map(({ property, extension }) => {
+                      const value = pRule.$$oa[property];
 
-            delete currentRule?.[property];
+                      delete pRule.$$oa[property];
 
-            return [extension, value];
-        });
+                      return [extension, value];
+                  });
 
         const baseRule = this.validator.getRuleFromSchema(pRule as Record<string, string>)?.schema as ValidationRuleObject;
         const rule = {

@@ -1,7 +1,7 @@
 import { IConverter } from './IConverter.js';
 import { ValidationRule, ValidationRuleObject, ValidationSchema, ValidationSchemaMetaKeys } from 'fastest-validator';
 import { OpenAPIV3_1 } from 'openapi-types';
-import { ObjectRules } from '../types/types.js';
+import { ObjectRules } from '../types/index.js';
 
 /**
  * @experimental

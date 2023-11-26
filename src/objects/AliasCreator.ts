@@ -1,4 +1,4 @@
-import { AliasRouteSchemaOpenApi, ApiRouteSchema } from '../types/types.js';
+import { AliasRouteSchemaOpenApi, ApiRouteSchema } from '../types/index.js';
 import { Alias } from './Alias.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../types/moleculer-web.js';
 import { Route } from './Route.js';
@@ -37,7 +37,7 @@ export class AliasCreator {
             .filter(Boolean);
     }
 
-    private extractAliasSubInformations(infos: ApiSchemaAlias): AliasRouteSchema | undefined {
+    private extractAliasSubInformations(infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {
         const isAliasRouteSchema = (v: unknown): v is AliasRouteSchemaOpenApi =>
             v && (['action', 'handler'] as Array<keyof AliasRouteSchema>).some((property) => !!(v as AliasRouteSchema)[property]);
 
@@ -59,6 +59,7 @@ export class AliasCreator {
             if (this.skipUnresolvedActions) {
                 return;
             }
+
             return {
                 action: null
             };
@@ -69,7 +70,7 @@ export class AliasCreator {
         }
     }
 
-    private extractAliasInformation(name: string, infos: ApiSchemaAlias): AliasRouteSchema {
+    private extractAliasInformation(name: string, infos: ApiSchemaAlias): AliasRouteSchemaOpenApi {
         const res = this.extractAliasSubInformations(infos);
 
         if (!res) {
@@ -107,7 +108,7 @@ export class AliasCreator {
         return res;
     }
 
-    private getSubAliases(alias: AliasRouteSchema): Array<AliasRouteSchemaOpenApi> {
+    private getSubAliases(alias: AliasRouteSchemaOpenApi): Array<AliasRouteSchemaOpenApi> {
         if (alias.method !== REST_METHOD) {
             return [alias];
         }

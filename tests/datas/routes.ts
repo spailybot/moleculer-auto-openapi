@@ -1,4 +1,6 @@
-import { ApiRouteSchema } from '../../src/types/types.js';
+import { ApiRouteSchema } from 'moleculer-web';
+import '../../src/types/index.js';
+import { AliasRouteSchemaOpenApi } from '../../src/index.js';
 
 export const routes = {
     testsTags: {
@@ -90,7 +92,7 @@ export const routes = {
             //old method, skipped now
             'FILE /': 'some.upload',
             // middlewares
-            other: [
+            middlewares: [
                 function (req, res, next) {
                     this.logger.info('Middleware 1');
                     next();
@@ -113,12 +115,12 @@ export const routes = {
             },
             // different method in name and body
             'GET multipleMethods': {
-                action: '$node.health',
+                action: 'some.go',
                 method: 'POST'
             },
             // different type in action name and action type
             'POST multipleTypes': {
-                action: 'multipart:$node.health',
+                action: 'multipart:some.go',
                 type: 'stream',
                 method: 'POST'
             }
@@ -128,6 +130,22 @@ export const routes = {
             urlencoded: true,
             text: true,
             raw: true
+        }
+    } as ApiRouteSchema,
+    falseRoute: {
+        openapi: false,
+        path: '/falseRoute',
+        aliases: {
+            'POST go': 'some.go'
+        }
+    } as ApiRouteSchema,
+    falsifiable: {
+        path: '/routeFalsifiable',
+        aliases: {
+            'POST go': {
+                openapi: false,
+                action: 'some.go'
+            } as AliasRouteSchemaOpenApi
         }
     } as ApiRouteSchema
 } as const;

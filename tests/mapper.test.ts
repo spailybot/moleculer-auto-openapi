@@ -26,7 +26,7 @@ import {
     RuleURL,
     RuleUUID
 } from 'fastest-validator';
-import { Mapper, Mappers, ValidationRuleMapping } from '../src/types/types.js';
+import { Mapper, Mappers, ValidationRuleMapping } from '../src/types/index.js';
 
 const subObject: RuleObject = {
     type: 'object',

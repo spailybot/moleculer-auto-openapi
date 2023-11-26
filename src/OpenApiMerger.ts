@@ -1,5 +1,5 @@
 import { ActionSchema, Service } from 'moleculer';
-import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonOpenApi, OpenApiMixinSettings } from './types/types.js';
+import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonOpenApi, OpenApiMixinSettings } from './types/index.js';
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
 import { Alias } from './objects/Alias.js';
@@ -9,7 +9,7 @@ type actionOpenApiMerged = Omit<ActionOpenApi, 'tags'> & { tags: Array<string> }
 
 export class OpenApiMerger {
     private static generateResponses(actionOpenApi: ActionOpenApi, defaultContentType: string): OA3_1.ResponsesObject {
-        const responses = actionOpenApi.responses;
+        const responses = actionOpenApi.responses ?? {};
 
         if (actionOpenApi.response) {
             const response: OA3_1.ResponseObject = {
@@ -141,7 +141,12 @@ export class OpenApiMerger {
             tagsMap.set(tag.name, tag);
         });
 
-        const openApi = [alias?.openapi, alias?.service?.name ? { tags: [alias.service.name] } : undefined, action?.openapi].reduce(
+        const openApi = [
+            alias?.openapi,
+            alias?.service?.name ? { tags: [alias.service.name] } : undefined,
+            alias?.service?.openapi,
+            action?.openapi
+        ].reduce(
             (previousValue: actionOpenApiMerged, currentValue) => {
                 if (!currentValue) {
                     return previousValue;
@@ -160,6 +165,7 @@ export class OpenApiMerger {
                 // previousValue.requestBody = currentValue.requestBody;
                 // query
                 // urlParams
+                // security ?
 
                 return previousValue;
             },
