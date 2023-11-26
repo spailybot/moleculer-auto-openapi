@@ -7,7 +7,7 @@ import {
 import { defaultOpenApiVersion } from './commons.js';
 import { Context, Service, ServiceSchema } from 'moleculer';
 import fs from 'fs';
-import { OpenApiMixinSettings } from './types/index.js';
+import { ECacheMode, OpenApiMixinSettings } from './types/index.js';
 import { getAbsoluteFSPath } from 'swagger-ui-dist';
 import { ExcludeRequiredProps } from './types/utils.js';
 import { RuleString } from 'fastest-validator';
@@ -21,9 +21,14 @@ export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSett
     events: {
         async '$api.aliases.regenerated'(this: openApiService) {
             const generateDocsAction = 'generateDocs';
-            if (this.settings.clearCacheOnRoutesGenerated && this.broker.cacher && this.actions[generateDocsAction]) {
-                const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.generateDocs*`, {}, {}, []);
-                await this.broker.cacher.clean(cacheKey);
+            const { cacheMode } = this.settings;
+            if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
+                const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.${generateDocsAction}`, {}, {}, []);
+                await this.broker.cacher.clean(`${cacheKey}*`);
+            }
+
+            if (cacheMode === ECacheMode.REFRESH) {
+                await this.actions[generateDocsAction]();
             }
         }
     },
@@ -33,7 +38,13 @@ export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSett
                 enabled(this: openApiService) {
                     return this.settings.cacheOpenApi;
                 },
-                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => `${actionName}|${params?.version || defaultOpenApiVersion}`,
+                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
+                    if (!params.version) {
+                        return actionName;
+                    }
+
+                    return `${actionName}|${params?.version || defaultOpenApiVersion}`;
+                },
                 ttl: 600
             },
             openapi: {

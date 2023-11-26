@@ -2,7 +2,7 @@ import type { Context, LoggerInstance, Service, ServiceBroker } from 'moleculer'
 import Moleculer from 'moleculer';
 import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import type { FastestValidatorType, OpenApiMixinSettings } from './types/index.js';
-import { ApiSettingsSchemaOpenApi } from './types/index.js';
+import { ApiSettingsSchemaOpenApi, ECacheMode } from './types/index.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
 import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, openApiVersionsSupported } from './commons.js';
 import { ApiSettingsSchema } from 'moleculer-web';
@@ -67,8 +67,8 @@ export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings
     },
     cacheOpenApi: true,
     skipUnresolvedActions: true,
-    clearCacheOnRoutesGenerated: true,
-    summaryTemplate: '{{summary}}\n            ({{action}}){{autoAlias}}',
+    cacheMode: ECacheMode.NEXT_CALL,
+    summaryTemplate: '{{summary}}\n            ({{action}}) {{autoAlias}}',
     returnAssetsAsStream: true,
     defaultResponseContentType: DEFAULT_CONTENT_TYPE,
     multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME

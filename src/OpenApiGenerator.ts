@@ -1,6 +1,6 @@
 import { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ValidationRule, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
-import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, tSystemParams } from './types/index.js';
+import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, TemplateVariables, tSystemParams } from './types/index.js';
 import {
     ALLOWING_BODY_METHODS,
     BODY_PARSERS_CONTENT_TYPE,
@@ -120,7 +120,7 @@ export class OpenApiGenerator {
                     responses: openApi?.responses
                 };
 
-                const templateVariables = {
+                const templateVariables: TemplateVariables = {
                     summary: openApi?.summary,
                     action: alias.action ?? UNRESOLVED_ACTION_NAME,
                     autoAlias: alias.route.autoAliases ? '[autoAlias]' : ''
@@ -129,10 +129,16 @@ export class OpenApiGenerator {
                 const summaryTemplate = alias.route?.openApiService?.settings?.summaryTemplate;
                 if (typeof summaryTemplate === 'string' || summaryTemplate === undefined) {
                     openApiMethod.summary = Object.entries(templateVariables)
-                        .reduce((previous, [k, v]) => {
-                            return previous.replace(new RegExp(`{{${k}}}`, 'g'), v ?? '');
-                        }, summaryTemplate ?? DEFAULT_SUMMARY_TEMPLATE)
+                        .reduce(
+                            (previous, [k, v]) => {
+                                return previous.replace(new RegExp(`{{${k}}}`, 'g'), v ?? '');
+                            },
+                            (summaryTemplate ?? DEFAULT_SUMMARY_TEMPLATE) as string
+                        )
                         .trim();
+                }
+                if (typeof summaryTemplate === 'function') {
+                    openApiMethod.summary = summaryTemplate(templateVariables);
                 }
 
                 (currentPath[method] as OA3_1.OperationObject) = openApiMethod;

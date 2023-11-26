@@ -34,10 +34,10 @@ export class MoleculerWebRoutesParser {
         const serviceName = getServiceName(service);
 
         (service.settings?.routes || []).forEach((routeSchema) => {
-            this.logger.debug(`RoutesParser.parse() - check route ${routeSchema.path ?? routeSchema.name}`);
+            this.logger.debug(`RoutesParser.parse() - check route ${routeSchema.name ?? routeSchema.path}`);
             //allow to exclude action from openapi
             if (routeSchema?.openapi === false) {
-                this.logger.debug(`RoutesParser.parse() - skip route ${routeSchema.path ?? routeSchema.name} because openapi = false`);
+                this.logger.debug(`RoutesParser.parse() - skip route ${routeSchema.name ?? routeSchema.path} because openapi = false`);
                 return;
             }
 

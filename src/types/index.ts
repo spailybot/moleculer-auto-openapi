@@ -8,6 +8,37 @@ export type tSystemParams = {
     deprecated?: boolean;
 };
 
+export interface TemplateVariables {
+    summary: string;
+    action: string;
+    autoAlias: string;
+}
+
+/**
+ * describe the different cache modes
+ */
+export enum ECacheMode {
+    /**
+     * by default . When new services are detected, it will clear the cache, without renewing it
+     *   + openapi will always be up-to-date
+     *   - First call will be a little slower
+     */
+    NEXT_CALL = 'next-call',
+    /**
+     * when new services are detected => will regenerate the cache .
+     *   + Faster answer of first call
+     *   - more CPU used (lot more if services are refreshed a lot of times)
+     */
+    REFRESH = 'refresh',
+    /**
+     * timeout : only clear cache on timeout (10minutes)
+     *   + less cpu used
+     *   - not compatible with dynamic servers
+     *   - openapi not always up to date
+     */
+    TIMEOUT = 'timeout'
+}
+
 export type OpenApiMixinSettings = {
     /**
      * map only local services (on the same node) ?
@@ -35,10 +66,15 @@ export type OpenApiMixinSettings = {
     skipUnresolvedActions?: boolean;
     /**
      * allow to clear the cache when the routes are reloaded (else, they will be cleared when cache expire)
-     * this doesn't work without cacheOpenApi = true
-     * @default true
+     *
+     * @remarks
+     *  this doesn't work without cacheOpenApi = true, or without cacher .
+     *
+     * @default next-call
+     * @see cacheOpenApi
+     * @see ECacheMode
      */
-    clearCacheOnRoutesGenerated?: boolean;
+    cacheMode?: ECacheMode;
     /**
      * add the openAPI to cache
      * If no cacher is available, the openApi will not be cached
@@ -54,7 +90,7 @@ export type OpenApiMixinSettings = {
      * @var string autoAlias : print [autoAlias] if an auto alias
      * @default {{summary}}\n            ({{action}}){{autoAlias}}
      */
-    summaryTemplate?: string;
+    summaryTemplate?: string | ((variables: TemplateVariables) => string);
     /**
      * return assets as a stream else as a buffer ?
      * @default true
