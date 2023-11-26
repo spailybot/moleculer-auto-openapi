@@ -2,12 +2,12 @@ import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import { ServiceBroker } from 'moleculer';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 import { routes } from '../datas/routes.js';
-import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT, openApiVersionsSupported } from '../../src/index.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
 import { OpenapiService } from '../datas/services/openapi.service.js';
 
 describe('Test that a service can be hide by setting openapi to false', () => {
     const broker = new ServiceBroker({
-        // logger: false,
+        logger: false,
         cacher: 'memory'
     });
 

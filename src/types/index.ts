@@ -15,26 +15,40 @@ export interface TemplateVariables {
 }
 
 /**
- * describe the different cache modes
+ * Enum to describe the different cache modes.
  */
 export enum ECacheMode {
     /**
-     * by default . When new services are detected, it will clear the cache, without renewing it
-     *   + openapi will always be up-to-date
-     *   - First call will be a little slower
+     * Cache Mode: NEXT_CALL
+     *
+     * Pro(s):
+     * - The OpenAPI will always be up-to-date. Each new service detection prompts a clear cache, not renewal though.
+     *
+     * Con(s):
+     * - The first call might be a bit slower due to updating process.
      */
     NEXT_CALL = 'next-call',
+
     /**
-     * when new services are detected => will regenerate the cache .
-     *   + Faster answer of first call
-     *   - more CPU used (lot more if services are refreshed a lot of times)
+     * Cache Mode: REFRESH
+     *
+     * Pro(s):
+     * - Provides faster response on the first call because cache regenerates whenever a new service is detected.
+     *
+     * Con(s):
+     * - More CPU usage, often significantly, if services are refreshed frequently.
      */
     REFRESH = 'refresh',
+
     /**
-     * timeout : only clear cache on timeout (10minutes)
-     *   + less cpu used
-     *   - not compatible with dynamic servers
-     *   - openapi not always up to date
+     * Cache Mode: TIMEOUT
+     *
+     * Pro(s):
+     * - Designed mindful of CPU usage, it only clears cache on timeouts (default 10 mins).
+     *
+     * Con(s):
+     * - Not ideal for dynamic servers due to its completely time-based cache clearing policy.
+     * - The OpenAPI might not be up-to-date all the time.
      */
     TIMEOUT = 'timeout'
 }

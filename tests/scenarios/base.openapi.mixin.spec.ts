@@ -13,8 +13,7 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 describe("Test 'openapi' mixin", () => {
     const broker = new ServiceBroker({
-        // logger: false,
-        logLevel: 'debug',
+        logger: false,
         cacher: 'memory'
     });
 

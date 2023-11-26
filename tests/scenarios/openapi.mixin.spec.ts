@@ -1,23 +1,11 @@
-import { ApiService, getApiService } from '../datas/services/api.service.js';
-import { Service, ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import { Validator } from '@seriousme/openapi-schema-validator';
-import { testMappersService } from '../datas/services/test-mappers.service.js';
-import { OpenapiService } from '../datas/services/openapi.service.js';
-import { SomeService } from '../datas/services/some.service.js';
-import { getServiceName, openApiVersionsSupported } from '../../src/commons.js';
-import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
-import { MathService } from '../datas/services/math.service.js';
-import { PostsService } from '../datas/services/posts.service.js';
-import { testOpenApiService } from '../datas/services/test-openapi.service.js';
-import * as http from 'http';
-import axios from 'axios';
+import { ServiceBroker } from 'moleculer';
+import { afterAll, beforeAll, describe } from '@jest/globals';
 import { routes } from '../datas/routes.js';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 
 describe("Test 'openapi' mixin", () => {
     const broker = new ServiceBroker({
-        // logger: false,
+        logger: false,
         cacher: 'memory'
     });
 

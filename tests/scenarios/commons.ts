@@ -3,7 +3,6 @@ import { testMappersService } from '../datas/services/test-mappers.service.js';
 import { SomeService } from '../datas/services/some.service.js';
 import { OpenapiService } from '../datas/services/openapi.service.js';
 import { getApiService } from '../datas/services/api.service.js';
-import { routes } from '../datas/routes.js';
 import { MathService } from '../datas/services/math.service.js';
 import { PostsService } from '../datas/services/posts.service.js';
 import { testOpenApiService } from '../datas/services/test-openapi.service.js';
