@@ -205,11 +205,30 @@ export class OpenApiGenerator {
 
                     const component = this.getComponent(schema);
 
-                    result.parameters.push({
+                    const schemaParameter = {
                         name: k,
                         in: 'query',
-                        required: component[EOAExtensions.optional] !== true,
+                        // required need to be true, or undefined
+                        required: component[EOAExtensions.optional] !== true || undefined,
                         schema
+                    };
+
+                    if (!excluded.includes(k)) {
+                        result.parameters.push(schemaParameter);
+                        return;
+                    }
+
+                    //handle the case where the pathParameter is defined in params
+                    result.parameters = result.parameters.map((parameter) => {
+                        if (parameter.name !== k) {
+                            return parameter;
+                        }
+
+                        return {
+                            ...schemaParameter,
+                            in: 'path',
+                            required: true
+                        };
                     });
                 });
             } else {

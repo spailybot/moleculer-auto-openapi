@@ -45,7 +45,6 @@
                     {
                         "name": "populate",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "oneOf": [
                                 {
@@ -63,7 +62,6 @@
                     {
                         "name": "fields",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "oneOf": [
                                 {
@@ -81,7 +79,6 @@
                     {
                         "name": "limit",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "type": "number"
                         }
@@ -89,7 +86,6 @@
                     {
                         "name": "offset",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "type": "number"
                         }
@@ -97,7 +93,6 @@
                     {
                         "name": "sort",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "type": "string"
                         }
@@ -105,7 +100,6 @@
                     {
                         "name": "search",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "default": "find me now",
                             "type": "string",
@@ -115,7 +109,6 @@
                     {
                         "name": "searchFields",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "oneOf": [
                                 {
@@ -133,7 +126,6 @@
                     {
                         "name": "query",
                         "in": "query",
-                        "required": false,
                         "schema": {
                             "oneOf": [
                                 {

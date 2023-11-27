@@ -73,7 +73,7 @@ export class MoleculerWebRoutesParser {
                 const routeAlias = route?.searchAlias(alias);
                 if (!routeAlias) {
                     if (route && !route.autoAliases) {
-                        this.logger.error(`fail to get alias configuration for path "${alias.fullPath}"`);
+                        this.logger.error(`fail to get alias configuration for alias ${alias.methods} "${alias.fullPath}"`);
                         return;
                     }
 

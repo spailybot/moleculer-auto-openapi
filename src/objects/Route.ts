@@ -40,7 +40,7 @@ export class Route {
         return this.aliases.find(
             (a) =>
                 a.method?.toLowerCase() === alias.methods?.toLowerCase() &&
-                a.path?.toLowerCase() === normalizePath(alias.path?.toLowerCase())
+                normalizePath(a.path?.toLowerCase()) === normalizePath(alias.path?.toLowerCase())
         );
     }
 }

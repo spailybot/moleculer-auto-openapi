@@ -494,6 +494,10 @@ export type routeAlias = {
     routePath: string;
 };
 
+export type RestServiceSettings = {
+    rest?: string | Array<string>;
+};
+
 export type MOLECULER_WEB_LIST_ALIASES_OUTPUT = Array<routeAlias>;
 export type MOLECULER_WEB_LIST_ALIASES_INPUT = {
     grouping?: boolean;

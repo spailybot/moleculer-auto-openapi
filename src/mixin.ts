@@ -34,6 +34,10 @@ export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSett
     },
     actions: {
         generateDocs: {
+            rest: {
+                path: '/openapi.json',
+                method: 'GET'
+            },
             cache: {
                 enabled(this: openApiService) {
                     return this.settings.cacheOpenApi;
@@ -119,6 +123,10 @@ export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSett
             }
         },
         assets: {
+            rest: {
+                path: '/assets/:file',
+                method: 'GET'
+            },
             openapi: {
                 summary: 'OpenAPI assets',
                 description: 'Return files from swagger-ui-dist folder'
@@ -156,6 +164,10 @@ export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSett
             }
         },
         ui: {
+            rest: {
+                path: '/ui',
+                method: 'GET'
+            },
             openapi: {
                 summary: 'OpenAPI ui',
                 description: 'You can provide any schema file in query param'

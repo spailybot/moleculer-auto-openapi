@@ -123,6 +123,16 @@ export const routes = {
                 action: 'multipart:some.go',
                 type: 'stream',
                 method: 'POST'
+            },
+            'GET /': {
+                handler: (req, res) => {
+                    res.end('OK');
+                }
+            },
+            'POST /': {
+                handler: (req, res) => {
+                    res.end('OK');
+                }
             }
         },
         bodyParsers: {

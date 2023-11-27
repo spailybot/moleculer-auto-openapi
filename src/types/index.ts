@@ -36,7 +36,7 @@ export enum ECacheMode {
      * - Provides faster response on the first call because cache regenerates whenever a new service is detected.
      *
      * Con(s):
-     * - More CPU usage, often significantly, if services are refreshed frequently.
+     * - More CPU usage, often significantly, if aliases/services are refreshed frequently.
      */
     REFRESH = 'refresh',
 

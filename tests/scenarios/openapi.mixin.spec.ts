@@ -1,7 +1,9 @@
 import { ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe } from '@jest/globals';
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { routes } from '../datas/routes.js';
 import { registerSchemaValidation, setupBroker } from './commons.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
+import { OpenapiService } from '../datas/services/openapi.service.js';
 
 describe("Test 'openapi' mixin", () => {
     const broker = new ServiceBroker({
@@ -17,21 +19,13 @@ describe("Test 'openapi' mixin", () => {
 
     registerSchemaValidation(broker);
 
-    // describe('test', () => {
-    //     it('should test', async () => {
-    //         const apiService = broker.services.find((svc) => svc.name === 'api');
-    //         if (!apiService) {
-    //             throw new Error('fail to locate api service');
-    //         }
-    //
-    //         const address = (apiService.server as http.Server)?.address();
-    //         if (!address || typeof address === 'string') {
-    //             throw new Error('incorrect address returned');
-    //         }
-    //
-    //         await axios.get(`/api/openapi/ui`, {
-    //             baseURL: `http://127.0.0.1:${address.port}`
-    //         });
-    //     });
-    // });
+    describe('test', () => {
+        it('should test', async () => {
+            const json = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
+                version: '3.1'
+            });
+
+            console.log(json);
+        });
+    });
 });
