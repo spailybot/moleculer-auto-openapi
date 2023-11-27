@@ -306,7 +306,7 @@ export default class WebApiService extends Service {
 
 Your setup is now complete.
 
-To view your API documentation via Swagger UI, you can navigate to `http://127.0.0.1:3000/openapi/ui` in your web browser (adjust the URL according to your configuration).
+To view your API documentation via Swagger UI, you can navigate to `http://127.0.0.1/openapi/ui` in your web browser (adjust the URL according to your configuration).
 
 #### What's Next?
 
@@ -325,4 +325,4 @@ Remember, the journey of mastering any tool involves experimentation, learning f
 
 ## 📄 License
 
-This project is protected under the [MIT](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [LICENSE](./LICENSE) file.
+This project is protected under the [MIT](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [LICENSE](https://github.com/spailybot/moleculer-auto-openapi/blob/main/LICENSE) file.
