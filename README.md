@@ -1,174 +1,328 @@
-# FORK
+<div align="center">
 
-This is a fork of moleculer-auto-openapi . Documentation need to be rewritten !
+[![Moleculer logo](http://moleculer.services/images/banner.png)](https://github.com/moleculerjs/moleculer)
+<h2>moleculer-auto-openapi</h2>
 
-Actually works only with a modified version of fastest-validator : github:thib3113/fastest-validator#fork
-waiting a PR
+<p align="center">
+<img src="https://img.shields.io/badge/Moleculer-3CAFCE.svg?style=flat-square&logo=Moleculer&logoColor=white" alt="Moleculer" />
+<img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat-square&logo=TypeScript&logoColor=white" alt="TypeScript" />
+</p>
+<img src="https://img.shields.io/npm/dw/%40spailybot%2Fmoleculer-auto-openapi" alt="GitHub license" />
+<img src="https://img.shields.io/github/license/spailybot/moleculer-auto-openapi?style=flat-square&color=5D6D7E" alt="GitHub license" />
+<a href="https://github.com/spailybot/moleculer-auto-openapi/graphs/contributors"><img src="https://img.shields.io/github/contributors/spailybot/moleculer-auto-openapi" alt="contributors" /></a>
+<img src="https://img.shields.io/github/languages/top/spailybot/moleculer-auto-openapi?style=flat-square&color=5D6D7E" alt="GitHub top language" />
+<a href="https://snyk.io/test/github/spailybot/moleculer-auto-openapi"><img alt="Known Vulnerabilities" src="https://snyk.io/test/github/spailybot/moleculer-auto-openapi/badge.svg" /></a>
+<a href="https://www.npmjs.com/package/@spailybot/moleculer-auto-openapi"><img alt="npm package Vulnerabilities" src="https://img.shields.io/npm/v/@spailybot/moleculer-auto-openapi.svg" /></a>
+</div>
 
-## TODO
+---
 
-- check multipart upload => bad content type
+This project is a fork of [moleculer-auto-openapi](https://github.com/grinat/moleculer-auto-openapi) by [grinat](https://github.com/grinat).
+
+Big thanks to [grinat](https://github.com/grinat) for the original work, and also to [everyone who has contributed](https://github.com/grinat/moleculer-auto-openapi/graphs/contributors) to it!
+
+
+## 🌟 Features
+
+- Supports multiple Moleculer-Web servers, allowing API separation
+- `Fastest-Validator` support for direct OpenAPI generation from parameters, complete with examples
+- OpenAPI 3.1 compatibility
+- Cached OpenAPI with efficient regeneration when needed
+- Granular and reusable configuration
+- TypeScript exports of mixin settings and OpenAPI parameters
+
+## ⚠️ Warning
+
+The use of metatags `$$oa` in Fastest-Validator is currently not available.
+
+To utilize it, you will need to wait for this Pull Request (PR) to be merged: https://github.com/icebob/fastest-validator/pull/341.
+
+Alternatively, you can instruct your dependency manager to map Fastest-Validator to the following fork: `github:thib3113/fastest-validator#fork`.
+
+## 🚀 Getting Started
+
+### 📦 Prerequisites
+
+To use this library, you must have the [Moleculer](https://github.com/moleculerjs/moleculer) framework installed along with the [Moleculer-Web](https://github.com/moleculerjs/moleculer-web) module. Additionally, the `listAliases` action must be available (which is the default setting).
+
+### 🔧 Installation
+
+Install the package using your preferred package manager:
+```
+npm install @spailybot/moleculer-auto-openapi
+```
+---
+
+#### Optional
+
+If you wish to use a local instance of Swagger UI, install it like this:
+```
+npm install swagger-ui-dist@^5
+```
+
+For the full TypeScript autocompletion experience, install the `openapi-types` package in addition to the above:
+```
+npm install --save-dev openapi-types
+```
+
+### 📁 Setting Up Your Service
+
+> **Note:** The following examples use the ESM syntax.
+>
+> Depending on your environment and requirements, you may need to adapt these examples, possibly to the CommonJS (CJS) syntax, or to your specific coding standard.
+
+<br>
+
+#### Create an OpenApi service
+
+<details open>
+    <summary>Typescript</summary>
+
+```typescript
+import { OpenApiMixin, type OpenApiMixinSettings, type MoleculerWebTypes } from '@spailybot/moleculer-auto-openapi';
+import { Service, type ServiceBroker } from 'moleculer';
+
+/**
+ * MoleculerWebTypes are typings created from moleculer-web to enhance included typings; their use is totally optional.
+ */
+
+export default class OpenApiService extends Service<OpenApiMixinSettings & MoleculerWebTypes.RestServiceSettings> {
+    public constructor(public broker: ServiceBroker) {
+        super(broker);
+
+        this.parseServiceSchema({
+            // Choose your preferred name
+            name: 'openapi',
+            mixins: [mixin],
+            settings: {
+                // Set the path as you prefer
+                rest: '/openapi',
+                // Path to the endpoint that returns the JSON
+                // With autoalias, it's exposed on /openapi.json
+                schemaPath: '/openapi/openapi.json',
+                // This will be the root of your document
+                // use it to define some default informations
+                openapi: {
+                    info: {
+                        title: "My API"
+                    }
+                }
+            }
+        });
+    }
+}
+
+/**
+ * Or, the service can be represented without the Class as follows:
+ * const OpenApiService: ServiceSchema<OpenApiMixinSettings & MoleculerWebTypes.RestServiceSettings> = {
+ *     // Choose your preferred name
+ *     name: 'openapi',
+ *     mixins: [mixin],
+ *     settings: {
+ *         // Set the path as you prefer
+ *         rest: '/openapi',
+ *         // Path to the endpoint that returns the JSON
+ *         // With autoalias, it's exposed on /openapi.json
+ *         schemaPath: '/openapi/openapi.json',
+ *         // This will be the root of your document
+ *         // use it to define some default informations
+ *         openapi: {
+ *           info: {
+ *             title: "My API"
+ *           }
+ *         }
+ *     }
+ * };
+ *
+ * export default OpenApiService;
+ */
+```
+</details>
+<details>
+    <summary>Javascript</summary>
+
+```javascript
+import { OpenApiMixin } from '@spailybot/moleculer-auto-openapi';
+import { Service } from 'moleculer';
+
+export default class OpenApiService extends Service {
+    public constructor(broker) {
+        super(broker);
+
+        this.parseServiceSchema({
+            // Choose your preferred name
+            name: 'openapi',
+            mixins: [OpenApiMixin],
+            settings: {
+                // Set the path as you prefer
+                rest: '/openapi',
+                // Path to the endpoint that returns the JSON
+                // With autoalias, it's exposed on /openapi.json
+                schemaPath: '/openapi/openapi.json',
+                // This will be the root of your document
+                // use it to define some default informations
+                openapi: {
+                    info: {
+                        title: "My API"
+                    }
+                }
+            }
+        });
+    }
+}
+
+/**
+ * Or, the service can be represented without the Class as follows:
+ * const OpenApiService = {
+ *     // Choose your preferred name
+ *     name: 'openapi',
+ *     mixins: [mixin],
+ *     settings: {
+ *         // Set the path as you prefer
+ *         rest: '/openapi',
+ *         // Path to the endpoint that returns the JSON
+ *         // With autoalias, it's exposed on /openapi.json
+ *         schemaPath: '/openapi/openapi.json',
+ *         // This will be the root of your document
+ *         // use it to define some default informations
+ *         openapi: {
+ *           info: {
+ *             title: "My API"
+ *           }
+ *         }
+ *     }
+ * };
+ *
+ * export default OpenApiService;
+ */
+```
+</details>
+
+You can find detailed information about all the settings of the mixin in the [technical documentation](https://spailybot.github.io/moleculer-auto-openapi/types/index.OpenApiMixinSettings.html).
+
+#### Update your moleculer-web service
+
+<details open>
+    <summary>Typescript</summary>
+
+```typescript
+import type { ApiSettingsSchemaOpenApi } from '@spailybot/moleculer-auto-openapi';
+import ApiGateway from "moleculer-web";
+import { Service, type ServiceBroker } from 'moleculer';
+
+/**
+ * Note that ApiSettingsSchemaOpenApi is a re-export of ApiSettingsSchema because moleculer-web doesn't allow to extend it.
+ */
+
+export default class WebApiService extends Service<ApiSettingsSchemaOpenApi> {
+    public constructor(public broker: ServiceBroker) {
+        super(broker);
+
+        this.parseServiceSchema({
+            name: "api",
+            mixins: [mixin],
+            settings: {
+                // Place other settings here
+                openapi: {
+                    // Define an OpenAPI specification that will be applied to all routes of this api
+                },
+                routes: [
+                    // Place additional route configurations here
+                    {
+                        openapi: {
+                            // Define an OpenAPI specification that will apply to all aliases within this route
+                        },
+                        path: '/openapi',
+                        aliases: {
+                            'GET /openapi.json': 'openapi.generateDocs',
+                            'GET /ui': 'openapi.ui',
+                            'GET /assets/:file': 'openapi.assets',
+                        },
+                    },
+                    // To use autoAliases, refer to the following configuration
+                    // {
+                    //     path: '/openapi',
+                    //     whitelist: ['openapi.*'],
+                    //     autoAliases: true
+                    // }
+
+                ]
+                // Insert other settings here
+            }
+        });
+    }
+}
+```
+</details>
+<details>
+    <summary>Javascript</summary>
+
+```javascript
+import ApiGateway from "moleculer-web";
+import { Service } from 'moleculer';
+
+export default class WebApiService extends Service {
+    public constructor(broker) {
+        super(broker);
+
+        this.parseServiceSchema({
+            name: "api",
+            mixins: [mixin],
+            settings: {
+                // Place other settings here
+                openapi: {
+                    // Define an OpenAPI specification that will be applied to all routes of this api
+                },
+                routes: [
+                    // Place additional route configurations here
+                    {
+                        openapi: {
+                            // Define an OpenAPI specification that will apply to all aliases within this route
+                        },
+                        path: '/openapi',
+                        aliases: {
+                            'GET /openapi.json': 'openapi.generateDocs',
+                            'GET /ui': 'openapi.ui',
+                            'GET /assets/:file': 'openapi.assets',
+                        },
+                    },
+                    // To use autoAliases, refer to the following configuration
+                    // {
+                    //     path: '/openapi',
+                    //     whitelist: ['openapi.*'],
+                    //     autoAliases: true
+                    // }
+
+                ]
+                // Insert other settings here
+            }
+        });
+    }
+}
+```
+</details>
+
+#### Launch Your Project
+
+Your setup is now complete.
+
+To view your API documentation via Swagger UI, you can navigate to `http://127.0.0.1:3000/openapi/ui` in your web browser (adjust the URL according to your configuration).
+
+#### What's Next?
+
+With your project now up and running, there are several resources available to help you develop further:
+
+1. **Examples:** Check out the examples in the [examples](https://github.com/spailybot/moleculer-auto-openapi/tree/main/examples) folder. These provide practical code snippets and usage scenarios that can help you understand how to leverage this tool in various situations.
+2. **Wiki:** Visit our [Wiki](https://github.com/spailybot/moleculer-auto-openapi/wiki) for a comprehensive guide on different features, advanced topics, and best practices.
+3. **FAQs:** The [Frequently Asked Questions](https://github.com/spailybot/moleculer-auto-openapi/wiki/FAQ) section can provide quick answers to common queries and issues others have encountered.
+
+Remember, the journey of mastering any tool involves experimentation, learning from examples, reading documentation, and continuous practice. Happy coding!
+
+### 📝 TODO
+
 - allow to add custom mappers
-- tests merges
-
-## Key features
- - support multiple moleculer-web server, allowing to separate apis
- - `Fastest-Validator` support, to generate openapi directly from parameters, with examples
- - Openapi 3.1 support
- - cached openapi, and regeneration when needed
- - granular and reusable configuration
- - Typescript exports of mixin settings, and openapi parameters
-
-# typescript
-this package rely on the library `openapi-types` feel free to install it in your devDependencies to better typing;
-
-### Typing on other nodes
-To get only typings, you can include `"@spailybot/moleculer-auto-openapi/index.d.ts"` in your project .
-
-an example
-````json
-{
-  "typeAcquisition": {
-    "enable": true,
-    "include": ["./node_modules/@spailybot/moleculer-auto-openapi/index.d.ts"]
-  }
-}
-````
 
 
-# moleculer-auto-openapi
-Auto generate openapi(swagger) scheme for molecular.
-Scheme generated based on action validation params, routes on all available services and paths in ApiGateway.
+## 📄 License
 
-## Install
-```shell script
-npm i moleculer-auto-openapi --save
-```
-
-## Usage
-Create openapi.service.js with content:
-```javascript
-const Openapi = require("moleculer-auto-openapi");
-
-module.exports = {
-  name: 'openapi',
-  mixins: [Openapi],
-  settings: {
-    // all setting optional
-    openapi: {
-      info: {
-        // about project
-        description: "Foo",
-        title: "Bar",
-      },
-      tags: [
-        // you tags
-        { name: "auth", description: "My custom name" },
-      ],
-      components: {
-        // you auth
-        securitySchemes: {
-          myBasicAuth: {
-            type: 'http',
-            scheme: 'basic',
-          },
-        },
-      },
-    },
-  },
-}
-```
-And add resolvers to your webapi service:
-```javascript
-module.exports = {
-  name: `api`,
-  mixins: [ApiGateway],
-  settings: {
-    routes: [
-      // moleculer-auto-openapi routes
-      {
-        path: '/api/openapi',
-        aliases: {
-          'GET /openapi.json': 'openapi.generateDocs', // swagger scheme
-          'GET /ui': 'openapi.ui', // ui
-          'GET /assets/:file': 'openapi.assets', // js/css files
-        },
-      },
-    ],
-  },
-};
-```
-
-Describe params in service:
-```javascript
-module.exports = {
-  actions: {
-    update: {
-      openapi: {
-        summary: "Foo bar baz",
-      },
-      params: {
-        $$strict: "remove",
-        roles: { type: "array", items: "string", enum: [ "user", "admin" ] },
-        sex: { type: "enum", values: ["male", "female"], default: "female" },
-        id: { type: "number", convert: true, default: 5 },
-        numberBy: "number",
-        someNum: { $$t: "Is some num", type: "number", convert: true },
-        types: {
-          type: "array",
-          $$t: "Types arr",
-          default: [{ id: 1, typeId: 5 }],
-          length: 1,
-          items: {
-            type: "object", strict: "remove", props: {
-              id: { type: "number", optional: true },
-              typeId: { type: "number", optional: true },
-            },
-          },
-        },
-        bars: {
-          type: "array",
-          $$t: "Bars arr",
-          min: 1,
-          max: 2,
-          items: {
-            type: "object", strict: "remove", props: {
-              id: { type: "number", optional: true },
-              fooNum: { $$t: "fooNum", type: "number", optional: true },
-            },
-          },
-        },
-        someObj: {
-          $$t: "Some obj",
-          default: { name: "bar" },
-          type: "object", strict: "remove", props: {
-            id: { $$t: "Some obj ID", type: "number", optional: true },
-            numberId: { type: "number", optional: true },
-            name: { type: "string", optional: true, max: 100 },
-          },
-        },
-        someBool: { type: "boolean", optional: true },
-        desc: { type: "string", optional: true, max: 10, min: 4, },
-        email: "email",
-        date: "date|optional|min:0|max:99",
-        uuid: "uuid",
-        url: "url",
-        shortObject: {
-          $$type: "object",
-          desc: { type: "string", optional: true, max: 10000 },
-          url: "url",
-        },
-        shortObject2: {
-          $$type: "object|optional",
-          desc: { type: "string", optional: true, max: 10000 },
-          url: "url",
-        },
-        password: { type: 'string', min: 8, pattern: /^[a-zA-Z0-9]+$/ },
-        password2: { type: 'string', min: 8, pattern: '^[a-zA-Z0-9]+$' }
-      },
-      handler() {},
-    },
-  },
-}
-```
-end etc. See test/openapi.mixin.spec.js for examples
+This project is protected under the [MIT](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [LICENSE](./LICENSE) file.

@@ -65,6 +65,9 @@ export type OpenApiMixinSettings = {
     schemaPath: string;
     /**
      * path you configured to point to open api assets
+     *
+     * You can use unpkg CDN by setting //unpkg.com/swagger-ui-dist[@<version>] :
+     *
      * @default //unpkg.com/swagger-ui-dist
      */
     assetsPath?: string;

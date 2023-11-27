@@ -11,7 +11,11 @@ import type * as MoleculerWebTypes from './types/moleculer-web.js';
 
 export * from './types/index.js';
 
+/**
+ * Use the import you prefer
+ */
 export default mixin;
 export { mixin };
+export const OpenApiMixin = mixin;
 
 export { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT, openApiVersionsSupported, MoleculerWebTypes };
