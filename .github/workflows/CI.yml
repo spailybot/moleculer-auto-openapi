@@ -118,7 +118,7 @@ jobs:
         run: pnpm install
         shell: bash
 
-      - uses: mattallty/jest-github-action@v1
+      - uses: EkoCommunications/jest-github-action@v1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CI: true
