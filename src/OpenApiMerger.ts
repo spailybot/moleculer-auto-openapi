@@ -161,11 +161,7 @@ export class OpenApiMerger {
 
                 previousValue.summary = currentValue.summary ?? previousValue.summary;
 
-                // TODO
-                // previousValue.requestBody = currentValue.requestBody;
-                // query
-                // urlParams
-                // security ?
+                previousValue.security = currentValue.security ?? previousValue.security;
 
                 return previousValue;
             },
