@@ -127,16 +127,11 @@ export class MoleculerOpenAPIGenerator {
 
         const routesParser = new MoleculerWebRoutesParser(this.logger);
 
-        try {
-            return (
-                await Promise.all(
-                    apiServices.map(async (svc) => await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions, services))
-                )
-            ).flat();
-        } catch (e) {
-            this.logger.error(e);
-            debugger;
-        }
+        return (
+            await Promise.all(
+                apiServices.map(async (svc) => await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions, services))
+            )
+        ).flat();
     }
 
     public async generateSchema(ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {

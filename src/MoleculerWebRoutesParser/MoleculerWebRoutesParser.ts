@@ -52,9 +52,12 @@ export class MoleculerWebRoutesParser {
             routes.set(route.path, route);
         });
 
-        const autoAliases = await this.fetchAliasesForService(ctx, serviceName);
+        //autoAliases are returned X times depending on the services started
+        const autoAliases = ((await this.fetchAliasesForService(ctx, serviceName)) ?? []).filter(
+            (alias, index, self) => index === self.findIndex((a) => a.fullPath === alias.fullPath)
+        );
 
-        return (autoAliases ?? [])
+        return autoAliases
             .flatMap((alias: routeAlias) => {
                 this.logger.debug(`RoutesParser.parse() - checking alias ${alias.path} for path ${alias.fullPath}`);
 
@@ -76,7 +79,7 @@ export class MoleculerWebRoutesParser {
 
                     this.logger.debug(`RoutesParser.parse() - alias ${alias.fullPath} seems to use autoAliases`);
 
-                    return new Alias(
+                    const newAlias = new Alias(
                         {
                             path: alias.path,
                             method: alias.methods,
@@ -85,6 +88,11 @@ export class MoleculerWebRoutesParser {
                         },
                         route
                     );
+
+                    if (alias.fullPath) {
+                        newAlias.fullPath = alias.fullPath;
+                    }
+                    return newAlias;
                 }
 
                 if (routeAlias.skipped) {

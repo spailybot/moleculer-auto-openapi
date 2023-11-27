@@ -7,7 +7,7 @@ import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
 
 export class Alias {
-    public readonly fullPath: string;
+    public fullPath: string;
     get path(): string {
         return this._path;
     }
