@@ -11,14 +11,19 @@ import { getServiceName, openApiVersionsSupported } from '../../src/commons.js';
 import { describe, expect, it } from '@jest/globals';
 import { Validator } from '@seriousme/openapi-schema-validator';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
+import { MergeService } from '../datas/services/merge.service.js';
+import { FalseService } from '../datas/services/false.service.js';
 
 const testServices = [
     testMappersService,
     SomeService,
+    SomeService,
     OpenapiService,
     MathService,
     PostsService,
-    testOpenApiService
+    testOpenApiService,
+    MergeService,
+    FalseService
 ] as unknown as Array<Service>;
 
 export const setupBroker = async (

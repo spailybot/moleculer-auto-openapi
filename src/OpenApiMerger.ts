@@ -74,7 +74,7 @@ export class OpenApiMerger {
                         if (!previousValue[k]?.[key]) {
                             previousValue[k][key] = {};
                         }
-                        this.mergeObjects(previousValue[k][key], currentValue?.[key]);
+                        this.mergeObjects(previousValue[k][key], currentValue?.[k]?.[key]);
                     });
                     return;
                 }
@@ -144,7 +144,7 @@ export class OpenApiMerger {
         const openApi = [
             alias?.openapi,
             alias?.service?.name ? { tags: [alias.service.name] } : undefined,
-            alias?.service?.openapi,
+            alias?.service?.settings?.openapi,
             action?.openapi
         ].reduce(
             (previousValue: actionOpenApiMerged, currentValue) => {

@@ -109,6 +109,9 @@ export class OpenApiGenerator {
 
                 const openApi = OpenApiMerger.merge(document, openApiService, apiService, route, alias, pathAction.action);
 
+                //update components
+                this.components = this.cleanComponents(openApi.components);
+
                 const openApiMethod: OA3_1.OperationObject = {
                     summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
                     description: !alias.isJokerAlias() ? openApi?.description : undefined,

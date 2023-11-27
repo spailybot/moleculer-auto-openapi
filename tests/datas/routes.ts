@@ -147,5 +147,79 @@ export const routes = {
                 action: 'some.go'
             } as AliasRouteSchemaOpenApi
         }
+    } as ApiRouteSchema,
+    merge: {
+        path: '/merge',
+        openapi: {
+            components: {
+                schemas: {
+                    RouteLevelComponent: {
+                        type: 'object',
+                        properties: {
+                            _id: {
+                                type: 'integer',
+                                format: 'int64'
+                            }
+                        }
+                    },
+                    RouteLevelErasedByAliasComponent: {
+                        type: 'object',
+                        properties: {
+                            route: {
+                                type: 'integer',
+                                format: 'int64'
+                            }
+                        }
+                    },
+                    RouteLevelErasedByServiceComponent: {
+                        type: 'object',
+                        properties: {
+                            route: {
+                                type: 'integer',
+                                format: 'int64'
+                            }
+                        }
+                    },
+                    RouteLevelErasedByActionComponent: {
+                        type: 'object',
+                        properties: {
+                            route: {
+                                type: 'integer',
+                                format: 'int64'
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        aliases: {
+            'GET merge': {
+                openapi: {
+                    components: {
+                        schemas: {
+                            AliasLevelComponent: {
+                                type: 'object',
+                                properties: {
+                                    _id: {
+                                        type: 'integer',
+                                        format: 'int64'
+                                    }
+                                }
+                            },
+                            RouteLevelErasedByAliasComponent: {
+                                type: 'object',
+                                properties: {
+                                    alias: {
+                                        type: 'integer',
+                                        format: 'int64'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                action: 'merge.action'
+            } as AliasRouteSchemaOpenApi
+        }
     } as ApiRouteSchema
 } as const;
