@@ -2,11 +2,22 @@
 
 This is a fork of moleculer-auto-openapi . Documentation need to be rewritten !
 
-TODO
+Actually works only with a modified version of fastest-validator : github:thib3113/fastest-validator#fork
+waiting a PR
 
-[] - check multipart upload => bad content type
-[] - allow to add custom mappers
-[] - tests merges
+## TODO
+
+- check multipart upload => bad content type
+- allow to add custom mappers
+- tests merges
+
+## Key features
+ - support multiple moleculer-web server, allowing to separate apis
+ - `Fastest-Validator` support, to generate openapi directly from parameters, with examples
+ - Openapi 3.1 support
+ - cached openapi, and regeneration when needed
+ - granular and reusable configuration
+ - Typescript exports of mixin settings, and openapi parameters
 
 # typescript
 this package rely on the library `openapi-types` feel free to install it in your devDependencies to better typing;

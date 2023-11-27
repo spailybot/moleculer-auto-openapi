@@ -1,7 +1,7 @@
 {
   "name": "@spailybot/moleculer-auto-openapi",
   "version": "0.1.4",
-  "description": "Auto generate openapi(swagger) scheme for moleculer",
+  "description": "Generate openapi scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
@@ -45,6 +45,8 @@
   },
   "keywords": [
     "openapi",
+    "openapi 3.1",
+    "fastest-validator",
     "swagger",
     "moleculer",
     "moleculer-web"

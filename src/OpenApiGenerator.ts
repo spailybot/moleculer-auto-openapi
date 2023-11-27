@@ -421,6 +421,10 @@ export class OpenApiGenerator {
             })
         );
 
+        if (this.components.schemas[schemeName]) {
+            this.logger.warn(`Generator - schema ${schemeName} already exist and will be overwrite`);
+        }
+
         this.components.schemas[schemeName] = {
             type: 'object',
             properties,
@@ -463,6 +467,8 @@ export class OpenApiGenerator {
         if (rule.type == 'object' && rule.properties) {
             // create child schema per object
             return {
+                summary: rule.title,
+                deprecated: rule.deprecated,
                 description: rule.description,
                 ...this._createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default })
             };

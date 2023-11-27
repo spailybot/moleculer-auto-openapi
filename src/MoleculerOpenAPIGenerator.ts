@@ -146,18 +146,11 @@ export class MoleculerOpenAPIGenerator {
 
         const services = await this.fetchServicesWithActions(ctx);
 
-        let aliases = await this.getAliases(ctx, services);
+        const aliases = await this.getAliases(ctx, services);
 
-        // this.attachParamsAndOpenapiFromEveryActionToRoutes(routes, services);
-        //
-        // routes = Object.fromEntries(Object.entries(routes).filter(([name, r]) => r.openapi !== false));
-        //
         return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(
             version,
             aliases
         );
-        // this.routesToOpenApi(routes, doc);
-        //
-        // return doc;
     }
 }
