@@ -54,7 +54,7 @@ export class MoleculerWebRoutesParser {
 
         //autoAliases are returned X times depending on the services started
         const autoAliases = ((await this.fetchAliasesForService(ctx, serviceName)) ?? []).filter(
-            (alias, index, self) => index === self.findIndex((a) => a.fullPath === alias.fullPath)
+            (alias, index, self) => index === self.findIndex((a) => a.fullPath === alias.fullPath && a.methods === alias.methods)
         );
 
         return autoAliases

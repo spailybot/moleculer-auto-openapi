@@ -77,7 +77,7 @@ export class OpenApiGenerator {
 
         const cachePathActions = new Map<string, string>();
 
-        aliases.sort(getAlphabeticSorter('path'));
+        aliases.sort(getAlphabeticSorter('fullPath'));
 
         aliases.forEach((alias) => {
             const route = alias.route;

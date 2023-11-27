@@ -7,7 +7,8 @@ import { OpenapiService } from '../datas/services/openapi.service.js';
 
 describe("Test 'openapi' mixin", () => {
     const broker = new ServiceBroker({
-        logger: false,
+        // logger: false,
+        logLevel: 'debug',
         cacher: 'memory'
     });
 

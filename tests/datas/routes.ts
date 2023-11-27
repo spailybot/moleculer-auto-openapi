@@ -125,15 +125,37 @@ export const routes = {
                 method: 'POST'
             },
             'GET /': {
+                openapi: {
+                    response: {
+                        description: 'my description',
+                        content: {
+                            schema: {
+                                type: 'string',
+                                examples: ['OK']
+                            }
+                        }
+                    }
+                },
                 handler: (req, res) => {
                     res.end('OK');
                 }
-            },
+            } as AliasRouteSchemaOpenApi,
             'POST /': {
+                openapi: {
+                    response: {
+                        description: 'my description post',
+                        content: {
+                            schema: {
+                                type: 'string',
+                                examples: ['OK']
+                            }
+                        }
+                    }
+                },
                 handler: (req, res) => {
                     res.end('OK');
                 }
-            }
+            } as AliasRouteSchemaOpenApi
         },
         bodyParsers: {
             json: true,
