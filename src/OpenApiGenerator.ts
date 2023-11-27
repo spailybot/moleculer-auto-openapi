@@ -109,8 +109,7 @@ export class OpenApiGenerator {
 
                 const openApi = OpenApiMerger.merge(document, openApiService, apiService, route, alias, pathAction.action);
 
-                //update components
-                this.components = this.cleanComponents(openApi.components);
+                this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
                 const openApiMethod: OA3_1.OperationObject = {
                     summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
@@ -150,21 +149,25 @@ export class OpenApiGenerator {
             document.paths[openapiPath] = currentPath;
         });
 
-        document.components = Object.keys(this.components).reduce(
+        document.components = this.mergeComponents(document.components, this.components);
+
+        return this.removeExtensions(document);
+    }
+
+    private mergeComponents(c1: OA3_1.ComponentsObject, c2: OA3_1.ComponentsObject): OA3_1.ComponentsObject {
+        return Object.keys(c2).reduce(
             (acc, key) => {
-                if (!Object.keys(this.components?.[key]).length) {
+                if (!Object.keys(c2?.[key]).length) {
                     return acc;
                 }
 
                 return {
                     ...acc,
-                    [key]: { ...document.components[key], ...this.components[key] }
+                    [key]: { ...c1[key], ...c2[key] }
                 };
             },
-            { ...document.components }
-        );
-
-        return this.removeExtensions(document);
+            { ...c1 }
+        ) as OA3_1.ComponentsObject;
     }
 
     private extractParameters(method: HTTP_METHODS, path: string, alias: Alias): parametersExtracted {
