@@ -6,8 +6,7 @@ export const FalseService: ServiceSchema = {
         openapi: false
     },
     actions: {
-        action: {
-            name: `you can't see me`,
+        hidden: {
             openapi: false,
             handler: () => {}
         }

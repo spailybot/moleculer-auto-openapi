@@ -20,6 +20,11 @@
 
 ---
 
+>**Why Use OpenAPI:**
+>
+> OpenAPI standardizes and documents RESTful APIs, streamlines development, improves team communication, and automates testing. Moreover, it can be used to generate client SDKs. It allows for a focus on business logic, making it a valuable tool in a microservices environment.
+
+
 This project is a fork of [moleculer-auto-openapi](https://github.com/grinat/moleculer-auto-openapi) by [grinat](https://github.com/grinat).
 
 Big thanks to [grinat](https://github.com/grinat) for the original work, and also to [everyone who has contributed](https://github.com/grinat/moleculer-auto-openapi/graphs/contributors) to it!
@@ -335,6 +340,7 @@ Remember, the journey of mastering any tool involves experimentation, learning f
   - allow to define a "to ref", and create the ref with this name
 - investigate the needs of requestBodyAndResponseBodyAreSameOnMethods / requestBodyAndResponseBodyAreSameDescription
 - support multiple openapi version on generator ? (will need converters)
+- doesn't support named action ... moleculer-web support it ?
 
 
 ## 📄 License

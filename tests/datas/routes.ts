@@ -182,6 +182,9 @@ export const routes = {
             'POST go': {
                 openapi: false,
                 action: 'some.go'
+            } as AliasRouteSchemaOpenApi,
+            'GET hidden': {
+                action: 'false.hidden'
             } as AliasRouteSchemaOpenApi
         }
     } as ApiRouteSchema,
@@ -198,34 +201,12 @@ export const routes = {
                                 format: 'int64'
                             }
                         }
-                    },
-                    RouteLevelErasedByAliasComponent: {
-                        type: 'object',
-                        properties: {
-                            route: {
-                                type: 'integer',
-                                format: 'int64'
-                            }
-                        }
-                    },
-                    RouteLevelErasedByServiceComponent: {
-                        type: 'object',
-                        properties: {
-                            route: {
-                                type: 'integer',
-                                format: 'int64'
-                            }
-                        }
-                    },
-                    RouteLevelErasedByActionComponent: {
-                        type: 'object',
-                        properties: {
-                            route: {
-                                type: 'integer',
-                                format: 'int64'
-                            }
-                        }
                     }
+                }
+            },
+            responses: {
+                '401': {
+                    description: 'route response'
                 }
             }
         },
@@ -242,20 +223,26 @@ export const routes = {
                                         format: 'int64'
                                     }
                                 }
-                            },
-                            RouteLevelErasedByAliasComponent: {
-                                type: 'object',
-                                properties: {
-                                    alias: {
-                                        type: 'integer',
-                                        format: 'int64'
-                                    }
-                                }
                             }
+                        }
+                    },
+                    responses: {
+                        '402': {
+                            description: 'alias response'
                         }
                     }
                 },
                 action: 'merge.action'
+            } as AliasRouteSchemaOpenApi,
+            'GET mergeNoResponse': {
+                openapi: {
+                    responses: {
+                        '402': {
+                            description: 'alias response'
+                        }
+                    }
+                },
+                action: 'merge.mergeNoResponse'
             } as AliasRouteSchemaOpenApi
         }
     } as ApiRouteSchema

@@ -1,7 +1,7 @@
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
 import { AliasRouteSchema } from './moleculer-web.js';
-import { OpenApiDefined, SubOptionalOrFalse } from './utils.js';
+import { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
 import { ActionSchema, ServiceSettingSchema } from 'moleculer';
 
 /**
@@ -103,7 +103,7 @@ export interface commonOpenApi {
      * specify all responses of the operation .
      * Merged by levels
      */
-    responses?: OA3_1.ResponsesObject;
+    responses?: OptionalOrFalse<OA3_1.ResponsesObject>;
 }
 
 export type openApiServiceOpenApi = Omit<OA3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;

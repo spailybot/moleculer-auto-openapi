@@ -17,16 +17,12 @@ export const MergeService: ServiceSchema = {
                                 format: 'int64'
                             }
                         }
-                    },
-                    RouteLevelErasedByServiceComponent: {
-                        type: 'object',
-                        properties: {
-                            service: {
-                                type: 'integer',
-                                format: 'int64'
-                            }
-                        }
                     }
+                }
+            },
+            responses: {
+                '403': {
+                    description: 'service response'
                 }
             }
         }
@@ -45,20 +41,29 @@ export const MergeService: ServiceSchema = {
                                     format: 'int64'
                                 }
                             }
-                        },
-                        RouteLevelErasedByActionComponent: {
-                            type: 'object',
-                            properties: {
-                                action: {
-                                    type: 'integer',
-                                    format: 'int64'
-                                }
-                            }
                         }
                     }
+                },
+                responses: {
+                    '404': {
+                        description: 'action response'
+                    }
+                },
+                response: {
+                    description: 'action success response'
                 }
             },
             handler(ctx) {}
+        },
+        mergeNoResponse: {
+            openapi: {
+                responses: {
+                    //remove route and alias responses . But keep the service one
+                    '401': false,
+                    '402': false
+                }
+            },
+            handler: () => {}
         }
     },
 

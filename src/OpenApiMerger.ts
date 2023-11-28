@@ -4,11 +4,15 @@ import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
 import { Alias } from './objects/Alias.js';
 import { DEFAULT_CONTENT_TYPE } from './constants.js';
+import { OptionalOrFalse } from './types/utils.js';
 
-type actionOpenApiMerged = Omit<ActionOpenApi, 'tags'> & { tags: Array<string> };
+type actionOpenApiMerged = Omit<ActionOpenApi, 'tags' | 'responses' | 'response'> & {
+    tags: Array<string>;
+    responses: OA3_1.ResponsesObject;
+};
 
 export class OpenApiMerger {
-    private static generateResponses(actionOpenApi: ActionOpenApi, defaultContentType: string): OA3_1.ResponsesObject {
+    private static generateResponses(actionOpenApi: ActionOpenApi, defaultContentType: string): OptionalOrFalse<OA3_1.ResponsesObject> {
         const responses = actionOpenApi.responses ?? {};
 
         if (actionOpenApi.response) {
@@ -46,6 +50,7 @@ export class OpenApiMerger {
             // if sub object use the value "false", we dismiss the previous value
             if (v === false) {
                 delete base[k];
+                return;
             }
 
             base[k] = v;
@@ -142,7 +147,7 @@ export class OpenApiMerger {
         action?: ActionSchema,
         openApiService?: ServiceSchema<OpenApiMixinSettings>,
         apiService?: ServiceSchema<ApiSettingsSchemaOpenApi>
-    ): Omit<ActionOpenApi, 'tags'> & { tags: Array<string> } {
+    ): actionOpenApiMerged {
         return [
             alias?.openapi,
             alias?.service?.name ? { tags: [alias.service.name] } : undefined,

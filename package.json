@@ -6,6 +6,7 @@
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "prepack": "npm run build",
     "version": "npm run build",
@@ -25,15 +26,15 @@
   ],
   "exports": {
     ".": {
-      "default": "./lib/index.cjs",
       "import": {
         "types": "./lib/index.d.ts",
         "default": "./lib/index.mjs"
       },
       "require": {
-        "types": "./lib/index.d.cts",
+        "types": "./lib/index.d.ts",
         "default": "./lib/index.cjs"
-      }
+      },
+      "default": "./lib/index.cjs"
     },
     "./types": {
       "types": "./index.d.ts"
@@ -90,6 +91,9 @@
   "peerDependencies": {
     "moleculer": "^0.14.31",
     "swagger-ui-dist": "^5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   },
   "pnpm": {
     "overrides": {

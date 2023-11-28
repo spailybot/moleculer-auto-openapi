@@ -13,7 +13,7 @@ import { Validator } from '@seriousme/openapi-schema-validator';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
 import { MergeService } from '../datas/services/merge.service.js';
 import { FalseService } from '../datas/services/false.service.js';
-import { OPENAPI_VERSIONS_SUPPORTED, OpenApiVersionsSupported } from '../../src/constants.js';
+import { OpenApiVersionsSupported } from '../../src/constants.js';
 
 const testServices = [
     testMappersService,

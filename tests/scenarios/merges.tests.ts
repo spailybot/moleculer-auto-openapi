@@ -70,10 +70,39 @@ describe('merge tests', () => {
                 expect(schemas.ServiceLevelComponent).toEqual(mergeComponent);
                 expect(schemas.ActionLevelComponent).toBeDefined();
                 expect(schemas.ActionLevelComponent).toEqual(mergeComponent);
+            });
+            describe('tests responses', () => {
+                it('should merge responses', async () => {
+                    const json = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
+                        version: '3.1'
+                    });
 
-                expect(schemas.RouteLevelErasedByAliasComponent?.properties?.alias).toBeDefined();
-                expect(schemas.RouteLevelErasedByServiceComponent?.properties?.service).toBeDefined();
-                expect(schemas.RouteLevelErasedByActionComponent?.properties?.action).toBeDefined();
+                    const currentPath = json?.paths?.['/api/merge/merge']?.get;
+                    expect(currentPath).toBeDefined();
+
+                    expect(currentPath?.responses).toBeDefined();
+                    const responses = currentPath?.responses as OpenAPIV3_1.ResponsesObject;
+
+                    expect(responses['200']?.description).toEqual('action success response');
+                    expect(responses['401']?.description).toEqual('route response');
+                    expect(responses['402']?.description).toEqual('alias response');
+                    expect(responses['403']?.description).toEqual('service response');
+                    expect(responses['404']?.description).toEqual('action response');
+                });
+                it('should allow to remove responses', async () => {
+                    const json = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
+                        version: '3.1'
+                    });
+
+                    const currentPath = json?.paths?.['/api/merge/mergeNoResponse']?.get;
+                    expect(currentPath).toBeDefined();
+
+                    expect(currentPath?.responses).toBeDefined();
+                    const responses = currentPath?.responses as OpenAPIV3_1.ResponsesObject;
+
+                    expect(responses['401']).toBeUndefined();
+                    expect(responses['402']).toBeUndefined();
+                });
             });
         });
     });

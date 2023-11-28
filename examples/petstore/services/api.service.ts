@@ -2,7 +2,8 @@ import type { Context } from 'moleculer';
 import { Service, ServiceBroker } from 'moleculer';
 import type { IncomingRequest, Route } from 'moleculer-web';
 import ApiGateway from 'moleculer-web';
-import { ApiSettingsSchemaOpenApi } from '@spailybot/moleculer-auto-openapi';
+import { ApiSettingsSchemaOpenApi, ApiSettingsOpenApi } from '@spailybot/moleculer-auto-openapi';
+import {OpenAPIV3_1} from "openapi-types";
 
 interface Meta {
     userAgent?: string | null | undefined;
@@ -36,7 +37,9 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                     {
                         path: '/',
                         whitelist: ['hidden.*', 'pet.*', 'user.*'],
-                        autoAliases: true
+                        autoAliases: true,
+                        authentication: true,
+                        authorization: true
                     }
                 ],
                 openapi: {
@@ -45,8 +48,17 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                         '403': {
                             description: 'This is an example of common response'
                         }
+                    },
+                    components: {
+                        securitySchemes: {
+                            myAuth: {
+                                type: 'http',
+                                scheme: 'bearer',
+                                description: 'the bearer is : "123456"'
+                            } as OpenAPIV3_1.SecuritySchemeObject
+                        }
                     }
-                }
+                } as ApiSettingsOpenApi
             },
 
             methods: {
