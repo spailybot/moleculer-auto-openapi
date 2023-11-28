@@ -117,7 +117,6 @@ export interface ApiSettingsSchemaOpenApi extends ApiSettingsSchema {
     openapi?: ApiSettingsOpenApi;
 }
 
-//TODO
 export interface AliasRouteOpenApi extends ActionOpenApi {}
 
 /**
@@ -135,7 +134,6 @@ export interface AliasRouteSchemaOpenApi extends AliasRouteSchema {
     openapi?: AliasRouteOpenApi | false;
 }
 
-//TODO
 export interface ApiRouteOpenApi extends commonOpenApi {}
 
 declare module 'moleculer' {
