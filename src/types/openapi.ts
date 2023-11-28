@@ -106,9 +106,7 @@ export interface commonOpenApi {
     responses?: OA3_1.ResponsesObject;
 }
 
-export type openApiServiceOpenApi = Omit<OA3_1.Document, 'info' | 'openapi' | keyof commonOpenApi> & {
-    info?: OA3_1.InfoObject;
-} & commonOpenApi;
+export type openApiServiceOpenApi = Omit<OA3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;
 
 export interface ApiSettingsOpenApi extends commonOpenApi {
     server?: OA3_1.ServerObject;
