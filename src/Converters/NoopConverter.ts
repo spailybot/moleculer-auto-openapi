@@ -8,11 +8,11 @@ import { ObjectRules } from '../types/index.js';
  */
 export class NoopConverter implements IConverter {
     getMetas(schema: ValidationSchema): ValidationSchemaMetaKeys {
-        return undefined;
+        return {};
     }
 
     getSchemaObjectFromRootSchema(schema: ValidationSchema): OpenAPIV3_1.SchemaObject {
-        return undefined;
+        return {};
     }
 
     getSchemaObjectFromRule(
@@ -24,10 +24,10 @@ export class NoopConverter implements IConverter {
     }
 
     getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OpenAPIV3_1.SchemaObject> {
-        return undefined;
+        return {};
     }
 
     getValidationRules(schema: ValidationSchema): Record<string, ValidationRule> {
-        return undefined;
+        return {};
     }
 }
