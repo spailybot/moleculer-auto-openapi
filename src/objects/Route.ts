@@ -4,27 +4,27 @@ import { normalizePath } from '../commons.js';
 import path from 'path/posix';
 import { bodyParserOptions, routeAlias } from '../types/moleculer-web.js';
 import { AliasCreator } from './AliasCreator.js';
-import { LoggerInstance, Service } from 'moleculer';
+import { LoggerInstance, ServiceSchema } from 'moleculer';
 
 export class Route {
     public readonly aliases: Array<Alias>;
     public readonly path: string;
-    public readonly bodyParsers: bodyParserOptions | boolean;
+    public readonly bodyParsers?: bodyParserOptions | boolean;
     public readonly autoAliases: boolean;
-    public readonly openapi: ApiRouteOpenApi;
-    public readonly openApiService: Service<OpenApiMixinSettings>;
-    public readonly apiService: Service<ApiSettingsSchemaOpenApi>;
+    public readonly openapi?: ApiRouteOpenApi;
+    public readonly openApiService?: ServiceSchema<OpenApiMixinSettings>;
+    public readonly apiService: ServiceSchema<ApiSettingsSchemaOpenApi>;
 
     constructor(
         private readonly logger: LoggerInstance,
         route: definedApiRouteSchema,
-        apiService: Service<ApiSettingsSchemaOpenApi>,
-        openApiService: Service<OpenApiMixinSettings>,
+        apiService: ServiceSchema<ApiSettingsSchemaOpenApi>,
+        openApiService?: ServiceSchema<OpenApiMixinSettings>,
         private readonly skipUnresolvedActions: boolean = true
     ) {
         this.path = Route.formatPath(route?.path, apiService);
         this.bodyParsers = route.bodyParsers;
-        this.autoAliases = route.autoAliases;
+        this.autoAliases = route.autoAliases ?? false;
         this.openapi = route.openapi;
         this.openApiService = openApiService;
         this.apiService = apiService;
@@ -32,7 +32,7 @@ export class Route {
         this.aliases = new AliasCreator(this.logger, this, route.aliases, this.skipUnresolvedActions).getAliases();
     }
 
-    public static formatPath(routePath: string, apiService: Service<ApiSettingsSchemaOpenApi>): string {
+    public static formatPath(routePath: string, apiService: ServiceSchema<ApiSettingsSchemaOpenApi>): string {
         return normalizePath(path.join(apiService?.settings?.path ?? '/', routePath ?? '/'));
     }
 

@@ -2,7 +2,7 @@ import { RuleCustom, ValidationRule, ValidationRuleObject, ValidationSchema } fr
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ValidationRuleMapping } from './FastestValidator.js';
 
-export type Mapper<Rule extends RuleCustom> = (rule: Rule, schema?: ObjectRules) => OA3_1.SchemaObject;
+export type Mapper<Rule extends RuleCustom> = (rule: Rule, schema?: ObjectRules) => OA3_1.SchemaObject | undefined;
 
 export type Mappers = {
     [K in keyof ValidationRuleMapping]: Mapper<ValidationRuleMapping[K]>;

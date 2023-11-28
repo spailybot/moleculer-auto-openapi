@@ -1,12 +1,11 @@
-import { describe, jest, it, expect, beforeEach } from '@jest/globals';
-import { getFastestValidatorMappers, MappersOptions } from '../src/mappers.js';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { MappersOptions } from '../src/mappers.js';
 import {
     RuleAny,
     RuleArray,
     RuleBoolean,
     RuleClass,
     RuleCurrency,
-    RuleCustom,
     RuleCustomInline,
     RuleDate,
     RuleEmail,
@@ -26,7 +25,8 @@ import {
     RuleURL,
     RuleUUID
 } from 'fastest-validator';
-import { Mapper, Mappers, ValidationRuleMapping } from '../src/types/index.js';
+import { Mapper, Mappers } from '../src/types/index.js';
+import { getFastestValidatorMappers } from '../src/Converters/FastestValidatorConverter.js';
 
 const subObject: RuleObject = {
     type: 'object',
@@ -97,15 +97,19 @@ describe('Fastest Validator Mappers', () => {
                         type: 'array'
                     }
                 })
-            ).toEqual({ type: 'array' });
+            ).toEqual({ type: 'array', items: {} });
         });
         it('should map array rule withEmpty', () => {
-            expect(mapperFn({ ...baseRule, empty: true })).toEqual({ type: 'array' });
+            expect(mapperFn({ ...baseRule, empty: true })).toEqual({
+                type: 'array',
+                items: {}
+            });
         });
         it('should map array rule withMin', () => {
             expect(mapperFn({ ...baseRule, type: 'array', min: 1 })).toEqual({
                 minItems: 1,
-                type: 'array'
+                type: 'array',
+                items: {}
             });
         });
         it('should map array rule withMax', () => {
@@ -117,14 +121,16 @@ describe('Fastest Validator Mappers', () => {
                 })
             ).toEqual({
                 maxItems: 1,
-                type: 'array'
+                type: 'array',
+                items: {}
             });
         });
         it('should map array rule withLength', () => {
             expect(mapperFn({ ...baseRule, type: 'array', length: 1 })).toEqual({
                 maxItems: 1,
                 minItems: 1,
-                type: 'array'
+                type: 'array',
+                items: {}
             });
         });
         it('should map array rule withContains', () => {
@@ -134,7 +140,7 @@ describe('Fastest Validator Mappers', () => {
                     type: 'array',
                     contains: ['test']
                 })
-            ).toEqual({ type: 'array' });
+            ).toEqual({ type: 'array', items: {} });
         });
         it('should map array rule withUnique', () => {
             expect(
@@ -143,7 +149,7 @@ describe('Fastest Validator Mappers', () => {
                     type: 'array',
                     unique: true
                 })
-            ).toEqual({ type: 'array', uniqueItems: true });
+            ).toEqual({ type: 'array', uniqueItems: true, items: {} });
         });
         it('should map array rule withEnum', () => {
             expect(
@@ -152,7 +158,7 @@ describe('Fastest Validator Mappers', () => {
                     type: 'array',
                     enum: ['test']
                 })
-            ).toEqual({ type: 'array' });
+            ).toEqual({ type: 'array', items: {} });
         });
         it('should map array rule withItems', () => {
             mockGetSchemaObjectFromRule.mockReturnValueOnce({ type: 'string' });
@@ -177,13 +183,14 @@ describe('Fastest Validator Mappers', () => {
                     type: 'array',
                     convert: true
                 })
-            ).toEqual({ type: 'array' });
+            ).toEqual({ type: 'array', items: {} });
         });
         it('should map array rule withDefault', () => {
             expect(mapperFn({ ...baseRule, type: 'array', default: ['test1', 'test2'] })).toEqual({
                 default: ['test1', 'test2'],
                 examples: [['test1', 'test2']],
-                type: 'array'
+                type: 'array',
+                items: {}
             });
         });
         it('should map array rule withSubObject', () => {

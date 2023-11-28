@@ -34,12 +34,12 @@ export class AliasCreator {
 
                 return this.getSubAliases(aliasInformations).map((alias) => new Alias(alias, this.route));
             })
-            .filter(Boolean);
+            .filter(Boolean) as Array<Alias>;
     }
 
     private extractAliasSubInformations(infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {
         const isAliasRouteSchema = (v: unknown): v is AliasRouteSchemaOpenApi =>
-            v && (['action', 'handler'] as Array<keyof AliasRouteSchema>).some((property) => !!(v as AliasRouteSchema)[property]);
+            !!v && (['action', 'handler'] as Array<keyof AliasRouteSchema>).some((property) => !!(v as AliasRouteSchema)[property]);
 
         if (isAliasRouteSchema(infos)) {
             return infos;
@@ -53,7 +53,7 @@ export class AliasCreator {
 
             return {
                 ...tmpAction,
-                action: tmpAction.action ?? null
+                action: tmpAction?.action
             };
         } else if (typeof infos !== 'string') {
             if (this.skipUnresolvedActions) {
@@ -61,7 +61,7 @@ export class AliasCreator {
             }
 
             return {
-                action: null
+                action: undefined
             };
         } else {
             return {
@@ -70,7 +70,7 @@ export class AliasCreator {
         }
     }
 
-    private extractAliasInformation(name: string, infos: ApiSchemaAlias): AliasRouteSchemaOpenApi {
+    private extractAliasInformation(name: string, infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {
         const res = this.extractAliasSubInformations(infos);
 
         if (!res) {

@@ -1,6 +1,6 @@
 import { ApiSettingsSchemaOpenApi, definedActionSchema, definedApiRouteSchema, OpenApiMixinSettings } from '../types/index.js';
 import { MOLECULER_WEB_LIST_ALIASES_INPUT, MOLECULER_WEB_LIST_ALIASES_OUTPUT, routeAlias } from '../types/moleculer-web.js';
-import { ActionSchema, Context, LoggerInstance, Service } from 'moleculer';
+import { ActionSchema, Context, LoggerInstance, Service, ServiceSchema } from 'moleculer';
 import { getServiceName, normalizePath } from '../commons.js';
 import { Route } from '../objects/Route.js';
 import { Alias } from '../objects/Alias.js';
@@ -12,18 +12,22 @@ export class MoleculerWebRoutesParser {
 
     public async parse(
         ctx: Context,
-        service: Service<ApiSettingsSchemaOpenApi>,
+        service: ServiceSchema<ApiSettingsSchemaOpenApi>,
         skipUnresolvedActions: boolean,
-        services: Array<Service>
+        services: Array<ServiceSchema>
     ): Promise<Array<Alias>> {
         this.logger.debug(`RoutesParser.parse()`);
-        const actionsMap = new Map<string, { service: Service; action: ActionSchema }>();
+        const actionsMap = new Map<string, { service: ServiceSchema; action: ActionSchema }>();
         const routes = new Map<string, Route>();
 
         // TODO map the current OA server (moleculer service), to route, to add the "server" field
 
         services.forEach((svc) =>
-            Object.values(svc.actions).forEach((action) => {
+            Object.values(svc.actions ?? {}).forEach((action) => {
+                if (typeof action === 'boolean' || typeof action === 'function' || !action.name) {
+                    return;
+                }
+
                 actionsMap.set(action.name, {
                     service: svc,
                     action
@@ -45,7 +49,7 @@ export class MoleculerWebRoutesParser {
                 this.logger,
                 routeSchema as definedApiRouteSchema,
                 service,
-                ctx.service as Service<OpenApiMixinSettings>,
+                (ctx.service as Service<OpenApiMixinSettings> | null)?.schema,
                 skipUnresolvedActions
             );
 
@@ -57,7 +61,7 @@ export class MoleculerWebRoutesParser {
             (alias, index, self) => index === self.findIndex((a) => a.fullPath === alias.fullPath && a.methods === alias.methods)
         );
 
-        return autoAliases
+        const unfilledAliases = autoAliases
             .flatMap((alias: routeAlias) => {
                 this.logger.debug(`RoutesParser.parse() - checking alias ${alias.path} for path ${alias.fullPath}`);
 
@@ -83,7 +87,7 @@ export class MoleculerWebRoutesParser {
                         {
                             path: alias.path,
                             method: alias.methods,
-                            action: alias.actionName,
+                            action: alias.actionName ?? undefined,
                             openapi: route?.openapi
                         },
                         route
@@ -102,7 +106,9 @@ export class MoleculerWebRoutesParser {
 
                 return routeAlias;
             })
-            .filter(Boolean)
+            .filter(Boolean) as Array<Alias>;
+
+        return unfilledAliases
             .map((alias) => {
                 if (!alias.action) {
                     return alias;
@@ -124,7 +130,7 @@ export class MoleculerWebRoutesParser {
 
                 return alias;
             })
-            .filter(Boolean);
+            .filter(Boolean) as Array<Alias>;
     }
 
     private fetchAliasesForService(ctx: Context, service: string) {

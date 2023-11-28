@@ -9,7 +9,7 @@
         "moduleResolution": "NodeNext",
         "sourceMap": true,
         "declaration": true,
-        "strict": false,
+        "strict": true,
         "typeRoots": ["./node_modules/@types"]
     },
     "exclude": ["node_modules", "build"],

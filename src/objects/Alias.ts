@@ -1,7 +1,7 @@
 import { AliasRouteSchemaOpenApi, definedActionSchema, definedAliasRouteSchemaOpenApi } from '../types/index.js';
 import { Route } from './Route.js';
 import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
-import { Service } from 'moleculer';
+import { ServiceSchema } from 'moleculer';
 import { PathAction } from './PathAction.js';
 import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
@@ -26,20 +26,20 @@ export class Alias {
     }
 
     public readonly route: Route;
-    public type: string;
-    private _method: rawHttpMethod;
-    private _path: string;
-    public action: string;
-    public actionSchema: definedActionSchema & { params?: ValidationSchema };
-    public service: Service;
+    public type?: string;
+    private _method: rawHttpMethod = '*';
+    private _path: string = '';
+    public action?: string;
+    public actionSchema?: definedActionSchema & { params?: ValidationSchema };
+    public service?: ServiceSchema;
     public openapi: definedAliasRouteSchemaOpenApi['openapi'];
     public skipped: boolean = false;
 
     constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
         this.route = route;
         this.type = infos.type;
-        this.method = infos.method;
-        this.path = infos.path;
+        this.method = infos.method ?? JOKER_METHOD;
+        this.path = infos.path ?? '/';
         this.fullPath = path.join(route?.path ?? '/', infos.path ?? '/');
         this.action = infos.action;
         if (infos.openapi === false) {

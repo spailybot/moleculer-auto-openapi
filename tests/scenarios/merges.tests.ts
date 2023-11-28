@@ -4,6 +4,7 @@ import { registerSchemaValidation, setupBroker } from './commons.js';
 import { routes } from '../datas/routes.js';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
 import { OpenapiService } from '../datas/services/openapi.service.js';
+import { OpenAPIV3_1 } from 'openapi-types';
 
 describe('merge tests', () => {
     describe('Test that a service can be hide by setting openapi to false', () => {
@@ -48,7 +49,7 @@ describe('merge tests', () => {
                 });
 
                 expect(json?.components?.schemas).toBeDefined();
-                const { schemas } = json.components;
+                const { schemas } = json.components as Required<Pick<OpenAPIV3_1.ComponentsObject, 'schemas'>>;
 
                 const mergeComponent = {
                     type: 'object',

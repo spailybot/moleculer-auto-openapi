@@ -39,7 +39,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             },
             cache: {
                 enabled(this: openApiService) {
-                    return this.settings.cacheOpenApi;
+                    return this.settings.cacheOpenApi ?? true;
                 },
                 keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
                     if (!params.version) {

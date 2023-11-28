@@ -79,6 +79,7 @@ describe('AliasCreator', () => {
         //skip custom function
         'GET custom': [
             {
+                // @ts-ignore
                 action: null,
                 method: 'get',
                 path: '/custom'
@@ -95,6 +96,7 @@ describe('AliasCreator', () => {
         //handle array without action
         'GET /wrong-middleware': [
             {
+                // @ts-ignore
                 action: null,
                 method: 'get',
                 path: '/wrong-middleware'
@@ -126,6 +128,7 @@ describe('AliasCreator', () => {
                     service
                 );
 
+                // @ts-ignore
                 const aliases = new AliasCreator(logger, route, { [aliasName]: alias }, true).getAliases();
 
                 expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result.map(expect.objectContaining)));
@@ -147,9 +150,10 @@ describe('AliasCreator', () => {
                     false
                 );
 
+                // @ts-ignore
                 const aliases = new AliasCreator(logger, route, { [aliasName]: alias }, false).getAliases();
 
-                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result.map(expect.objectContaining)));
+                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result?.map(expect.objectContaining)));
             }
         );
     });

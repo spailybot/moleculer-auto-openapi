@@ -1,4 +1,4 @@
-import { Errors } from 'moleculer';
+import { Context, Errors } from 'moleculer';
 
 const MoleculerClientError = Errors.MoleculerClientError;
 
@@ -6,11 +6,11 @@ export const MathService = {
     name: 'math',
     version: 2,
     actions: {
-        add(ctx) {
+        add(ctx: Context<{ a: number; b: number }>) {
             return Number(ctx.params.a) + Number(ctx.params.b);
         },
 
-        sub(ctx) {
+        sub(ctx: Context<{ a: number; b: number }>) {
             return Number(ctx.params.a) - Number(ctx.params.b);
         },
 
@@ -23,7 +23,7 @@ export const MathService = {
                 a: 'number',
                 b: 'number'
             },
-            handler(ctx) {
+            handler(ctx: Context<{ a: number; b: number }>) {
                 return Number(ctx.params.a) * Number(ctx.params.b);
             }
         },
@@ -33,11 +33,11 @@ export const MathService = {
                 a: { type: 'number', convert: true },
                 b: { type: 'number', convert: true }
             },
-            handler(ctx) {
+            handler(ctx: Context<{ a: number; b: number }>) {
                 let a = Number(ctx.params.a);
                 let b = Number(ctx.params.b);
                 if (b != 0 && !Number.isNaN(b)) return a / b;
-                else throw new MoleculerClientError('Divide by zero!', 422, null, ctx.params);
+                else throw new MoleculerClientError('Divide by zero!', 422, '', ctx.params);
             }
         }
     }

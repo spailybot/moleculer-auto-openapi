@@ -1,4 +1,4 @@
-import { ActionSchema, Service } from 'moleculer';
+import { ActionSchema, ServiceSchema } from 'moleculer';
 import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonOpenApi, OpenApiMixinSettings } from './types/index.js';
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
@@ -24,9 +24,11 @@ export class OpenApiMerger {
                 response.description = actionResponse.description;
                 response.headers = actionResponse.headers;
                 response.links = actionResponse.links;
-                response.content = {
-                    [actionResponse.type ?? defaultContentType]: actionResponse.content
-                };
+                if (actionResponse.content) {
+                    response.content = {
+                        [actionResponse.type ?? defaultContentType]: actionResponse.content
+                    };
+                }
             }
 
             responses['200'] = response;
@@ -56,7 +58,11 @@ export class OpenApiMerger {
         tagsRegistered: Map<string, OA3_1.TagObject>,
         openApisConfig: Array<commonOpenApi | undefined> = []
     ): actionOpenApiMerged {
-        return openApisConfig.reduce((previousValue, currentValue) => {
+        return openApisConfig.reduce((pValue, currentValue) => {
+            const previousValue = pValue ?? {
+                components: {}
+            };
+
             if (!previousValue?.components) {
                 previousValue.components = {};
             }
@@ -65,16 +71,18 @@ export class OpenApiMerger {
                 return previousValue;
             }
 
-            Object.keys(currentValue).forEach((k: keyof commonOpenApi) => {
+            Object.keys(currentValue).forEach((currentValueKey) => {
+                const k = currentValueKey as keyof commonOpenApi;
                 if (k === 'components') {
-                    if (!previousValue?.[k]) {
-                        previousValue[k] = {};
-                    }
-                    Object.keys(currentValue[k]).forEach((key) => {
-                        if (!previousValue[k]?.[key]) {
-                            previousValue[k][key] = {};
+                    Object.keys(currentValue.components ?? {}).forEach((componentKey) => {
+                        const key = componentKey as keyof typeof previousValue.components;
+                        if (!previousValue.components) {
+                            previousValue.components = {};
                         }
-                        this.mergeObjects(previousValue[k][key], currentValue?.[k]?.[key]);
+                        if (!previousValue.components[key]) {
+                            previousValue.components[key] = {};
+                        }
+                        this.mergeObjects(previousValue.components[key] as Record<string, unknown>, currentValue?.components?.[key]);
                     });
                     return;
                 }
@@ -83,7 +91,7 @@ export class OpenApiMerger {
                     if (!previousValue?.[k]) {
                         previousValue[k] = {};
                     }
-                    this.mergeObjects(previousValue[k], currentValue?.[k]);
+                    this.mergeObjects(previousValue[k] as Record<string, unknown>, currentValue?.[k]);
                     return;
                 }
 
@@ -129,11 +137,11 @@ export class OpenApiMerger {
 
     static merge(
         tagsMap: Map<string, OA3_1.TagObject>,
-        openApiService: Service<OpenApiMixinSettings>,
-        apiService: Service<ApiSettingsSchemaOpenApi>,
         route: Route,
         alias: Alias,
-        action: ActionSchema
+        action?: ActionSchema,
+        openApiService?: ServiceSchema<OpenApiMixinSettings>,
+        apiService?: ServiceSchema<ApiSettingsSchemaOpenApi>
     ): Omit<ActionOpenApi, 'tags'> & { tags: Array<string> } {
         return [
             alias?.openapi,
@@ -148,7 +156,7 @@ export class OpenApiMerger {
 
                 currentValue.responses = this.generateResponses(
                     currentValue,
-                    openApiService.settings.defaultResponseContentType ?? DEFAULT_CONTENT_TYPE
+                    openApiService?.settings?.defaultResponseContentType ?? DEFAULT_CONTENT_TYPE
                 );
 
                 previousValue = this.mergeCommons(tagsMap, [previousValue, currentValue]);
@@ -159,7 +167,7 @@ export class OpenApiMerger {
 
                 return previousValue;
             },
-            this.mergeCommons(tagsMap, [openApiService.settings.openapi, apiService.settings.openapi, route.openapi])
+            this.mergeCommons(tagsMap, [openApiService?.settings?.openapi, apiService?.settings?.openapi, route.openapi])
         ) as actionOpenApiMerged;
     }
 }

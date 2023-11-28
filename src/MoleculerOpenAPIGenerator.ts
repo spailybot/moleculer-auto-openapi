@@ -1,4 +1,4 @@
-import type { Context, LoggerInstance, Service, ServiceBroker } from 'moleculer';
+import type { Context, LoggerInstance, Service, ServiceBroker, ServiceSchema } from 'moleculer';
 import Moleculer from 'moleculer';
 import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import type { FastestValidatorType, OpenApiMixinSettings } from './types/index.js';
@@ -113,12 +113,10 @@ export class MoleculerOpenAPIGenerator {
         });
     }
 
-    private async getAliases(ctx: Context, services: Array<Service<ApiSettingsSchema>>): Promise<Array<Alias>> {
+    private async getAliases(ctx: Context, services: Array<ServiceSchema<ApiSettingsSchema>>): Promise<Array<Alias>> {
         this.logger.debug(`getAliases()`);
         //only moleculer-web service
-        const apiServices = services.filter((service) => service?.settings?.routes) as Array<
-            Service<ApiSettingsSchemaOpenApi & Partial<OpenApiMixinSettings>>
-        >;
+        const apiServices = services.filter((service) => service?.settings?.routes) as Array<ServiceSchema<ApiSettingsSchemaOpenApi>>;
 
         this.logger.debug(`getAliases() : ${apiServices?.length ?? 0} moleculer-web services found`);
         if (!apiServices?.length) {
@@ -129,7 +127,7 @@ export class MoleculerOpenAPIGenerator {
 
         return (
             await Promise.all(
-                apiServices.map(async (svc) => await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions, services))
+                apiServices.map(async (svc) => await routesParser.parse(ctx, svc, this.settings.skipUnresolvedActions ?? true, services))
             )
         ).flat();
     }

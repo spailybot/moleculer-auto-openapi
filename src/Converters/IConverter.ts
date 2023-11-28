@@ -9,7 +9,7 @@ export interface IConverter {
     getValidationRules(schema: ValidationSchema): Record<string, ValidationRule>;
     getMetas(schema: ValidationSchema): ValidationSchemaMetaKeys;
     getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OA3_1.SchemaObject>;
-    getSchemaObjectFromRootSchema(schema: ValidationSchema): OA3_1.SchemaObject;
+    getSchemaObjectFromRootSchema(schema: ValidationSchema): OA3_1.SchemaObject | undefined;
     getSchemaObjectFromRule(
         pRule: ValidationRule,
         parentProperties?: Partial<ValidationRuleObject>,

@@ -1,7 +1,7 @@
 import * as moleculerWeb from 'moleculer-web';
+import { ApiRouteSchema } from 'moleculer-web';
 import { ServiceSchema } from 'moleculer';
 import type { ApiSettingsSchemaOpenApi } from '../../../src/index.js';
-import { ApiRouteSchema } from 'moleculer-web';
 
 const ApiGateway = moleculerWeb.default;
 
@@ -24,7 +24,7 @@ export const getApiService = (routes: Array<ApiRouteSchema> = []): ServiceSchema
         ...ApiService,
         settings: {
             ...ApiService.settings,
-            routes: [...ApiService.settings?.routes, ...routes]
+            routes: [...(ApiService.settings?.routes ?? []), ...routes]
         }
     } as ServiceSchema<ApiSettingsSchemaOpenApi>;
 };

@@ -65,10 +65,6 @@ export class OpenApiGenerator {
             openapi: `${openApiVersion}.0`,
             ...this.document,
             tags: [],
-            info: {
-                title: 'moleculer-web API',
-                ...this.document.info
-            },
             components: this.cleanComponents(this.document.components)
         };
 
@@ -77,16 +73,20 @@ export class OpenApiGenerator {
             delete (document as commonOpenApi).responses;
         }
 
-        const cachePathActions = new Map<string, string>();
+        const cachePathActions = new Map<string, string | undefined>();
 
         aliases.sort(getAlphabeticSorter('fullPath'));
 
         aliases.forEach((alias) => {
+            if (!document.paths) {
+                document.paths = {};
+            }
+
             const route = alias.route;
             const { apiService, openApiService } = route;
 
             const openapiPath: string = this.formatParamUrl(normalizePath(alias.fullPath));
-            const currentPath: OA3_1.PathItemObject = document.paths[openapiPath] ?? {};
+            const currentPath: OA3_1.PathItemObject = document.paths?.[openapiPath] ?? {};
 
             if (alias.isJokerAlias()) {
                 currentPath.description = alias.actionSchema?.openapi?.description;
@@ -109,7 +109,7 @@ export class OpenApiGenerator {
 
                 cachePathActions.set(cacheKeyName, pathAction.action?.name);
 
-                const openApi = OpenApiMerger.merge(tagsMap, openApiService, apiService, route, alias, pathAction.action);
+                const openApi = OpenApiMerger.merge(tagsMap, route, alias, pathAction.action, openApiService, apiService);
 
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
@@ -126,7 +126,7 @@ export class OpenApiGenerator {
                 };
 
                 const templateVariables: TemplateVariables = {
-                    summary: openApi?.summary,
+                    summary: openApi?.summary ?? '',
                     action: alias.action ?? UNRESOLVED_ACTION_NAME,
                     autoAlias: alias.route.autoAliases ? '[autoAlias]' : ''
                 };
@@ -162,12 +162,14 @@ export class OpenApiGenerator {
     private mergeComponents(c1: OA3_1.ComponentsObject, c2: OA3_1.ComponentsObject): OA3_1.ComponentsObject {
         return Object.keys(c2).reduce(
             (acc, key) => {
+                // @ts-ignore
                 if (!Object.keys(c2?.[key]).length) {
                     return acc;
                 }
 
                 return {
                     ...acc,
+                    // @ts-ignore
                     [key]: { ...c1[key], ...c2[key] }
                 };
             },
@@ -183,13 +185,13 @@ export class OpenApiGenerator {
               }))
             : this.extractParamsFromUrl(path);
 
-        const result: parametersExtracted = {
+        const result: parametersExtracted & Required<Pick<parametersExtracted, 'parameters'>> = {
             parameters: [...pathParameters]
         };
 
         const excluded = pathParameters.map((params: OA3_1.ParameterObject) => params.name);
 
-        if (['multipart', 'stream'].includes(alias.type)) {
+        if (['multipart', 'stream'].includes(alias.type ?? '')) {
             result.requestBody = alias.openapi?.requestBody ? alias.openapi?.requestBody : this.generateFileUploadBody(alias, excluded);
 
             return result;
@@ -242,6 +244,10 @@ export class OpenApiGenerator {
 
             //body
             if (!alias.openapi?.requestBody) {
+                if (!alias.action) {
+                    //in theory will never happen
+                    throw new Error('something is wrong');
+                }
                 const bodyParameters = this.getParameters(method, actionParams, true);
                 if (Object.keys(bodyParameters).length > 0) {
                     const currentBodyParameters = {
@@ -253,7 +259,7 @@ export class OpenApiGenerator {
 
                     const tmpContentTypes: Array<string> = Object.entries(alias.route?.bodyParsers || {})
                         .filter(([, v]) => Boolean(v))
-                        .flatMap(([parser]) => BODY_PARSERS_CONTENT_TYPE[parser] ?? []);
+                        .flatMap(([parser]) => BODY_PARSERS_CONTENT_TYPE[parser as keyof typeof BODY_PARSERS_CONTENT_TYPE] ?? []);
 
                     // TODO specify input content type ? + allow to specify one ? allow to force one ?
                     const contentTypes = (tmpContentTypes?.length
@@ -262,13 +268,13 @@ export class OpenApiGenerator {
 
                     let required = false;
                     if (this.isReferenceObject(schema)) {
-                        const schemaRef = this.getComponentByRef(schema.$ref);
+                        const schemaRef = this.getComponentByRef<OpenAPIV3.BaseSchemaObject>(schema.$ref);
 
                         if (!schemaRef) {
                             throw new Error(`fail to get schema from path ${schema.$ref}`);
                         }
 
-                        required = schemaRef.required?.length > 0;
+                        required = (schemaRef.required ?? []).length > 0;
                     }
 
                     result.requestBody = {
@@ -291,7 +297,7 @@ export class OpenApiGenerator {
         const defaultInBody = ALLOWING_BODY_METHODS.includes(method);
         return Object.fromEntries(
             Object.entries(this.converter.getValidationRules(params))
-                .map(([k, param]: [string, ValidationRule | undefined | any]): [string, ValidationRule] => {
+                .map(([k, param]: [string, ValidationRule | undefined | any]): [string, ValidationRule] | undefined => {
                     const openApiInParameter = (param as ValidationRuleObject)?.$$oa?.in;
                     const inBody = openApiInParameter ? openApiInParameter === 'body' : defaultInBody;
 
@@ -301,7 +307,7 @@ export class OpenApiGenerator {
 
                     return [k, param];
                 })
-                .filter(Boolean)
+                .filter(Boolean) as Array<[string, ValidationRule]>
         );
     }
 
@@ -311,7 +317,9 @@ export class OpenApiGenerator {
      * @link https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
      */
     private generateFileUploadBody(alias: Alias, excluded: Array<string>): OA3_1.RequestBodyObject {
-        const typeBodyParser = alias.type ? BODY_PARSERS_CONTENT_TYPE[alias.type] : undefined;
+        const typeBodyParser = alias.type
+            ? BODY_PARSERS_CONTENT_TYPE[alias.type as keyof typeof BODY_PARSERS_CONTENT_TYPE]
+            : BODY_PARSERS_CONTENT_TYPE.multipart;
 
         const schema: OA3_1.MediaTypeObject['schema'] = {};
 
@@ -349,13 +357,15 @@ export class OpenApiGenerator {
             if (alias.action && alias.actionSchema?.params) {
                 //merge schema with field "file"
                 const paramsSchema = this.createRequestBodyFromParams(alias.action, alias.actionSchema.params ?? {}, excluded);
-                schema.allOf.push(paramsSchema);
+                if (paramsSchema) {
+                    schema.allOf.push(paramsSchema);
+                }
             }
         }
 
         return {
             content: {
-                [typeBodyParser]: {
+                [typeBodyParser[0]]: {
                     schema
                 }
             }
@@ -378,7 +388,7 @@ export class OpenApiGenerator {
         return refComponent;
     }
 
-    private getComponentByRef(path: string): OA3_1.SchemaObject | undefined {
+    private getComponentByRef<T extends Record<string, unknown>>(path: string): T | undefined {
         const pathSegments = path.split('/').filter((segment) => segment !== ''); // Séparer le chemin en segments
 
         //bad path format
@@ -391,9 +401,9 @@ export class OpenApiGenerator {
             return undefined;
         }
 
-        return pathSegments.slice(2).reduce((currentObject, segment) => {
+        return pathSegments.slice(2).reduce((currentObject: Record<string, any> | undefined, segment) => {
             return currentObject && currentObject.hasOwnProperty(segment) ? currentObject[segment] : undefined;
-        }, this.components);
+        }, this.components) as unknown as T;
     }
 
     createRequestBodyFromParams(
@@ -401,7 +411,7 @@ export class OpenApiGenerator {
         obj: ValidationSchema,
         exclude: Array<string> = [],
         parentNode: { default?: any } = {}
-    ): OA3_1.SchemaObject | OA3_1.ReferenceObject {
+    ): OA3_1.SchemaObject | OA3_1.ReferenceObject | undefined {
         if (obj.$$root === true) {
             return this.converter.getSchemaObjectFromRootSchema(obj);
         }
@@ -439,9 +449,13 @@ export class OpenApiGenerator {
         obj: Record<string, OA3_1.SchemaObject>,
         customProperties: { default?: any } = {}
     ): OA3_1.ReferenceObject {
+        if (!this.components.schemas) {
+            this.components.schemas = {};
+        }
+
         const required: Array<string> = [];
         const properties = Object.fromEntries(
-            Object.entries(obj).map(([fieldName, rule]) => {
+            Object.entries(obj).map(([fieldName, rule]: [string, OA3_1.SchemaObject]) => {
                 const nextSchemeName = `${schemeName}.${fieldName}`;
                 if (rule[EOAExtensions.optional] != true) {
                     required.push(fieldName);
@@ -504,10 +518,10 @@ export class OpenApiGenerator {
             };
         }
 
-        if (rule.type === 'array') {
+        if (rule.type === 'array' && rule.items) {
             return {
                 ...rule,
-                items: rule.items ? this._createSchemaPartFromRule(nextSchemeName, rule.items as OA3_1.SchemaObject) : undefined
+                items: this._createSchemaPartFromRule(nextSchemeName, rule.items as OA3_1.SchemaObject)
             };
         }
 
@@ -549,11 +563,11 @@ export class OpenApiGenerator {
 
         if (typeof obj === 'object') {
             Object.values(EOAExtensions).forEach((extension) => {
-                delete obj[extension];
+                delete (obj as Record<string, unknown>)[extension];
             });
 
             return Object.fromEntries(
-                Object.entries(obj).map(([k, v]) => {
+                Object.entries(obj as Record<string, unknown>).map(([k, v]) => {
                     return [k, this.removeExtensions(v)];
                 })
             ) as T;
@@ -567,6 +581,7 @@ export class OpenApiGenerator {
             Object.entries(components).map(([k, v]: [string, OptionalOrFalse<OA3_1.ComponentsObject>]) => [
                 k,
                 Object.fromEntries(
+                    // @ts-ignore
                     Object.entries(v)
                         .map(([key, value]) => (value === false ? undefined : [key, value]))
                         .filter(Boolean)
@@ -578,10 +593,14 @@ export class OpenApiGenerator {
     private handleTags(document: OA3_1.Document, tagsMap: Map<string, OA3_1.TagObject>, tags: Array<string> = []): Array<string> {
         const uniqTags = Array.from(new Set(tags));
 
+        if (!document.tags) {
+            document.tags = [];
+        }
+
         uniqTags.forEach((tag) => {
             const tagObject: OA3_1.TagObject | undefined = tagsMap.get(tag);
-            if (!document.tags?.some(({ name }) => name === tag) && tagObject) {
-                document.tags.push(tagObject);
+            if (!document.tags!.some(({ name }) => name === tag) && tagObject) {
+                document.tags!.push(tagObject);
             }
         });
 

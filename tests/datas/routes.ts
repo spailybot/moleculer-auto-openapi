@@ -1,6 +1,7 @@
 import { ApiRouteSchema } from 'moleculer-web';
 import '../../src/types/index.js';
 import { AliasRouteSchemaOpenApi } from '../../src/index.js';
+import * as http from 'http';
 
 export const routes = {
     testsTags: {
@@ -94,11 +95,15 @@ export const routes = {
             // middlewares
             middlewares: [
                 function (req, res, next) {
+                    // @ts-ignore
                     this.logger.info('Middleware 1');
+                    // @ts-ignore
                     next();
                 },
                 function (req, res, next) {
+                    // @ts-ignore
                     this.logger.info('Middleware 2');
+                    // @ts-ignore
                     next();
                 }
             ],
@@ -136,7 +141,7 @@ export const routes = {
                         }
                     }
                 },
-                handler: (req, res) => {
+                handler: (req: http.IncomingMessage, res: http.ServerResponse) => {
                     res.end('OK');
                 }
             } as AliasRouteSchemaOpenApi,
@@ -152,7 +157,7 @@ export const routes = {
                         }
                     }
                 },
-                handler: (req, res) => {
+                handler: (req: http.IncomingMessage, res: http.ServerResponse) => {
                     res.end('OK');
                 }
             } as AliasRouteSchemaOpenApi
