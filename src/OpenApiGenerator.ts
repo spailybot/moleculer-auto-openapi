@@ -116,6 +116,7 @@ export class OpenApiGenerator {
                     description: !alias.isJokerAlias() ? openApi?.description : undefined,
                     operationId: openApi?.operationId,
                     externalDocs: openApi?.externalDocs,
+                    security: openApi?.security,
                     tags: Array.from(new Set(openApi?.tags ?? [])),
                     parameters,
                     requestBody,

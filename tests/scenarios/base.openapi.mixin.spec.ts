@@ -35,10 +35,7 @@ describe("Test 'openapi' mixin", () => {
 
         // @ts-ignore
         const json = JSON.stringify(doc, ' ', 2);
-        fs.writeFileSync(path.join(path.dirname(expectedJSONPath), 'receivedSchema.json'), json);
 
-        // check json https://editor.swagger.io/
-        //console.log(JSON.stringify(json, null, ""));
         expect(JSON.parse(json)).toEqual(expectedSchema);
     });
 

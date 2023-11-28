@@ -1,4 +1,4 @@
-import { ServiceSchema } from 'moleculer';
+import { ActionSchema, ServiceSchema } from 'moleculer';
 
 export const PostsService: ServiceSchema = {
     name: 'posts',
@@ -86,8 +86,11 @@ export const PostsService: ServiceSchema = {
         },
         update: {
             // rest: 'PUT /:id',
+            openapi: {
+                security: [{ myAuth: [] }]
+            },
             handler(ctx) {}
-        },
+        } as ActionSchema,
         remove: {
             // rest: 'DELETE /:id',
             handler(ctx) {}

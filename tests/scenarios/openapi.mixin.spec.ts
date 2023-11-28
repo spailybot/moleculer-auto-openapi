@@ -1,5 +1,5 @@
 import { ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import { routes } from '../datas/routes.js';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
@@ -19,6 +19,23 @@ describe("Test 'openapi' mixin", () => {
     afterAll(() => broker.stop());
 
     registerSchemaValidation(broker);
+
+    describe('security', () => {
+        it('should pass the security scheme', async () => {
+            const json = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
+                version: '3.1'
+            });
+
+            const securityObject = json?.paths?.['/api/edge/posts/{id}']?.put?.security;
+            expect(securityObject).toBeDefined();
+
+            expect(securityObject).toEqual([
+                {
+                    myAuth: []
+                }
+            ]);
+        });
+    });
 
     describe('test', () => {
         it('should test', async () => {
