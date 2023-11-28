@@ -28,8 +28,8 @@ import {
     ValidationSchemaMetaKeys
 } from 'fastest-validator';
 import { OpenAPIV3_1 as OA, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { EOAExtensions } from '../commons.js';
 import { IConverter } from './IConverter.js';
+import { EOAExtensions } from '../constants.js';
 
 export class FastestValidatorConverter implements IConverter {
     private readonly mappers: Mappers;

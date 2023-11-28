@@ -4,12 +4,12 @@ import {
     OA_GENERATE_DOCS_INPUT,
     OA_GENERATE_DOCS_OUTPUT
 } from './MoleculerOpenAPIGenerator.js';
-import { defaultOpenApiVersion } from './commons.js';
 import { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
 import { ECacheMode, OpenApiMixinSettings } from './types/index.js';
 import { getAbsoluteFSPath } from 'swagger-ui-dist';
 import { RuleString } from 'fastest-validator';
+import { DEFAULT_OPENAPI_VERSION } from './constants.js';
 
 const swaggerUiAssetPath = getAbsoluteFSPath();
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
@@ -46,7 +46,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                         return actionName;
                     }
 
-                    return `${actionName}|${params?.version || defaultOpenApiVersion}`;
+                    return `${actionName}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
                 },
                 ttl: 600
             },

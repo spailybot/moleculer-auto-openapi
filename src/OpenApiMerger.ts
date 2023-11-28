@@ -3,7 +3,7 @@ import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonO
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
 import { Alias } from './objects/Alias.js';
-import { DEFAULT_CONTENT_TYPE } from './commons.js';
+import { DEFAULT_CONTENT_TYPE } from './constants.js';
 
 type actionOpenApiMerged = Omit<ActionOpenApi, 'tags'> & { tags: Array<string> };
 

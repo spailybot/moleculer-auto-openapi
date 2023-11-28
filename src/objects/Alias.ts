@@ -1,10 +1,11 @@
 import { AliasRouteSchemaOpenApi, definedActionSchema, definedAliasRouteSchemaOpenApi } from '../types/index.js';
 import { Route } from './Route.js';
-import { HTTP_METHODS, HTTP_METHODS_ARRAY, isRawHttpMethod, JOKER_METHOD, normalizePath, rawHttpMethod } from '../commons.js';
+import { isRawHttpMethod, normalizePath } from '../commons.js';
 import { ServiceSchema } from 'moleculer';
 import { PathAction } from './PathAction.js';
 import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
+import { HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, rawHttpMethod } from '../constants.js';
 
 export class Alias {
     public fullPath: string;

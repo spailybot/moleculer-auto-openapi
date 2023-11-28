@@ -4,13 +4,13 @@ import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import type { FastestValidatorType, OpenApiMixinSettings } from './types/index.js';
 import { ApiSettingsSchemaOpenApi, ECacheMode } from './types/index.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
-import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, openApiVersionsSupported } from './commons.js';
 import { ApiSettingsSchema } from 'moleculer-web';
 import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { Alias } from './objects/Alias.js';
 import { OpenApiGenerator } from './OpenApiGenerator.js';
 import { ExcludeRequiredProps } from './types/utils.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
+import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, OpenApiVersionsSupported } from './constants.js';
 
 export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings>> & Partial<OpenApiMixinSettings> = {
     onlyLocal: false, // build schema from only local services
@@ -79,7 +79,7 @@ export type OA_GENERATE_DOCS_INPUT = {
      * maybe a future option ?
      * @hidden
      */
-    version?: openApiVersionsSupported;
+    version?: OpenApiVersionsSupported;
 };
 export type OA_GENERATE_DOCS_OUTPUT = OA3_1.Document;
 

@@ -7,12 +7,13 @@ import { MathService } from '../datas/services/math.service.js';
 import { PostsService } from '../datas/services/posts.service.js';
 import { testOpenApiService } from '../datas/services/test-openapi.service.js';
 import { ApiRouteSchema } from 'moleculer-web';
-import { getServiceName, openApiVersionsSupported } from '../../src/commons.js';
+import { getServiceName } from '../../src/commons.js';
 import { describe, expect, it } from '@jest/globals';
 import { Validator } from '@seriousme/openapi-schema-validator';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
 import { MergeService } from '../datas/services/merge.service.js';
 import { FalseService } from '../datas/services/false.service.js';
+import { OPENAPI_VERSIONS_SUPPORTED, OpenApiVersionsSupported } from '../../src/constants.js';
 
 const testServices = [
     testMappersService,
@@ -50,11 +51,11 @@ export const setupBroker = async (
 
 export const registerSchemaValidation = (broker: ServiceBroker) => {
     describe('schema validation', () => {
-        it.each<openApiVersionsSupported>(['3.1'])(`generate a valid openapi %s documentation`, async (OAVersion) => {
+        it.each<OpenApiVersionsSupported>(['3.1'])(`generate a valid openapi %s documentation`, async (OAVersion) => {
             expect(Validator.supportedVersions.has(OAVersion));
 
             const json = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
-                version: OAVersion as openApiVersionsSupported
+                version: OAVersion as OpenApiVersionsSupported
             });
             const validator = new Validator();
             const res = await validator.validate(JSON.parse(JSON.stringify(json)));

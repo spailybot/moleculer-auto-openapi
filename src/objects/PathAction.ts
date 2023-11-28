@@ -1,8 +1,8 @@
 import { Alias } from './Alias.js';
-import { HTTP_METHODS } from '../commons.js';
 import { ActionSchema } from 'moleculer';
 import { definedActionSchema } from '../types/index.js';
 import { ValidationSchema } from 'fastest-validator';
+import { HTTP_METHODS } from '../constants.js';
 
 export class PathAction {
     public actionType?: string;

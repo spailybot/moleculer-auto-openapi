@@ -1,6 +1,10 @@
 import { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { ValidationRule, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
 import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, TemplateVariables, tSystemParams } from './types/index.js';
+import { getAlphabeticSorter, matchAll, normalizePath } from './commons.js';
+import { LoggerInstance } from 'moleculer';
+import { Alias } from './objects/Alias.js';
+import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
 import {
     ALLOWING_BODY_METHODS,
     BODY_PARSERS_CONTENT_TYPE,
@@ -8,17 +12,11 @@ import {
     DEFAULT_MULTI_PART_FIELD_NAME,
     DEFAULT_SUMMARY_TEMPLATE,
     EOAExtensions,
-    getAlphabeticSorter,
     HTTP_METHODS,
-    matchAll,
     multiOAProperties,
-    normalizePath,
-    openApiVersionsSupported
-} from './commons.js';
-import { LoggerInstance } from 'moleculer';
-import { Alias } from './objects/Alias.js';
-import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
-import { UNRESOLVED_ACTION_NAME } from './constants.js';
+    OpenApiVersionsSupported,
+    UNRESOLVED_ACTION_NAME
+} from './constants.js';
 import { OpenApiMerger } from './OpenApiMerger.js';
 import { OptionalOrFalse, SubOptionalOrFalse } from './types/utils.js';
 
@@ -53,7 +51,7 @@ export class OpenApiGenerator {
         this.document = baseDocument;
     }
 
-    public generate(openApiVersion: openApiVersionsSupported, aliases: Array<Alias>): OA3_1.Document {
+    public generate(openApiVersion: OpenApiVersionsSupported, aliases: Array<Alias>): OA3_1.Document {
         const tagsMap: Map<string, OA3_1.TagObject> = new Map<string, OA3_1.TagObject>();
 
         if ((this.document as { openapi?: string }).openapi) {
