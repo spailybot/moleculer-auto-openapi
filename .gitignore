@@ -236,3 +236,5 @@ $RECYCLE.BIN/
 /cache
 /debug.json
 /statics
+
+dist

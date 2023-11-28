@@ -5,19 +5,18 @@ import {
     OA_GENERATE_DOCS_OUTPUT
 } from './MoleculerOpenAPIGenerator.js';
 import { defaultOpenApiVersion } from './commons.js';
-import { Context, Service, ServiceSchema } from 'moleculer';
+import { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
 import { ECacheMode, OpenApiMixinSettings } from './types/index.js';
 import { getAbsoluteFSPath } from 'swagger-ui-dist';
-import { ExcludeRequiredProps } from './types/utils.js';
 import { RuleString } from 'fastest-validator';
 
 const swaggerUiAssetPath = getAbsoluteFSPath();
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
 
-export const mixin: ServiceSchema<Required<ExcludeRequiredProps<OpenApiMixinSettings>> & Partial<OpenApiMixinSettings>> = {
+export const mixin: ServiceSchema<ServiceSettingSchema> = {
     name: `openapi`,
-    settings: defaultSettings,
+    settings: defaultSettings as OpenApiMixinSettings,
     events: {
         async '$api.aliases.regenerated'(this: openApiService) {
             const generateDocsAction = 'generateDocs';
