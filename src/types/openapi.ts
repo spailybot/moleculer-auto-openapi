@@ -1,8 +1,8 @@
-import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
-import { AliasRouteSchema } from './moleculer-web.js';
-import { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
-import { ActionSchema, ServiceSettingSchema } from 'moleculer';
+import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
+import type { AliasRouteSchema } from './moleculer-web.js';
+import type { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
+import type { ActionSchema, ServiceSettingSchema } from 'moleculer';
 
 /**
  * describe an openapi response .

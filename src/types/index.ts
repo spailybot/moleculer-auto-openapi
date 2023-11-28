@@ -1,5 +1,5 @@
-import { ApiRouteSchema } from 'moleculer-web';
-import { openApiServiceOpenApi } from './openapi.js';
+import type { ApiRouteSchema } from 'moleculer-web';
+import type { openApiServiceOpenApi } from './openapi.js';
 
 export type tSystemParams = {
     description?: string;

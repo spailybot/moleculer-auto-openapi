@@ -1,6 +1,6 @@
 import { FastestValidatorType, FVOARuleMetaKeys, Mapper, Mappers, ObjectRules } from '../types/index.js';
 import { getOpenApiType, MappersOptions } from '../mappers.js';
-import {
+import type {
     RuleAny,
     RuleArray,
     RuleBoolean,
@@ -27,8 +27,8 @@ import {
     ValidationSchema,
     ValidationSchemaMetaKeys
 } from 'fastest-validator';
-import { OpenAPIV3_1 as OA, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { IConverter } from './IConverter.js';
+import type { OpenAPIV3_1 as OA, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { IConverter } from './IConverter.js';
 import { EOAExtensions } from '../constants.js';
 
 export class FastestValidatorConverter implements IConverter {
