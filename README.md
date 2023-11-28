@@ -51,7 +51,6 @@ Install the package using your preferred package manager:
 ```
 npm install @spailybot/moleculer-auto-openapi
 ```
----
 
 #### Optional
 
@@ -64,6 +63,8 @@ For the full TypeScript autocompletion experience, install the `openapi-types` p
 ```
 npm install --save-dev openapi-types
 ```
+
+---
 
 ### 📁 Setting Up Your Service
 
