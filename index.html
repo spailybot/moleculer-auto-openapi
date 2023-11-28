@@ -6,6 +6,9 @@
 <p align="center">
 <img src="https://img.shields.io/badge/Moleculer-3CAFCE.svg?style=flat-square&logo=Moleculer&logoColor=white" alt="Moleculer" />
 <img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat-square&logo=TypeScript&logoColor=white" alt="TypeScript" />
+<a href="https://www.typescriptlang.org/tsconfig#strict">
+    <img src="https://img.shields.io/badge/TypeScript-Strict%20Mode-blue" alt="TypeScript Strict Mode">
+</a>
 </p>
 <img src="https://img.shields.io/npm/dw/%40spailybot%2Fmoleculer-auto-openapi" alt="GitHub license" />
 <img src="https://img.shields.io/github/license/spailybot/moleculer-auto-openapi?style=flat-square&color=5D6D7E" alt="GitHub license" />
