@@ -54,6 +54,8 @@ export class OpenApiGenerator {
     }
 
     public generate(openApiVersion: openApiVersionsSupported, aliases: Array<Alias>): OA3_1.Document {
+        const tagsMap: Map<string, OA3_1.TagObject> = new Map<string, OA3_1.TagObject>();
+
         if ((this.document as { openapi?: string }).openapi) {
             this.logger.warn(`setting manually the openapi version is not supported`);
             delete (this.document as { openapi?: string }).openapi;
@@ -107,7 +109,7 @@ export class OpenApiGenerator {
 
                 cachePathActions.set(cacheKeyName, pathAction.action?.name);
 
-                const openApi = OpenApiMerger.merge(document, openApiService, apiService, route, alias, pathAction.action);
+                const openApi = OpenApiMerger.merge(tagsMap, openApiService, apiService, route, alias, pathAction.action);
 
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
@@ -117,7 +119,7 @@ export class OpenApiGenerator {
                     operationId: openApi?.operationId,
                     externalDocs: openApi?.externalDocs,
                     security: openApi?.security,
-                    tags: Array.from(new Set(openApi?.tags ?? [])),
+                    tags: this.handleTags(document, tagsMap, openApi?.tags),
                     parameters,
                     requestBody,
                     responses: openApi?.responses
@@ -149,6 +151,8 @@ export class OpenApiGenerator {
 
             document.paths[openapiPath] = currentPath;
         });
+
+        document.tags?.sort(getAlphabeticSorter('name'));
 
         document.components = this.mergeComponents(document.components, this.components);
 
@@ -569,5 +573,18 @@ export class OpenApiGenerator {
                 )
             ])
         );
+    }
+
+    private handleTags(document: OA3_1.Document, tagsMap: Map<string, OA3_1.TagObject>, tags: Array<string> = []): Array<string> {
+        const uniqTags = Array.from(new Set(tags));
+
+        uniqTags.forEach((tag) => {
+            const tagObject: OA3_1.TagObject | undefined = tagsMap.get(tag);
+            if (!document.tags?.some(({ name }) => name === tag) && tagObject) {
+                document.tags.push(tagObject);
+            }
+        });
+
+        return uniqTags;
     }
 }

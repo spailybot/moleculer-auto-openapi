@@ -327,7 +327,6 @@ Remember, the journey of mastering any tool involves experimentation, learning f
 
 - allow to add custom mappers
 - allow easier securitySchemes setup
-- remove unused tags
 - $$oa
   - allow to define a ref, and use the ref instead of creating a new one
   - allow to define a "to ref", and create the ref with this name

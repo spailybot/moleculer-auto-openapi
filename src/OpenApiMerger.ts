@@ -3,7 +3,7 @@ import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonO
 import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
 import { Alias } from './objects/Alias.js';
-import { DEFAULT_CONTENT_TYPE, getAlphabeticSorter } from './commons.js';
+import { DEFAULT_CONTENT_TYPE } from './commons.js';
 
 type actionOpenApiMerged = Omit<ActionOpenApi, 'tags'> & { tags: Array<string> };
 
@@ -128,20 +128,14 @@ export class OpenApiMerger {
     }
 
     static merge(
-        document: OA3_1.Document,
+        tagsMap: Map<string, OA3_1.TagObject>,
         openApiService: Service<OpenApiMixinSettings>,
         apiService: Service<ApiSettingsSchemaOpenApi>,
         route: Route,
         alias: Alias,
         action: ActionSchema
     ): Omit<ActionOpenApi, 'tags'> & { tags: Array<string> } {
-        const tags = document.tags ?? [];
-        const tagsMap: Map<string, OA3_1.TagObject> = new Map<string, OA3_1.TagObject>();
-        tags.forEach((tag) => {
-            tagsMap.set(tag.name, tag);
-        });
-
-        const openApi = [
+        return [
             alias?.openapi,
             alias?.service?.name ? { tags: [alias.service.name] } : undefined,
             alias?.service?.settings?.openapi,
@@ -167,11 +161,5 @@ export class OpenApiMerger {
             },
             this.mergeCommons(tagsMap, [openApiService.settings.openapi, apiService.settings.openapi, route.openapi])
         ) as actionOpenApiMerged;
-
-        const outputTags = Array.from(tagsMap.values());
-        outputTags.sort(getAlphabeticSorter('name'));
-        document.tags = outputTags;
-
-        return openApi;
     }
 }
