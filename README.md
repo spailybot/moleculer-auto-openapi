@@ -33,9 +33,9 @@ Big thanks to [grinat](https://github.com/grinat) for the original work, and als
 
 ## ⚠️ Warning
 
-The use of metatags `$$oa` in Fastest-Validator is currently not available.
+The use of metaparams `$$oa` in Fastest-Validator is currently not available.
 
-To utilize it, you will need to wait for this Pull Request (PR) to be merged: https://github.com/icebob/fastest-validator/pull/341.
+To utilize it, you will need to wait for this Pull Request to be merged: https://github.com/icebob/fastest-validator/pull/341.
 
 Alternatively, you can instruct your dependency manager to map Fastest-Validator to the following fork: `github:thib3113/fastest-validator#fork`.
 
