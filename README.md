@@ -18,6 +18,7 @@
 <a href="https://bundlephobia.com/package/@spailybot/moleculer-auto-openapi"><img src="https://badgen.net/bundlephobia/tree-shaking/@spailybot/moleculer-auto-openapi" alt="tree shaking supported"></a>
 <img alt="npm bundle size (scoped)" src="https://img.shields.io/bundlephobia/min/%40spailybot/moleculer-auto-openapi">
 <a href="https://github.com/spailybot/moleculer-auto-openapi/stargazers/"><img src="https://img.shields.io/github/stars/spailybot/moleculer-auto-openapi.svg?style=social&label=Star" alt="GitHub stars"></a>
+<img src="https://img.shields.io/badge/module%20type-cjs%2Besm%2Btypes-brightgreen" alt="Module type: CJS+ESM+Types" />
 
 
 </div>
@@ -42,14 +43,7 @@ Big thanks to [grinat](https://github.com/grinat) for the original work, and als
 - Cached OpenAPI with efficient regeneration when needed
 - Granular and reusable configuration
 - TypeScript exports of mixin settings and OpenAPI parameters
-
-## ⚠️ Warning
-
-The use of metaparams `$$oa` in Fastest-Validator is currently not available.
-
-To utilize it, you will need to wait for this Pull Request to be merged: https://github.com/icebob/fastest-validator/pull/341.
-
-Alternatively, you can instruct your dependency manager to map Fastest-Validator to the following fork: `github:thib3113/fastest-validator#fork`.
+- Get your first openapi in less a minute
 
 ## 🚀 Getting Started
 

@@ -56,40 +56,6 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                                 files: 3
                             }
                         }
-                    },
-                    {
-                        path: '/users',
-                        aliases: {
-                            'REST /': {
-                                openapi: {
-                                    tags: [
-                                        {
-                                            name: 'User',
-                                            description: 'Represent an user'
-                                        },
-                                        'User'
-                                    ]
-                                } as ApiRouteOpenApi,
-                                // add except because this bug https://github.com/moleculerjs/moleculer-web/issues/344
-                                except: [],
-                                action: 'users'
-                            },
-                            'POST /avatar': {
-                                openapi: {
-                                    tags: ['User']
-                                },
-                                type: 'multipart',
-                                action: 'users.upload_avatar',
-                                busboyConfig: {
-                                    limits: {
-                                        //this will generate an uniq file field
-                                        files: 1
-                                    }
-                                }
-                            } as ApiRouteOpenApi
-                        },
-                        authentication: true,
-                        authorization: true
                     }
                 ],
                 openapi: {

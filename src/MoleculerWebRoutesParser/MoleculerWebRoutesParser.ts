@@ -53,7 +53,7 @@ export class MoleculerWebRoutesParser {
                 skipUnresolvedActions
             );
 
-            routes.set(route.path, route);
+            routes.set(`${serviceName}-${route.path}`, route);
         });
 
         //autoAliases are returned X times depending on the services started
@@ -65,7 +65,7 @@ export class MoleculerWebRoutesParser {
             .flatMap((alias: routeAlias) => {
                 this.logger.debug(`RoutesParser.parse() - checking alias ${alias.path} for path ${alias.fullPath}`);
 
-                const route = routes.get(normalizePath(alias.routePath));
+                const route = routes.get(`${serviceName}-${normalizePath(alias.routePath)}`);
 
                 if (!route) {
                     this.logger.debug(

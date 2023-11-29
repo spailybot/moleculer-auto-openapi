@@ -19,9 +19,10 @@ export const ApiService = {
     }
 } as ServiceSchema<ApiSettingsSchemaOpenApi>;
 
-export const getApiService = (routes: Array<ApiRouteSchema> = []): ServiceSchema<ApiSettingsSchemaOpenApi> => {
+export const getApiService = (routes: Array<ApiRouteSchema> = [], name = 'api'): ServiceSchema<ApiSettingsSchemaOpenApi> => {
     return {
         ...ApiService,
+        name,
         settings: {
             ...ApiService.settings,
             routes: [...(ApiService.settings?.routes ?? []), ...routes]

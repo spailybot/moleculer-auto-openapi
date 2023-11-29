@@ -109,6 +109,12 @@ export interface commonOpenApi {
 export type openApiServiceOpenApi = Omit<OA3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;
 
 export interface ApiSettingsOpenApi extends commonOpenApi {
+    /**
+     * This configuration is under your responsibility.
+     * If assigned, ensure that the URL correctly points to your Moleculer-web API.
+     * This module will not modify the configuration (will not add the Moleculer-web root path).
+     * As such, it can accommodate any reverse proxy configuration.
+     */
     server?: OA3_1.ServerObject;
 }
 

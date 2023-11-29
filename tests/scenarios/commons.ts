@@ -32,7 +32,7 @@ export const setupBroker = async (
     pServices: typeof testServices = testServices,
     routes: Array<ApiRouteSchema> = []
 ) => {
-    const services = [...pServices, getApiService(routes)] as unknown as Array<Service>;
+    const services = [...pServices, getApiService(routes), getApiService(routes, 'api2')] as unknown as Array<Service>;
     services.forEach((svc) => broker.createService(svc));
     await broker.start();
 

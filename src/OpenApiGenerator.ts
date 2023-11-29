@@ -59,9 +59,10 @@ export class OpenApiGenerator {
             delete (this.document as { openapi?: string }).openapi;
         }
 
-        const document: OA3_1.Document = {
+        const document: OA3_1.Document & { servers: Array<OA3_1.ServerObject> } = {
             openapi: `${openApiVersion}.0`,
             ...this.document,
+            servers: [],
             tags: [],
             components: this.cleanComponents(this.document.components)
         };
@@ -95,7 +96,19 @@ export class OpenApiGenerator {
                 const method = pathAction.method;
                 const cacheKeyName = `${openapiPath}.${method}`;
 
-                if (currentPath[method]) {
+                const currentMethod = currentPath[method];
+                if (currentMethod) {
+                    if (
+                        currentMethod.servers?.length &&
+                        alias.route.apiService.settings?.openapi?.server?.url &&
+                        !currentMethod.servers?.find((srv) => srv.url === alias.route.apiService.settings?.openapi?.server?.url)
+                    ) {
+                        const server = alias.route.apiService.settings.openapi.server;
+                        currentMethod.servers.push(server);
+                        this.addServerToDocument(document, server);
+                        return;
+                    }
+
                     const actionFromCache = cachePathActions.get(cacheKeyName);
                     this.logger.warn(
                         `${method.toUpperCase()} ${openapiPath} is already register by action ${actionFromCache ?? '<unamedAction>'} skip`
@@ -112,10 +125,11 @@ export class OpenApiGenerator {
 
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
-                const openApiMethod: OA3_1.OperationObject = {
+                const openApiMethod: OA3_1.OperationObject & { servers: Array<OA3_1.ServerObject> } = {
                     summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
                     description: !alias.isJokerAlias() ? openApi?.description : undefined,
                     operationId: openApi?.operationId,
+                    servers: [],
                     externalDocs: openApi?.externalDocs,
                     security: openApi?.security,
                     tags: this.handleTags(document, tagsMap, openApi?.tags),
@@ -123,6 +137,13 @@ export class OpenApiGenerator {
                     requestBody,
                     responses: openApi?.responses
                 };
+
+                if (alias.route.apiService.settings?.openapi?.server) {
+                    const server = alias.route.apiService.settings.openapi.server;
+                    openApiMethod.servers.push(server);
+
+                    this.addServerToDocument(document, server);
+                }
 
                 const templateVariables: TemplateVariables = {
                     summary: openApi?.summary ?? '',
@@ -156,6 +177,16 @@ export class OpenApiGenerator {
         document.components = this.mergeComponents(document.components, this.components);
 
         return this.removeExtensions(document);
+    }
+
+    private addServerToDocument(document: OA3_1.Document, server: OA3_1.ServerObject) {
+        if (!document.servers) {
+            document.servers = [];
+        }
+
+        if (!document.servers.some((srv) => srv.url === server.url)) {
+            document.servers.push(server);
+        }
     }
 
     private mergeComponents(c1: OA3_1.ComponentsObject, c2: OA3_1.ComponentsObject): OA3_1.ComponentsObject {
