@@ -317,26 +317,22 @@
                                         "type": "object",
                                         "properties": {
                                             "file": {
-                                                "oneOf": [
-                                                    {
-                                                        "type": "string",
-                                                        "format": "binary"
-                                                    },
-                                                    {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "type": "string",
-                                                            "format": "binary"
-                                                        }
-                                                    }
-                                                ]
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "format": "binary"
+                                                }
                                             }
-                                        }
+                                        },
+                                        "required": [
+                                            "file"
+                                        ]
                                     }
                                 ]
                             }
                         }
-                    }
+                    },
+                    "required": true
                 },
                 "responses": {
                     "200": {

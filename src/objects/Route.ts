@@ -2,7 +2,7 @@ import { ApiRouteOpenApi, ApiSettingsSchemaOpenApi, definedApiRouteSchema, OpenA
 import { Alias } from './Alias.js';
 import { normalizePath } from '../commons.js';
 import path from 'path/posix';
-import { bodyParserOptions, routeAlias } from '../types/moleculer-web.js';
+import { bodyParserOptions, BusboyConfig, routeAlias } from '../types/moleculer-web.js';
 import { AliasCreator } from './AliasCreator.js';
 import { LoggerInstance, ServiceSchema } from 'moleculer';
 
@@ -14,6 +14,7 @@ export class Route {
     public readonly openapi?: ApiRouteOpenApi;
     public readonly openApiService?: ServiceSchema<OpenApiMixinSettings>;
     public readonly apiService: ServiceSchema<ApiSettingsSchemaOpenApi>;
+    public readonly busboyConfig?: BusboyConfig<unknown>;
 
     constructor(
         private readonly logger: LoggerInstance,
@@ -24,6 +25,7 @@ export class Route {
     ) {
         this.path = Route.formatPath(route?.path, apiService);
         this.bodyParsers = route.bodyParsers;
+        this.busboyConfig = route.busboyConfig;
         this.autoAliases = route.autoAliases ?? false;
         this.openapi = route.openapi;
         this.openApiService = openApiService;

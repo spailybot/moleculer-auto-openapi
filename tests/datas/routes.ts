@@ -127,7 +127,13 @@ export const routes = {
             'POST multipleTypes': {
                 action: 'multipart:some.go',
                 type: 'stream',
-                method: 'POST'
+                method: 'POST',
+                //alias level of busboyConfig
+                busboyConfig: {
+                    limits: {
+                        files: 1
+                    }
+                }
             },
             'GET /': {
                 openapi: {
@@ -167,6 +173,12 @@ export const routes = {
             urlencoded: true,
             text: true,
             raw: true
+        },
+        //alias level of busboyConfig
+        busboyConfig: {
+            limits: {
+                files: 1
+            }
         }
     } as ApiRouteSchema,
     falseRoute: {

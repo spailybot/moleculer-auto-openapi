@@ -4,7 +4,6 @@ import { Service, type ServiceBroker } from 'moleculer';
 /**
  * MoleculerWebTypes are typings created from moleculer-web to enhance included typings; their use is totally optional.
  */
-
 export default class OpenApiService extends Service<OpenApiMixinSettings & MoleculerWebTypes.RestServiceSettings> {
     public constructor(public broker: ServiceBroker) {
         super(broker);
@@ -17,8 +16,8 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                 schemaPath: '/openapi/openapi.json',
                 openapi: {
                     info: {
-                        title: 'My API',
-                        version: '0.0.1'
+                        title: process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API',
+                        version: process.env.npm_package_version ? `${process.env.npm_package_version}` : '0.0.1'
                     },
                     components: {
                         //declare security scheme
@@ -29,7 +28,8 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                             }
                         }
                     }
-                }
+                },
+                skipUnresolvedActions: true
             }
         });
     }

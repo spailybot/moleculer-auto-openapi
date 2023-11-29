@@ -2,8 +2,8 @@ import type { Context } from 'moleculer';
 import { Service, ServiceBroker } from 'moleculer';
 import type { IncomingRequest, Route } from 'moleculer-web';
 import ApiGateway from 'moleculer-web';
-import { ApiSettingsSchemaOpenApi, ApiSettingsOpenApi } from '@spailybot/moleculer-auto-openapi';
-import {OpenAPIV3_1} from "openapi-types";
+import type { ApiSettingsSchemaOpenApi, ApiSettingsOpenApi, ApiRouteOpenApi } from '@spailybot/moleculer-auto-openapi';
+import { OpenAPIV3_1 } from 'openapi-types';
 
 interface Meta {
     userAgent?: string | null | undefined;
@@ -36,8 +36,58 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                     },
                     {
                         path: '/',
-                        whitelist: ['hidden.*', 'pet.*', 'user.*'],
+                        whitelist: ['hidden.*', 'pets.*'],
                         autoAliases: true,
+                        aliases: {
+                            'POST /pets/:id/image': {
+                                type: 'multipart',
+                                action: 'pets.upload_image'
+                            } as ApiRouteOpenApi,
+                            'POST /pets/:id/image-stream': {
+                                type: 'stream',
+                                action: 'pets.upload_image'
+                            } as ApiRouteOpenApi
+                        },
+                        authentication: true,
+                        authorization: true,
+                        busboyConfig: {
+                            limits: {
+                                //this will limit upload to 3 files at the same time
+                                files: 3
+                            }
+                        }
+                    },
+                    {
+                        path: '/users',
+                        aliases: {
+                            'REST /': {
+                                openapi: {
+                                    tags: [
+                                        {
+                                            name: 'User',
+                                            description: 'Represent an user'
+                                        },
+                                        'User'
+                                    ]
+                                } as ApiRouteOpenApi,
+                                // add except because this bug https://github.com/moleculerjs/moleculer-web/issues/344
+                                except: [],
+                                action: 'users'
+                            },
+                            'POST /avatar': {
+                                openapi: {
+                                    tags: ['User']
+                                },
+                                type: 'multipart',
+                                action: 'users.upload_avatar',
+                                busboyConfig: {
+                                    limits: {
+                                        //this will generate an uniq file field
+                                        files: 1
+                                    }
+                                }
+                            } as ApiRouteOpenApi
+                        },
                         authentication: true,
                         authorization: true
                     }

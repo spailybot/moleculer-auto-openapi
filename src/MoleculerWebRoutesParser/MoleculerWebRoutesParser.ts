@@ -117,7 +117,7 @@ export class MoleculerWebRoutesParser {
                 const action = actionsMap.get(alias.action);
                 if (!action) {
                     this.logger.warn(`fail to get details about action "${alias.action}"`);
-                    return alias;
+                    return skipUnresolvedActions ? undefined : alias;
                 }
 
                 //allow to exclude action from openapi

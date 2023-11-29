@@ -125,6 +125,13 @@ export type OpenApiMixinSettings = {
      * @default file
      */
     multiPartFileFieldName?: string;
+
+    /**
+     * add the name of the services in tags ?
+     *
+     * @default false
+     */
+    addServiceNameToTags?: boolean;
 };
 
 export { ApiRouteSchema };

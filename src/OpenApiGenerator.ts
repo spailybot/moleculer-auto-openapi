@@ -95,8 +95,6 @@ export class OpenApiGenerator {
                 const method = pathAction.method;
                 const cacheKeyName = `${openapiPath}.${method}`;
 
-                const { parameters, requestBody } = this.extractParameters(method, openapiPath, alias) ?? {};
-
                 if (currentPath[method]) {
                     const actionFromCache = cachePathActions.get(cacheKeyName);
                     this.logger.warn(
@@ -108,6 +106,9 @@ export class OpenApiGenerator {
                 cachePathActions.set(cacheKeyName, pathAction.action?.name);
 
                 const openApi = OpenApiMerger.merge(tagsMap, route, alias, pathAction.action, openApiService, apiService);
+
+                // TODO need to pass merged openApi to parameter extraction !
+                const { parameters, requestBody } = this.extractParameters(method, openapiPath, alias) ?? {};
 
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
@@ -210,9 +211,11 @@ export class OpenApiGenerator {
 
                     const component = this.getComponent(schema);
 
-                    const schemaParameter = {
+                    const schemaParameter: OA3_1.ParameterObject = {
                         name: k,
                         in: 'query',
+                        style: schema.type === 'object' ? 'deepObject' : undefined,
+                        explode: schema.type === 'object' ? true : undefined,
                         // required need to be true, or undefined
                         required: component[EOAExtensions.optional] !== true || undefined,
                         schema
@@ -334,24 +337,27 @@ export class OpenApiGenerator {
                 throw new Error('$$root parameters is not supported on multipart');
             }
 
+            const filesLimit = alias.busboyConfig?.limits?.files ?? alias?.route?.busboyConfig?.limits?.files;
             const fileField = alias.route.openApiService?.settings?.multiPartFileFieldName ?? DEFAULT_MULTI_PART_FIELD_NAME;
             schema.allOf = [
                 {
                     type: 'object',
                     properties: {
-                        [fileField]: {
-                            oneOf: [
-                                binarySchema,
-                                {
-                                    type: 'array',
-                                    items: binarySchema
-                                }
-                            ]
-                        }
-                    }
+                        [fileField]:
+                            filesLimit === 1
+                                ? binarySchema
+                                : {
+                                      type: 'array',
+                                      items: binarySchema,
+                                      maxItems: filesLimit
+                                  }
+                    },
+                    required: [fileField]
                 }
             ];
 
+            // actually, moleculer-web doesn't handle fastest-validator params when uploading a file .
+            // so params will not be checked by the validator ! but can be used to define it
             if (alias.action && alias.actionSchema?.params) {
                 //merge schema with field "file"
                 const paramsSchema = this.createRequestBodyFromParams(alias.action, alias.actionSchema.params ?? {}, excluded);
@@ -362,6 +368,7 @@ export class OpenApiGenerator {
         }
 
         return {
+            required: true,
             content: {
                 [typeBodyParser[0]]: {
                     schema

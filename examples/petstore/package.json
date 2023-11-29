@@ -21,7 +21,7 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "@spailybot/moleculer-auto-openapi": "^0.1.9",
+    "@spailybot/moleculer-auto-openapi": "^0.1.12",
     "moleculer": "^0.14.32",
     "moleculer-web": "^0.10.7",
     "fastest-validator": "github:thib3113/fastest-validator#fork"

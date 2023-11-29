@@ -2,6 +2,11 @@ import { ServiceSchema } from 'moleculer';
 
 export const SomeService: ServiceSchema = {
     name: 'some',
+    settings: {
+        openapi: {
+            tags: ['some']
+        }
+    },
     actions: {
         upload: {
             openapi: {

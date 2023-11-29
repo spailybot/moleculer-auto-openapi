@@ -36,10 +36,15 @@ esbuild
         ...globalConfig,
         outdir: path.join(dist, 'esm'),
         splitting: true,
+        metafile: true,
         format: 'esm',
         outExtension: { '.js': '.mjs' },
         target: ['esnext']
     })
+    // .then((result) => {
+    //     // npx esbuild-visualizer --metadata ./meta.json
+    //     fs.writeFileSync('meta.json', JSON.stringify(result.metafile))
+    // })
     .catch(() => process.exit(1));
 esbuild
     .build({

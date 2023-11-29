@@ -150,7 +150,7 @@ export class OpenApiMerger {
     ): actionOpenApiMerged {
         return [
             alias?.openapi,
-            alias?.service?.name ? { tags: [alias.service.name] } : undefined,
+            openApiService?.settings?.addServiceNameToTags && alias?.service?.name ? { tags: [alias.service.name] } : undefined,
             alias?.service?.settings?.openapi,
             action?.openapi
         ].reduce(

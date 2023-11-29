@@ -71,7 +71,8 @@ export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings
     summaryTemplate: '{{summary}}\n            ({{action}}) {{autoAlias}}',
     returnAssetsAsStream: true,
     defaultResponseContentType: DEFAULT_CONTENT_TYPE,
-    multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME
+    multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME,
+    addServiceNameToTags: false
 };
 
 export type OA_GENERATE_DOCS_INPUT = {

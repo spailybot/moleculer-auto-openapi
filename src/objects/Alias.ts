@@ -6,6 +6,7 @@ import { PathAction } from './PathAction.js';
 import path from 'path/posix';
 import { ValidationSchema } from 'fastest-validator';
 import { HTTP_METHODS, HTTP_METHODS_ARRAY, JOKER_METHOD, rawHttpMethod } from '../constants.js';
+import type { BusboyConfig } from '../types/moleculer-web.js';
 
 export class Alias {
     public fullPath: string;
@@ -35,10 +36,12 @@ export class Alias {
     public service?: ServiceSchema;
     public openapi: definedAliasRouteSchemaOpenApi['openapi'];
     public skipped: boolean = false;
+    public readonly busboyConfig?: BusboyConfig<unknown>;
 
     constructor(infos: AliasRouteSchemaOpenApi, route: Route) {
         this.route = route;
         this.type = infos.type;
+        this.busboyConfig = infos.busboyConfig;
         this.method = infos.method ?? JOKER_METHOD;
         this.path = infos.path ?? '/';
         this.fullPath = path.join(route?.path ?? '/', infos.path ?? '/');

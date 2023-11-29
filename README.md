@@ -6,9 +6,7 @@
 <p align="center">
 <img src="https://img.shields.io/badge/Moleculer-3CAFCE.svg?style=flat-square&logo=Moleculer&logoColor=white" alt="Moleculer" />
 <img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat-square&logo=TypeScript&logoColor=white" alt="TypeScript" />
-<a href="https://www.typescriptlang.org/tsconfig#strict">
-    <img src="https://img.shields.io/badge/TypeScript-Strict%20Mode-blue" alt="TypeScript Strict Mode">
-</a>
+<a href="https://www.typescriptlang.org/tsconfig#strict"><img src="https://img.shields.io/badge/TypeScript-Strict%20Mode-blue" alt="TypeScript Strict Mode"></a>
 </p>
 <img src="https://img.shields.io/npm/dw/%40spailybot%2Fmoleculer-auto-openapi" alt="GitHub license" />
 <img src="https://img.shields.io/github/license/spailybot/moleculer-auto-openapi?style=flat-square&color=5D6D7E" alt="GitHub license" />
@@ -16,6 +14,12 @@
 <img src="https://img.shields.io/github/languages/top/spailybot/moleculer-auto-openapi?style=flat-square&color=5D6D7E" alt="GitHub top language" />
 <a href="https://snyk.io/test/github/spailybot/moleculer-auto-openapi"><img alt="Known Vulnerabilities" src="https://snyk.io/test/github/spailybot/moleculer-auto-openapi/badge.svg" /></a>
 <a href="https://www.npmjs.com/package/@spailybot/moleculer-auto-openapi"><img alt="npm package Vulnerabilities" src="https://img.shields.io/npm/v/@spailybot/moleculer-auto-openapi.svg" /></a>
+<a href="https://github.com/spailybot/moleculer-auto-openapi/actions/workflows/CI.yml"><img src="https://github.com/spailybot/moleculer-auto-openapi/actions/workflows/CI.yml/badge.svg" alt="CI"></a>
+<a href="https://bundlephobia.com/package/@spailybot/moleculer-auto-openapi"><img src="https://badgen.net/bundlephobia/tree-shaking/@spailybot/moleculer-auto-openapi" alt="tree shaking supported"></a>
+<img alt="npm bundle size (scoped)" src="https://img.shields.io/bundlephobia/min/%40spailybot/moleculer-auto-openapi">
+<a href="https://github.com/spailybot/moleculer-auto-openapi/stargazers/"><img src="https://img.shields.io/github/stars/spailybot/moleculer-auto-openapi.svg?style=social&label=Star" alt="GitHub stars"></a>
+
+
 </div>
 
 ---
@@ -338,10 +342,12 @@ Remember, the journey of mastering any tool involves experimentation, learning f
 - $$oa
   - allow to define a ref, and use the ref instead of creating a new one
   - allow to define a "to ref", and create the ref with this name
+  - allow to define examples
+  - allow to force the optional / required (edge case / multipart)
 - investigate the needs of requestBodyAndResponseBodyAreSameOnMethods / requestBodyAndResponseBodyAreSameDescription
 - support multiple openapi version on generator ? (will need converters)
 - doesn't support named action ... moleculer-web support it ?
-
+- allow to specify response code
 
 ## 📄 License
 
