@@ -2,15 +2,16 @@
  * These keys can be utilized at the root level of the fastest validator schema within the $$oa meta parameters.
  *
  * @example
- * {
- *     $$oa: {
- *         description: "my description",
- *         summary: "my summary"
- *     },
- *     //the rest of your schema
- *     $$strict: true
- *     foo: "string"
- * }
+ *
+{
+    $$oa: {
+        description: "my description",
+        summary: "my summary"
+    },
+    $$strict: true,
+    foo: "string",
+    //the rest of your schema
+}
  */
 export interface FVOASchemaMetaKeys {
     description?: string;
@@ -20,19 +21,19 @@ export interface FVOASchemaMetaKeys {
  * These keys can be put to use within the rule set of the fastest validator schema, under the $$oa meta parameters.
  *
  * @example
- * {
- *     //the rest of your schema
- *     $$strict: true
- *     foo: {
- *         $$oa: {
- *             in: 'body';
- *             description: "rule description";
- *             summary: "deprecated rule summary";
- *             deprecated: true;
- *         },
- *         type: "string"
- *     }
- * }
+ {
+     $$strict: true,
+     foo: {
+         $$oa: {
+             in: 'body';
+             description: "rule description";
+             summary: "deprecated rule summary";
+             deprecated: true;
+         },
+         type: "string"
+     },
+     //the rest of your schema
+ }
  */
 export interface FVOARuleMetaKeys {
     in?: 'body' | 'query';
