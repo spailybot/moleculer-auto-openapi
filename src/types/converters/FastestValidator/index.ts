@@ -23,6 +23,7 @@ import {
     RuleUUID,
     ValidationRuleName
 } from 'fastest-validator';
+import { FVOARuleMetaKeys, FVOASchemaMetaKeys } from './extensions.js';
 
 /**
  * map a Fastest-Validator rule with its type
@@ -79,17 +80,6 @@ export type ValidationRuleMapping = {
  */
 export type FastestValidatorType = FastestValidatorDefault.default;
 
-export interface FVOASchemaMetaKeys {
-    description?: string;
-    summary?: string;
-}
-export interface FVOARuleMetaKeys {
-    in?: 'body' | 'query';
-    description?: string;
-    summary?: string;
-    deprecated?: boolean;
-}
-
 declare module 'fastest-validator' {
     interface ValidationSchemaMetaKeys {
         $$oa?: FVOASchemaMetaKeys;
@@ -98,3 +88,5 @@ declare module 'fastest-validator' {
         $$oa?: FVOARuleMetaKeys;
     }
 }
+
+export * from './extensions.js';
