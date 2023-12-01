@@ -1,11 +1,11 @@
-import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import { OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * schemas
  */
 
 // Standard moleculer schemas
-const DbMixinList: OA3_1.SchemaObject = {
+const DbMixinList: OpenAPIV3_1.SchemaObject = {
     type: 'object',
     properties: {
         rows: {
@@ -19,16 +19,16 @@ const DbMixinList: OA3_1.SchemaObject = {
         }
     }
 };
-const DbMixinFindList: OA3_1.SchemaObject = {
+const DbMixinFindList: OpenAPIV3_1.SchemaObject = {
     type: 'array',
     items: {
         type: 'object'
     }
 };
-const Item: OA3_1.SchemaObject = {
+const Item: OpenAPIV3_1.SchemaObject = {
     type: 'object'
 };
-const Error: OA3_1.SchemaObject = {
+const Error: OpenAPIV3_1.SchemaObject = {
     type: 'object',
     properties: {
         name: {
@@ -59,7 +59,7 @@ const Error: OA3_1.SchemaObject = {
 /**
  * RESPONSES
  */
-const ServerError: OA3_1.ResponseObject = {
+const ServerError: OpenAPIV3_1.ResponseObject = {
     // extends: 'Error',
     description: 'Server errors: 500, 501, 400, 404 and etc...',
     content: {
@@ -82,7 +82,7 @@ const ServerError: OA3_1.ResponseObject = {
     }
 };
 
-const UnauthorizedError: OA3_1.ResponseObject = {
+const UnauthorizedError: OpenAPIV3_1.ResponseObject = {
     description: 'Need auth',
     content: {
         'application/json': {
@@ -104,7 +104,7 @@ const UnauthorizedError: OA3_1.ResponseObject = {
         }
     }
 };
-const ValidationError: OA3_1.ResponseObject = {
+const ValidationError: OpenAPIV3_1.ResponseObject = {
     description: 'Fields invalid',
     content: {
         'application/json': {
@@ -131,7 +131,7 @@ const ValidationError: OA3_1.ResponseObject = {
         }
     }
 };
-const ReturnedData: OA3_1.ResponseObject = {
+const ReturnedData: OpenAPIV3_1.ResponseObject = {
     description: '',
     content: {
         'application/json': {
@@ -151,7 +151,7 @@ const ReturnedData: OA3_1.ResponseObject = {
         }
     }
 };
-const FileNotExist: OA3_1.ResponseObject = {
+const FileNotExist: OpenAPIV3_1.ResponseObject = {
     description: 'File not exist',
     content: {
         'application/json': {
@@ -173,7 +173,7 @@ const FileNotExist: OA3_1.ResponseObject = {
         }
     }
 };
-const FileTooBig: OA3_1.ResponseObject = {
+const FileTooBig: OpenAPIV3_1.ResponseObject = {
     description: 'File too big',
     content: {
         'application/json': {
@@ -210,7 +210,7 @@ export const schemas = {
     Error
 };
 
-export const responses: Record<string, OA3_1.ResponseObject> = {
+export const responses: Record<string, OpenAPIV3_1.ResponseObject> = {
     ServerError,
     UnauthorizedError,
     ValidationError,

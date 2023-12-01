@@ -2,7 +2,7 @@ import { Context, Service, ServiceBroker, ServiceSettingSchema } from 'moleculer
 import { ActionOpenApi, MoleculerWebTypes } from '@spailybot/moleculer-auto-openapi';
 import { IPet, IPetFilters } from './objects/IPet';
 import { generatePets, MoleculerWebMetas } from './objects/commons';
-import { RuleArray, RuleMulti, RuleNumber, RuleObject } from 'fastest-validator';
+import { RuleArray, RuleMulti, RuleNumber, RuleObject, RuleString } from 'fastest-validator';
 import ApiGateway from 'moleculer-web';
 import { EStatus } from './objects/EStatus';
 import { ITag } from './objects/ITag';
@@ -114,6 +114,9 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                         security: [
                             {
                                 myAuth: []
+                            },
+                            {
+                                OAuth2: ['write_pets']
                             }
                         ],
                         response: {
@@ -335,6 +338,9 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                         security: [
                             {
                                 myAuth: []
+                            },
+                            {
+                                OAuth2: ['write_pets']
                             }
                         ],
                         responses: {
@@ -385,6 +391,7 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
 
                         fakePets.push(pet);
 
+                        ctx.meta.$location = `/pets/${pet.id}`;
                         ctx.meta.$statusCode = 201;
 
                         return pet;
@@ -396,6 +403,9 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                         security: [
                             {
                                 myAuth: []
+                            },
+                            {
+                                OAuth2: ['write_pets']
                             }
                         ],
                         responses: {
@@ -423,10 +433,25 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                 },
                 upload_image: {
                     params: {
-                        fieldName: 'string|optional'
+                        fieldName: {
+                            $$oa: {
+                                //here we can set the params is not optional on the API !
+                                optional: false
+                            },
+                            type: 'string',
+                            //need to be optional here ! because params are not sent like normal endpoint
+                            optional: true
+                        } as RuleString
                     },
                     handler: (ctx: Context<NodeJS.ReadableStream, MoleculerWebMetas>) => {
-                        this.logger.info(`Received an image upload ! `, {
+                        // here params need to be validated manually !
+                        if (!ctx.action?.params || !this.broker.validator) {
+                            throw new Error('something is wrong');
+                        }
+
+                        const params = this.broker.validator.compile(ctx.action.params)(ctx.meta.$params);
+
+                        this.logger.info(`Received an image upload with field name ${params.fieldName} ! `, {
                             $multipart: ctx.meta.$multipart,
                             fieldname: ctx.meta.fieldname,
                             filename: ctx.meta.filename,

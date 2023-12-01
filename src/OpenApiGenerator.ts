@@ -1,5 +1,5 @@
-import { OpenAPIV3, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
-import { ValidationRule, ValidationRuleObject, ValidationSchema } from 'fastest-validator';
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import { ValidationRule, ValidationRuleObject, ValidationSchema, ValidationSchemaMetaKeys } from 'fastest-validator';
 import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, TemplateVariables, tSystemParams } from './types/index.js';
 import { getAlphabeticSorter, matchAll, normalizePath } from './commons.js';
 import { LoggerInstance } from 'moleculer';
@@ -19,14 +19,15 @@ import {
 } from './constants.js';
 import { OpenApiMerger } from './OpenApiMerger.js';
 import { OptionalOrFalse, SubOptionalOrFalse } from './types/utils.js';
+import { EOAOperationsExtensionTypes } from './types/internal.js';
 
 type parametersExtracted = {
-    parameters?: Array<OA3_1.ParameterObject>;
-    requestBody?: OA3_1.OperationObject['requestBody'];
+    parameters: Array<OpenAPIV3_1.ParameterObject>;
+    requestBody?: OpenAPIV3_1.OperationObject['requestBody'];
 };
 
 export class OpenApiGenerator {
-    private components: OA3_1.ComponentsObject = {
+    private components: OpenAPIV3_1.ComponentsObject = {
         schemas: {},
         responses: {},
         parameters: {},
@@ -51,15 +52,15 @@ export class OpenApiGenerator {
         this.document = baseDocument;
     }
 
-    public generate(openApiVersion: OpenApiVersionsSupported, aliases: Array<Alias>): OA3_1.Document {
-        const tagsMap: Map<string, OA3_1.TagObject> = new Map<string, OA3_1.TagObject>();
+    public generate(openApiVersion: OpenApiVersionsSupported, aliases: Array<Alias>): OpenAPIV3_1.Document {
+        const tagsMap: Map<string, OpenAPIV3_1.TagObject> = new Map<string, OpenAPIV3_1.TagObject>();
 
         if ((this.document as { openapi?: string }).openapi) {
             this.logger.warn(`setting manually the openapi version is not supported`);
             delete (this.document as { openapi?: string }).openapi;
         }
 
-        const document: OA3_1.Document & { servers: Array<OA3_1.ServerObject> } = {
+        const document: OpenAPIV3_1.Document & { servers: Array<OpenAPIV3_1.ServerObject> } = {
             openapi: `${openApiVersion}.0`,
             ...this.document,
             servers: [],
@@ -85,7 +86,7 @@ export class OpenApiGenerator {
             const { apiService, openApiService } = route;
 
             const openapiPath: string = this.formatParamUrl(normalizePath(alias.fullPath));
-            const currentPath: OA3_1.PathItemObject = document.paths?.[openapiPath] ?? {};
+            const currentPath: OpenAPIV3_1.PathItemObject = document.paths?.[openapiPath] ?? {};
 
             if (alias.isJokerAlias()) {
                 currentPath.description = alias.actionSchema?.openapi?.description;
@@ -96,14 +97,23 @@ export class OpenApiGenerator {
                 const method = pathAction.method;
                 const cacheKeyName = `${openapiPath}.${method}`;
 
-                const currentMethod = currentPath[method];
+                const currentMethod = currentPath[method] as OpenAPIV3_1.OperationObject<EOAOperationsExtensionTypes> | undefined;
                 if (currentMethod) {
                     if (
-                        currentMethod.servers?.length &&
+                        (currentMethod[EOAExtensions.server] || currentMethod.servers?.length) &&
                         alias.route.apiService.settings?.openapi?.server?.url &&
                         !currentMethod.servers?.find((srv) => srv.url === alias.route.apiService.settings?.openapi?.server?.url)
                     ) {
                         const server = alias.route.apiService.settings.openapi.server;
+
+                        if (!currentMethod.servers?.length) {
+                            currentMethod.servers = [];
+                            const alreadySetServer = currentMethod[EOAExtensions.server];
+                            if (alreadySetServer) {
+                                currentMethod.servers.push(alreadySetServer);
+                            }
+                        }
+
                         currentMethod.servers.push(server);
                         this.addServerToDocument(document, server);
                         return;
@@ -125,11 +135,10 @@ export class OpenApiGenerator {
 
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
-                const openApiMethod: OA3_1.OperationObject & { servers: Array<OA3_1.ServerObject> } = {
+                const openApiMethod: OpenAPIV3_1.OperationObject & EOAOperationsExtensionTypes = {
                     summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
                     description: !alias.isJokerAlias() ? openApi?.description : undefined,
                     operationId: openApi?.operationId,
-                    servers: [],
                     externalDocs: openApi?.externalDocs,
                     security: openApi?.security,
                     tags: this.handleTags(document, tagsMap, openApi?.tags),
@@ -140,7 +149,7 @@ export class OpenApiGenerator {
 
                 if (alias.route.apiService.settings?.openapi?.server) {
                     const server = alias.route.apiService.settings.openapi.server;
-                    openApiMethod.servers.push(server);
+                    openApiMethod[EOAExtensions.server] = server;
 
                     this.addServerToDocument(document, server);
                 }
@@ -166,7 +175,7 @@ export class OpenApiGenerator {
                     openApiMethod.summary = summaryTemplate(templateVariables);
                 }
 
-                (currentPath[method] as OA3_1.OperationObject) = openApiMethod;
+                (currentPath[method] as OpenAPIV3_1.OperationObject) = openApiMethod;
             });
 
             document.paths[openapiPath] = currentPath;
@@ -179,7 +188,7 @@ export class OpenApiGenerator {
         return this.removeExtensions(document);
     }
 
-    private addServerToDocument(document: OA3_1.Document, server: OA3_1.ServerObject) {
+    private addServerToDocument(document: OpenAPIV3_1.Document, server: OpenAPIV3_1.ServerObject) {
         if (!document.servers) {
             document.servers = [];
         }
@@ -189,7 +198,7 @@ export class OpenApiGenerator {
         }
     }
 
-    private mergeComponents(c1: OA3_1.ComponentsObject, c2: OA3_1.ComponentsObject): OA3_1.ComponentsObject {
+    private mergeComponents(c1: OpenAPIV3_1.ComponentsObject, c2: OpenAPIV3_1.ComponentsObject): OpenAPIV3_1.ComponentsObject {
         return Object.keys(c2).reduce(
             (acc, key) => {
                 // @ts-ignore
@@ -204,10 +213,120 @@ export class OpenApiGenerator {
                 };
             },
             { ...c1 }
-        ) as OA3_1.ComponentsObject;
+        ) as OpenAPIV3_1.ComponentsObject;
+    }
+
+    private addQueryParameters(
+        parameters: parametersExtracted['parameters'],
+        alias: Alias,
+        method: HTTP_METHODS,
+        actionParams: ValidationSchema
+    ): parametersExtracted['parameters'] {
+        if (alias.openapi?.queryParameters) {
+            return alias.openapi.queryParameters.map((param) => ({ ...param, in: 'query' }));
+        }
+
+        const queryParameters = this.getParameters(method, actionParams, false);
+        Object.entries(queryParameters).forEach(([k, v]) => {
+            const schema = this.converter.getSchemaObjectFromRule(v) as OpenAPIV3.SchemaObject;
+
+            if (!schema) {
+                return undefined;
+            }
+
+            const component = this.getComponent(schema);
+
+            const schemaParameter: OpenAPIV3_1.ParameterObject = {
+                name: k,
+                in: 'query',
+                style: schema.type === 'object' ? 'deepObject' : undefined,
+                explode: schema.type === 'object' ? true : undefined,
+                // required need to be true, or undefined
+                required: component[EOAExtensions.optional] !== true || undefined,
+                schema
+            };
+
+            if (!parameters.some((p) => p.name === k)) {
+                parameters.push(schemaParameter);
+                return;
+            }
+
+            parameters = parameters.map((parameter) => {
+                if (parameter.name !== k) {
+                    return parameter;
+                }
+
+                return {
+                    ...schemaParameter,
+                    in: 'path',
+                    required: true
+                };
+            });
+        });
+        return parameters;
+    }
+
+    private getRequestBody(
+        alias: Alias,
+        method: HTTP_METHODS,
+        actionParams: ValidationSchema,
+        metas: ValidationSchemaMetaKeys,
+        excluded: Array<string> = []
+    ): parametersExtracted['requestBody'] {
+        if (alias.openapi?.requestBody) {
+            return alias.openapi?.requestBody;
+        }
+        if (!alias.action) {
+            return undefined;
+        }
+
+        const openApiMetas = metas?.$$oa ?? {};
+
+        const bodyParameters = this.getParameters(method, actionParams, true);
+        if (Object.keys(bodyParameters).length > 0) {
+            const currentBodyParameters = {
+                ...metas,
+                ...bodyParameters
+            };
+
+            const schema = this.createRequestBodyFromParams(alias.action, currentBodyParameters, excluded);
+
+            const tmpContentTypes: Array<string> = Object.entries(alias.route?.bodyParsers || {})
+                .filter(([, v]) => Boolean(v))
+                .flatMap(([parser]) => BODY_PARSERS_CONTENT_TYPE[parser as keyof typeof BODY_PARSERS_CONTENT_TYPE] ?? []);
+
+            // TODO specify input content type ? + allow to specify one ? allow to force one ?
+            const contentTypes = (tmpContentTypes?.length
+                ? tmpContentTypes
+                : [alias.route?.openApiService?.settings?.defaultResponseContentType]) ?? [DEFAULT_CONTENT_TYPE];
+
+            let required = false;
+            if (this.isReferenceObject(schema)) {
+                const schemaRef = this.getComponentByRef<OpenAPIV3_1.BaseSchemaObject>(schema.$ref);
+
+                if (!schemaRef) {
+                    throw new Error(`fail to get schema from path ${schema.$ref}`);
+                }
+
+                required = (schemaRef.required ?? []).length > 0;
+            }
+
+            return {
+                description: openApiMetas.description,
+                summary: openApiMetas.summary,
+                required,
+                content: Object.fromEntries(
+                    contentTypes.map((contentType) => [contentType, { schema }]) as Array<[string, OpenAPIV3_1.MediaTypeObject]>
+                )
+            };
+        }
     }
 
     private extractParameters(method: HTTP_METHODS, path: string, alias: Alias): parametersExtracted {
+        const actionParams = alias?.actionSchema?.params ?? {};
+        const metas = this.converter.getMetas(actionParams);
+        const isUploadAlias = ['multipart', 'stream'].includes(alias.type ?? '');
+
         const pathParameters = alias.openapi?.pathParameters
             ? alias.openapi.pathParameters.map((param) => ({
                   ...param,
@@ -215,113 +334,21 @@ export class OpenApiGenerator {
               }))
             : this.extractParamsFromUrl(path);
 
+        //force fake method if alias, to force using a maximum of params in the request like a GET
+        const mergedParameters = this.addQueryParameters(pathParameters, alias, isUploadAlias ? HTTP_METHODS.GET : method, actionParams);
+
         const result: parametersExtracted & Required<Pick<parametersExtracted, 'parameters'>> = {
-            parameters: [...pathParameters]
+            parameters: mergedParameters
         };
 
-        const excluded = pathParameters.map((params: OA3_1.ParameterObject) => params.name);
+        const excluded = pathParameters.map((params: OpenAPIV3_1.ParameterObject) => params.name);
 
-        if (['multipart', 'stream'].includes(alias.type ?? '')) {
+        if (isUploadAlias) {
             result.requestBody = alias.openapi?.requestBody ? alias.openapi?.requestBody : this.generateFileUploadBody(alias, excluded);
-
-            return result;
-        } else if (alias.openapi?.queryParameters || alias.openapi?.requestBody || (alias.actionSchema?.params && alias.action)) {
-            const actionParams = alias?.actionSchema?.params ?? {};
-            const metas = this.converter.getMetas(actionParams);
-            const openApiMetas = metas?.$$oa ?? {};
-
-            //query
-            if (!alias.openapi?.queryParameters) {
-                const queryParameters = this.getParameters(method, actionParams, false);
-                Object.entries(queryParameters).forEach(([k, v]) => {
-                    const schema = this.converter.getSchemaObjectFromRule(v) as OpenAPIV3.SchemaObject;
-
-                    if (!schema) {
-                        return undefined;
-                    }
-
-                    const component = this.getComponent(schema);
-
-                    const schemaParameter: OA3_1.ParameterObject = {
-                        name: k,
-                        in: 'query',
-                        style: schema.type === 'object' ? 'deepObject' : undefined,
-                        explode: schema.type === 'object' ? true : undefined,
-                        // required need to be true, or undefined
-                        required: component[EOAExtensions.optional] !== true || undefined,
-                        schema
-                    };
-
-                    if (!excluded.includes(k)) {
-                        result.parameters.push(schemaParameter);
-                        return;
-                    }
-
-                    //handle the case where the pathParameter is defined in params
-                    result.parameters = result.parameters.map((parameter) => {
-                        if (parameter.name !== k) {
-                            return parameter;
-                        }
-
-                        return {
-                            ...schemaParameter,
-                            in: 'path',
-                            required: true
-                        };
-                    });
-                });
-            } else {
-                result.parameters = alias.openapi.queryParameters.map((param) => ({ ...param, in: 'query' }));
-            }
-
-            //body
-            if (!alias.openapi?.requestBody) {
-                if (!alias.action) {
-                    //in theory will never happen
-                    throw new Error('something is wrong');
-                }
-                const bodyParameters = this.getParameters(method, actionParams, true);
-                if (Object.keys(bodyParameters).length > 0) {
-                    const currentBodyParameters = {
-                        ...metas,
-                        ...bodyParameters
-                    };
-
-                    const schema = this.createRequestBodyFromParams(alias.action, currentBodyParameters, excluded);
-
-                    const tmpContentTypes: Array<string> = Object.entries(alias.route?.bodyParsers || {})
-                        .filter(([, v]) => Boolean(v))
-                        .flatMap(([parser]) => BODY_PARSERS_CONTENT_TYPE[parser as keyof typeof BODY_PARSERS_CONTENT_TYPE] ?? []);
-
-                    // TODO specify input content type ? + allow to specify one ? allow to force one ?
-                    const contentTypes = (tmpContentTypes?.length
-                        ? tmpContentTypes
-                        : [alias.route?.openApiService?.settings?.defaultResponseContentType]) ?? [DEFAULT_CONTENT_TYPE];
-
-                    let required = false;
-                    if (this.isReferenceObject(schema)) {
-                        const schemaRef = this.getComponentByRef<OpenAPIV3.BaseSchemaObject>(schema.$ref);
-
-                        if (!schemaRef) {
-                            throw new Error(`fail to get schema from path ${schema.$ref}`);
-                        }
-
-                        required = (schemaRef.required ?? []).length > 0;
-                    }
-
-                    result.requestBody = {
-                        description: openApiMetas.description,
-                        summary: openApiMetas.summary,
-                        required,
-                        content: Object.fromEntries(
-                            contentTypes.map((contentType) => [contentType, { schema }]) as Array<[string, OA3_1.MediaTypeObject]>
-                        )
-                    };
-                }
-            } else {
-                result.requestBody = alias.openapi.requestBody;
-            }
+        } else {
+            result.requestBody = this.getRequestBody(alias, method, actionParams, metas, excluded);
         }
+
         return result;
     }
 
@@ -348,14 +375,14 @@ export class OpenApiGenerator {
      *
      * @link https://moleculer.services/docs/0.14/moleculer-web.html#File-upload-aliases
      */
-    private generateFileUploadBody(alias: Alias, excluded: Array<string>): OA3_1.RequestBodyObject {
+    private generateFileUploadBody(alias: Alias, excluded: Array<string>): OpenAPIV3_1.RequestBodyObject {
         const typeBodyParser = alias.type
             ? BODY_PARSERS_CONTENT_TYPE[alias.type as keyof typeof BODY_PARSERS_CONTENT_TYPE]
             : BODY_PARSERS_CONTENT_TYPE.multipart;
 
-        const schema: OA3_1.MediaTypeObject['schema'] = {};
+        const schema: OpenAPIV3_1.MediaTypeObject['schema'] = {};
 
-        const binarySchema: { type: OA3_1.NonArraySchemaObjectType; format: string } = {
+        const binarySchema: { type: OpenAPIV3_1.NonArraySchemaObjectType; format: string } = {
             type: 'string',
             format: 'binary'
         };
@@ -387,15 +414,14 @@ export class OpenApiGenerator {
                 }
             ];
 
-            // actually, moleculer-web doesn't handle fastest-validator params when uploading a file .
-            // so params will not be checked by the validator ! but can be used to define it
-            if (alias.action && alias.actionSchema?.params) {
-                //merge schema with field "file"
-                const paramsSchema = this.createRequestBodyFromParams(alias.action, alias.actionSchema.params ?? {}, excluded);
-                if (paramsSchema) {
-                    schema.allOf.push(paramsSchema);
-                }
-            }
+            // actually, moleculer-web doesn't handle params when uploading a file . only
+            // if (alias.action && alias.actionSchema?.params) {
+            //     //merge schema with field "file"
+            //     const paramsSchema = this.createRequestBodyFromParams(alias.action, alias.actionSchema.params ?? {}, excluded);
+            //     if (paramsSchema) {
+            //         schema.allOf.push(paramsSchema);
+            //     }
+            // }
         }
 
         return {
@@ -405,14 +431,14 @@ export class OpenApiGenerator {
                     schema
                 }
             }
-        } as OA3_1.RequestBodyObject;
+        } as OpenAPIV3_1.RequestBodyObject;
     }
 
-    private isReferenceObject(component: any): component is OA3_1.ReferenceObject {
-        return !!(component as OA3_1.ReferenceObject)?.$ref;
+    private isReferenceObject(component: any): component is OpenAPIV3_1.ReferenceObject {
+        return !!(component as OpenAPIV3_1.ReferenceObject)?.$ref;
     }
 
-    private getComponent(component: OA3_1.ReferenceObject | OA3_1.SchemaObject): OA3_1.SchemaObject {
+    private getComponent(component: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject): OpenAPIV3_1.SchemaObject {
         if (!this.isReferenceObject(component)) {
             return component;
         }
@@ -447,14 +473,14 @@ export class OpenApiGenerator {
         obj: ValidationSchema,
         exclude: Array<string> = [],
         parentNode: { default?: any } = {}
-    ): OA3_1.SchemaObject | OA3_1.ReferenceObject | undefined {
+    ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject | undefined {
         if (obj.$$root === true) {
             return this.converter.getSchemaObjectFromRootSchema(obj);
         }
 
         const rootRules = this.converter.getSchemaObjectFromSchema(obj);
 
-        const rules: Record<string, OA3_1.SchemaObject> = Object.fromEntries(
+        const rules: Record<string, OpenAPIV3_1.SchemaObject> = Object.fromEntries(
             Object.entries(rootRules).filter(([name, rule]) => !exclude.includes(name) && rule)
         );
 
@@ -466,13 +492,13 @@ export class OpenApiGenerator {
      * @param url
      * @returns {[]}
      */
-    extractParamsFromUrl(url = ''): Array<OA3_1.ParameterObject> {
+    extractParamsFromUrl(url = ''): Array<OpenAPIV3_1.ParameterObject> {
         return [...matchAll(/{(\w+)}/g, url).flat()].map((name) => ({
             name,
             in: 'path',
             required: true,
             schema: { type: 'string' }
-        })) as Array<OA3_1.ParameterObject>;
+        })) as Array<OpenAPIV3_1.ParameterObject>;
     }
     /**
      * Convert moleculer params to openapi definitions(components schemas)
@@ -482,16 +508,16 @@ export class OpenApiGenerator {
      */
     _createSchemaComponentFromObject(
         schemeName: string,
-        obj: Record<string, OA3_1.SchemaObject>,
+        obj: Record<string, OpenAPIV3_1.SchemaObject>,
         customProperties: { default?: any } = {}
-    ): OA3_1.ReferenceObject {
+    ): OpenAPIV3_1.ReferenceObject {
         if (!this.components.schemas) {
             this.components.schemas = {};
         }
 
         const required: Array<string> = [];
         const properties = Object.fromEntries(
-            Object.entries(obj).map(([fieldName, rule]: [string, OA3_1.SchemaObject]) => {
+            Object.entries(obj).map(([fieldName, rule]: [string, OpenAPIV3_1.SchemaObject]) => {
                 const nextSchemeName = `${schemeName}.${fieldName}`;
                 if (rule[EOAExtensions.optional] != true) {
                     required.push(fieldName);
@@ -537,7 +563,10 @@ export class OpenApiGenerator {
         return this.formatParamUrl(url.slice(0, start) + '{' + url.slice(++start, end) + '}' + url.slice(end));
     }
 
-    private _createSchemaPartFromRule(nextSchemeName: string, rule: OA3_1.SchemaObject): OA3_1.SchemaObject | OA3_1.ReferenceObject {
+    private _createSchemaPartFromRule(
+        nextSchemeName: string,
+        rule: OpenAPIV3_1.SchemaObject
+    ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject {
         const systemParams: tSystemParams = this.extractSystemParams(rule as Record<string, unknown>);
 
         rule.description = systemParams.description;
@@ -557,7 +586,7 @@ export class OpenApiGenerator {
         if (rule.type === 'array' && rule.items) {
             return {
                 ...rule,
-                items: this._createSchemaPartFromRule(nextSchemeName, rule.items as OA3_1.SchemaObject)
+                items: this._createSchemaPartFromRule(nextSchemeName, rule.items as OpenAPIV3_1.SchemaObject)
             };
         }
 
@@ -568,7 +597,7 @@ export class OpenApiGenerator {
                     return;
                 }
 
-                rule[property] = (rule[property] as Array<OA3_1.SchemaObject>).map((schema) => {
+                rule[property] = (rule[property] as Array<OpenAPIV3_1.SchemaObject>).map((schema) => {
                     if (schema.type !== 'object') {
                         return schema;
                     }
@@ -612,9 +641,9 @@ export class OpenApiGenerator {
         return obj;
     }
 
-    private cleanComponents(components: SubOptionalOrFalse<OA3_1.ComponentsObject> = {}): OA3_1.ComponentsObject {
+    private cleanComponents(components: SubOptionalOrFalse<OpenAPIV3_1.ComponentsObject> = {}): OpenAPIV3_1.ComponentsObject {
         return Object.fromEntries(
-            Object.entries(components).map(([k, v]: [string, OptionalOrFalse<OA3_1.ComponentsObject>]) => [
+            Object.entries(components).map(([k, v]: [string, OptionalOrFalse<OpenAPIV3_1.ComponentsObject>]) => [
                 k,
                 Object.fromEntries(
                     // @ts-ignore
@@ -626,7 +655,11 @@ export class OpenApiGenerator {
         );
     }
 
-    private handleTags(document: OA3_1.Document, tagsMap: Map<string, OA3_1.TagObject>, tags: Array<string> = []): Array<string> {
+    private handleTags(
+        document: OpenAPIV3_1.Document,
+        tagsMap: Map<string, OpenAPIV3_1.TagObject>,
+        tags: Array<string> = []
+    ): Array<string> {
         const uniqTags = Array.from(new Set(tags));
 
         if (!document.tags) {
@@ -634,7 +667,7 @@ export class OpenApiGenerator {
         }
 
         uniqTags.forEach((tag) => {
-            const tagObject: OA3_1.TagObject | undefined = tagsMap.get(tag);
+            const tagObject: OpenAPIV3_1.TagObject | undefined = tagsMap.get(tag);
             if (!document.tags!.some(({ name }) => name === tag) && tagObject) {
                 document.tags!.push(tagObject);
             }

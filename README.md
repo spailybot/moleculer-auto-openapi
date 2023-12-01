@@ -288,6 +288,7 @@ export default class WebApiService extends Service<ApiSettingsSchemaOpenApi> {
                             'GET /openapi.json': 'openapi.generateDocs',
                             'GET /ui': 'openapi.ui',
                             'GET /assets/:file': 'openapi.assets',
+                            'GET /oauth2-redirect': 'openapi.oauth2Redirect',
                         },
                     },
                     // To use autoAliases, refer to the following configuration
@@ -335,6 +336,7 @@ export default class WebApiService extends Service {
                             'GET /openapi.json': 'openapi.generateDocs',
                             'GET /ui': 'openapi.ui',
                             'GET /assets/:file': 'openapi.assets',
+                            'GET /oauth2-redirect': 'openapi.oauth2Redirect',
                         },
                     },
                     // To use autoAliases, refer to the following configuration

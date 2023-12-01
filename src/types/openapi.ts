@@ -1,4 +1,4 @@
-import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
 import type { AliasRouteSchema } from './moleculer-web.js';
 import type { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
@@ -8,9 +8,9 @@ import type { ActionSchema, ServiceSettingSchema } from 'moleculer';
  * describe an openapi response .
  * by default it use default content type {@link OpenApiMixinSettings.defaultResponseContentType}
  */
-export type actionOpenApiResponse = Omit<OA3_1.ResponseObject, 'content'> & { content?: OA3_1.MediaTypeObject; type?: string };
+export type actionOpenApiResponse = Omit<OpenAPIV3_1.ResponseObject, 'content'> & { content?: OpenAPIV3_1.MediaTypeObject; type?: string };
 
-export type openApiTag = string | OA3_1.TagObject | null;
+export type openApiTag = string | OpenAPIV3_1.TagObject | null;
 
 export interface ActionOpenApi extends commonOpenApi {
     /**
@@ -18,19 +18,19 @@ export interface ActionOpenApi extends commonOpenApi {
      * can be directly a {@link https://spec.openapis.org/oas/v3.1.0#media-type-object | Media Type Object} so it will reuse the default contentType
      * or an object specifying the type and the media
      */
-    response?: OA3_1.MediaTypeObject | actionOpenApiResponse;
+    response?: OpenAPIV3_1.MediaTypeObject | actionOpenApiResponse;
     /**
      * allow to bypass the generation from params . Specify it yourself
      */
-    requestBody?: OA3_1.RequestBodyObject;
+    requestBody?: OpenAPIV3_1.RequestBodyObject;
     /**
      * allow to bypass the query generation from params . Specify it yourself
      */
-    queryParameters?: Array<Omit<OA3_1.ParameterObject, 'in'>>;
+    queryParameters?: Array<Omit<OpenAPIV3_1.ParameterObject, 'in'>>;
     /**
      * allow to bypass the query generation from params . Specify it yourself
      */
-    pathParameters?: Array<Omit<OA3_1.ParameterObject, 'in'>>;
+    pathParameters?: Array<Omit<OpenAPIV3_1.ParameterObject, 'in'>>;
     /**
      * add a description to this operation
      */
@@ -38,7 +38,7 @@ export interface ActionOpenApi extends commonOpenApi {
     /**
      * add an external documentation to this operation
      */
-    externalDocs?: OA3_1.ExternalDocumentationObject;
+    externalDocs?: OpenAPIV3_1.ExternalDocumentationObject;
     /**
      * add an operation id to this operation
      */
@@ -50,7 +50,7 @@ export interface ActionOpenApi extends commonOpenApi {
     /**
      * add a list of servers to this operation
      */
-    servers?: Array<OA3_1.ServerObject>;
+    servers?: Array<OpenAPIV3_1.ServerObject>;
     /**
      * set this endpoint as deprecated
      */
@@ -58,7 +58,7 @@ export interface ActionOpenApi extends commonOpenApi {
     /**
      * specify the security needed to call this endpoint
      */
-    security?: Array<OA3_1.SecurityRequirementObject>;
+    security?: Array<OpenAPIV3_1.SecurityRequirementObject>;
 }
 
 export interface commonOpenApi {
@@ -98,15 +98,15 @@ export interface commonOpenApi {
      *
      */
     tags?: Array<openApiTag>;
-    components?: SubOptionalOrFalse<OA3_1.ComponentsObject>;
+    components?: SubOptionalOrFalse<OpenAPIV3_1.ComponentsObject>;
     /**
      * specify all responses of the operation .
      * Merged by levels
      */
-    responses?: OptionalOrFalse<OA3_1.ResponsesObject>;
+    responses?: OptionalOrFalse<OpenAPIV3_1.ResponsesObject>;
 }
 
-export type openApiServiceOpenApi = Omit<OA3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;
+export type openApiServiceOpenApi = Omit<OpenAPIV3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;
 
 export interface ApiSettingsOpenApi extends commonOpenApi {
     /**
@@ -115,7 +115,7 @@ export interface ApiSettingsOpenApi extends commonOpenApi {
      * This module will not modify the configuration (will not add the Moleculer-web root path).
      * As such, it can accommodate any reverse proxy configuration.
      */
-    server?: OA3_1.ServerObject;
+    server?: OpenAPIV3_1.ServerObject;
 }
 
 export interface ApiSettingsSchemaOpenApi extends ApiSettingsSchema {

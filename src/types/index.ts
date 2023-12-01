@@ -1,5 +1,6 @@
 import type { ApiRouteSchema } from 'moleculer-web';
 import type { openApiServiceOpenApi } from './openapi.js';
+import { SwaggerUiOptions } from './swaggerUiOptions.js';
 
 export type tSystemParams = {
     description?: string;
@@ -59,6 +60,7 @@ export type OpenApiMixinSettings = {
      * @default false
      */
     onlyLocal?: boolean;
+    //TODO replace this paths by "openapiServicePath", holding a rest path, or an object with multiple paths ... if empty, try to resolve it
     /**
      * path to openapi.json / to the openapi generation action
      */
@@ -132,6 +134,11 @@ export type OpenApiMixinSettings = {
      * @default false
      */
     addServiceNameToTags?: boolean;
+
+    /**
+     * set some swaggerUi options
+     */
+    swaggerUiOptions?: SwaggerUiOptions;
 };
 
 export { ApiRouteSchema };
@@ -139,3 +146,5 @@ export { ApiRouteSchema };
 // TODO precise exports
 export * from './openapi.js';
 export * from './converters/index.js';
+
+export { SwaggerUiOptions };

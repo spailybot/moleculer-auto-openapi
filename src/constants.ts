@@ -1,11 +1,28 @@
 export const UNRESOLVED_ACTION_NAME = 'unknown-action';
 
-export enum EOAExtensions {
-    optional = 'x-fastest-optional',
-    description = 'x-fastest-description',
-    summary = 'x-fastest-summary',
-    deprecated = 'x-fastest-deprecated'
-}
+export const EOAOperationsExtensions = {
+    server: 'x-moleculer-web-server'
+} as const;
+
+export const EOASchemaExtensions = {
+    optional: 'x-fastest-optional',
+    description: 'x-fastest-description',
+    summary: 'x-fastest-summary',
+    deprecated: 'x-fastest-deprecated'
+} as const;
+
+export const EOAExtensions = {
+    ...EOAOperationsExtensions,
+    ...EOASchemaExtensions
+} as const;
+
+// export enum EOAExtensions {
+//     optional = 'x-fastest-optional',
+//     description = 'x-fastest-description',
+//     summary = 'x-fastest-summary',
+//     deprecated = 'x-fastest-deprecated',
+//     server = 'x-moleculer-web-server'
+// }
 
 export enum HTTP_METHODS {
     GET = 'get',

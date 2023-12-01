@@ -2,15 +2,20 @@ import type { Context } from 'moleculer';
 import { Service, ServiceBroker } from 'moleculer';
 import type { IncomingRequest, Route } from 'moleculer-web';
 import ApiGateway from 'moleculer-web';
-import type { ApiSettingsSchemaOpenApi, ApiSettingsOpenApi, ApiRouteOpenApi } from '@spailybot/moleculer-auto-openapi';
+import type { ApiRouteOpenApi, ApiSettingsOpenApi, ApiSettingsSchemaOpenApi } from '@spailybot/moleculer-auto-openapi';
 import { OpenAPIV3_1 } from 'openapi-types';
+import * as jose from 'jose';
+import crypto, { KeyObject } from 'crypto';
+import { IUser } from './objects/IUser.js';
 
 interface Meta {
     userAgent?: string | null | undefined;
-    user?: object | null | undefined;
+    user?: IUser | undefined | null;
 }
 
 export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
+    private jwsPublicKey?: KeyObject;
+
     constructor(broker: ServiceBroker) {
         super(broker);
 
@@ -33,6 +38,16 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                         path: '/openapi',
                         whitelist: ['openapi.*'],
                         autoAliases: true
+                    },
+                    {
+                        path: '/oauth2',
+                        whitelist: ['oauth2.*'],
+                        autoAliases: true,
+                        bodyParsers: {
+                            //swagger oauth2 will need urlencoded
+                            urlencoded: true,
+                            json: true
+                        }
                     },
                     {
                         path: '/',
@@ -81,25 +96,8 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                 /**
                  * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
                  */
-                authenticate(ctx: Context, route: Route, req: IncomingRequest): Record<string, unknown> | null {
-                    // Read the token from header
-                    const auth = req.headers.authorization;
-
-                    if (auth && auth.startsWith('Bearer')) {
-                        const token = auth.slice(7);
-
-                        // Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-                        if (token === '123456') {
-                            // Returns the resolved user. It will be set to the `ctx.meta.user`
-                            return { id: 1, name: 'John Doe' };
-                        }
-                        // Invalid token
-                        throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN, null);
-                    } else {
-                        // No token. Throw an error or do nothing if anonymous access is allowed.
-                        // throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
-                        return null;
-                    }
+                authenticate: async (ctx: Context, route: Route, req: IncomingRequest): Promise<Meta['user']> => {
+                    return this.handleAuthentication(req);
                 },
 
                 /**
@@ -112,13 +110,97 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                     const { user } = ctx.meta;
 
                     //check if the action has an openapi.security filled
-                    const openApiSecurityConfigured = typeof req.$action.openapi == 'object' && !!req.$action.openapi?.security?.length;
+                    const openApiSecurityNeeded = typeof req.$action.openapi == 'object' && !!req.$action.openapi?.security;
 
-                    if (!user && openApiSecurityConfigured) {
+                    if (!user && openApiSecurityNeeded) {
                         throw new ApiGateway.Errors.UnAuthorizedError('NO_RIGHTS', null);
                     }
                 }
+            },
+            events: {
+                'oauth2.publicKey.generated': (publicKey: string) => {
+                    this.logger.info('receive a new public key to authenticate');
+                    this.jwsPublicKey = crypto.createPublicKey(publicKey);
+                }
             }
         });
+    }
+
+    private async handleAuthentication(req: IncomingRequest): Promise<Meta['user']> {
+        const securityNeeded = typeof req.$action.openapi == 'object' && req.$action.openapi?.security;
+
+        if (!securityNeeded) {
+            return null;
+        }
+
+        const userAuthentication = await this.handleSecuritys(securityNeeded, req);
+
+        if (!userAuthentication) {
+            throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN, null);
+        }
+
+        return userAuthentication;
+    }
+
+    /**
+     * The `securityRequirement` is designed to handle multiple security combinations.
+     * Security combinations are configurations where at least one configuration needs to be valid for the operation to function.
+     * Each combination is processed in order and stops at the first successful match.
+     */
+    private async handleSecuritys(
+        securityNeeded: Array<OpenAPIV3_1.SecurityRequirementObject>,
+        req: IncomingRequest
+    ): Promise<Meta['user']> {
+        for (const security of securityNeeded) {
+            const resSecurity = await this.handleSecurity(security, req);
+            if (resSecurity) {
+                return resSecurity;
+            }
+        }
+
+        return null;
+    }
+
+    private async handleSecurity(security: OpenAPIV3_1.SecurityRequirementObject, req: IncomingRequest): Promise<Meta['user']> {
+        // Read the token from header
+        const authorization = req.headers.authorization;
+        let user: Meta['user'];
+        const authorizationSplitted = authorization?.split(' ');
+        for (const securityKey in security) {
+            const scopes = security[securityKey];
+
+            switch (securityKey) {
+                case 'myAuth':
+                    if (
+                        !authorizationSplitted ||
+                        authorizationSplitted[0]?.toLowerCase() != 'bearer' ||
+                        authorizationSplitted[1] != '123456'
+                    ) {
+                        return null;
+                    }
+
+                    user = { ...user, user: { id: 1, name: 'John Doe' } };
+                case 'OAuth2':
+                    if (!this.jwsPublicKey || !authorizationSplitted || authorizationSplitted[0]?.toLowerCase() != 'bearer') {
+                        return null;
+                    }
+
+                    const { payload } = await jose.jwtVerify<IUser>(authorizationSplitted[1], this.jwsPublicKey, {
+                        issuer: 'urn:example:issuer',
+                        audience: 'urn:example:audience'
+                    });
+
+                    //check the scopes
+                    const payloadScopes = payload.scope?.split(' ');
+                    const missedScopes = scopes.some((scope) => !payloadScopes?.includes(scope));
+                    if (missedScopes) {
+                        return null;
+                    }
+
+                    return payload;
+                default:
+                    return null;
+            }
+        }
     }
 }

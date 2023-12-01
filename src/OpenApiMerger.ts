@@ -1,6 +1,6 @@
 import { ActionSchema, ServiceSchema } from 'moleculer';
 import { ActionOpenApi, actionOpenApiResponse, ApiSettingsSchemaOpenApi, commonOpenApi, OpenApiMixinSettings } from './types/index.js';
-import { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import { OpenAPIV3_1 } from 'openapi-types';
 import { Route } from './objects/Route.js';
 import { Alias } from './objects/Alias.js';
 import { DEFAULT_CONTENT_TYPE } from './constants.js';
@@ -8,20 +8,23 @@ import { OptionalOrFalse } from './types/utils.js';
 
 type actionOpenApiMerged = Omit<ActionOpenApi, 'tags' | 'responses' | 'response'> & {
     tags: Array<string>;
-    responses: OA3_1.ResponsesObject;
+    responses: OpenAPIV3_1.ResponsesObject;
 };
 
 export class OpenApiMerger {
-    private static generateResponses(actionOpenApi: ActionOpenApi, defaultContentType: string): OptionalOrFalse<OA3_1.ResponsesObject> {
+    private static generateResponses(
+        actionOpenApi: ActionOpenApi,
+        defaultContentType: string
+    ): OptionalOrFalse<OpenAPIV3_1.ResponsesObject> {
         const responses = actionOpenApi.responses ?? {};
 
         if (actionOpenApi.response) {
-            const response: OA3_1.ResponseObject = {
+            const response: OpenAPIV3_1.ResponseObject = {
                 description: ''
             };
             if ((actionOpenApi.response as actionOpenApiResponse).description === undefined) {
                 response.content = {
-                    [defaultContentType]: actionOpenApi.response as OA3_1.MediaTypeObject
+                    [defaultContentType]: actionOpenApi.response as OpenAPIV3_1.MediaTypeObject
                 };
             } else {
                 const actionResponse = actionOpenApi.response as actionOpenApiResponse;
@@ -60,7 +63,7 @@ export class OpenApiMerger {
     }
 
     private static mergeCommons(
-        tagsRegistered: Map<string, OA3_1.TagObject>,
+        tagsRegistered: Map<string, OpenAPIV3_1.TagObject>,
         openApisConfig: Array<commonOpenApi | undefined> = []
     ): actionOpenApiMerged {
         return openApisConfig.reduce((pValue, currentValue) => {
@@ -141,7 +144,7 @@ export class OpenApiMerger {
     }
 
     static merge(
-        tagsMap: Map<string, OA3_1.TagObject>,
+        tagsMap: Map<string, OpenAPIV3_1.TagObject>,
         route: Route,
         alias: Alias,
         action?: ActionSchema,

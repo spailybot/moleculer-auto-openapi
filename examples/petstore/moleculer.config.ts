@@ -1,4 +1,4 @@
-import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
+import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
 
 /**
@@ -187,4 +187,4 @@ const brokerConfig: BrokerOptions = {
 
 };
 
-export = brokerConfig;
+export default brokerConfig;

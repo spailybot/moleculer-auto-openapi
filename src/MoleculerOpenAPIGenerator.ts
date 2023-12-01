@@ -1,6 +1,6 @@
 import type { Context, LoggerInstance, Service, ServiceBroker, ServiceSchema } from 'moleculer';
 import Moleculer from 'moleculer';
-import type { OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { FastestValidatorType, OpenApiMixinSettings } from './types/index.js';
 import { ApiSettingsSchemaOpenApi, ECacheMode } from './types/index.js';
 import type { ApiSettingsSchema } from 'moleculer-web';
@@ -72,7 +72,8 @@ export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings
     returnAssetsAsStream: true,
     defaultResponseContentType: DEFAULT_CONTENT_TYPE,
     multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME,
-    addServiceNameToTags: false
+    addServiceNameToTags: false,
+    swaggerUiOptions: {}
 };
 
 export type OA_GENERATE_DOCS_INPUT = {
@@ -82,7 +83,7 @@ export type OA_GENERATE_DOCS_INPUT = {
      */
     version?: OpenApiVersionsSupported;
 };
-export type OA_GENERATE_DOCS_OUTPUT = OA3_1.Document;
+export type OA_GENERATE_DOCS_OUTPUT = OpenAPIV3_1.Document;
 
 export class MoleculerOpenAPIGenerator {
     private readonly broker: ServiceBroker;

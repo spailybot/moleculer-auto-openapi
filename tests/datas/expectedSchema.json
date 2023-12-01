@@ -17,7 +17,6 @@
     "paths": {
         "/api/find": {
             "get": {
-                "servers": [],
                 "summary": "Some find summary\n            (some.find)",
                 "tags": ["some"],
                 "parameters": [
@@ -158,7 +157,6 @@
         },
         "/api/go": {
             "post": {
-                "servers": [],
                 "summary": "(some.go)",
                 "tags": ["some"],
                 "parameters": [],
@@ -203,7 +201,6 @@
         },
         "/api/login-custom-function": {
             "post": {
-                "servers": [],
                 "summary": "Login\n            (unknown-action)",
                 "tags": ["auth"],
                 "parameters": [],
@@ -238,7 +235,6 @@
         },
         "/api/some-login": {
             "post": {
-                "servers": [],
                 "summary": "(some.login)",
                 "tags": ["some"],
                 "parameters": [],
@@ -270,7 +266,6 @@
         },
         "/api/update/{id}": {
             "patch": {
-                "servers": [],
                 "summary": "Foo bar baz\n            (some.update)",
                 "tags": ["some"],
                 "parameters": [
@@ -311,7 +306,6 @@
         },
         "/api/upload": {
             "put": {
-                "servers": [],
                 "summary": "(some.upload)",
                 "tags": ["some"],
                 "parameters": [],

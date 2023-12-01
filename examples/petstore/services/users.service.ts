@@ -20,7 +20,6 @@ export default class UsersService extends Service {
                             $params: ctx.meta.$params
                         });
 
-
                         return new Promise<void>((resolve, reject) => {
                             const fileStream = ctx.params;
 

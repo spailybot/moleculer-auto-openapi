@@ -27,9 +27,10 @@ import type {
     ValidationSchema,
     ValidationSchemaMetaKeys
 } from 'fastest-validator';
-import type { OpenAPIV3_1 as OA, OpenAPIV3_1 as OA3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { IConverter } from './IConverter.js';
 import { EOAExtensions } from '../constants.js';
+import { EOAExtensionsValues, EOASchemaExtensionsValues, EOASchemaExtensionsValueTypes } from '../types/internal.js';
 
 export class FastestValidatorConverter implements IConverter {
     private readonly mappers: Mappers;
@@ -58,12 +59,12 @@ export class FastestValidatorConverter implements IConverter {
         return Object.fromEntries(Object.entries(schema).filter(([k]) => k.startsWith('$$')));
     }
 
-    public getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OA3_1.SchemaObject> {
+    public getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OpenAPIV3_1.SchemaObject> {
         // if (schema.$$root !== true) {
         return Object.fromEntries(
             Object.entries(this.getValidationRules(schema))
                 .map(([k, v]) => [k, this.getSchemaObjectFromRule(v, undefined, schema)])
-                .filter(Boolean) as Array<[string, OA3_1.SchemaObject]>
+                .filter(Boolean) as Array<[string, OpenAPIV3_1.SchemaObject]>
         );
         // }
 
@@ -72,7 +73,7 @@ export class FastestValidatorConverter implements IConverter {
         // return { [ROOT_PROPERTY]: this.getSchemaObjectFromRule(schema as ValidationRule) };
     }
 
-    public getSchemaObjectFromRootSchema(schema: ValidationSchema): OA3_1.SchemaObject | undefined {
+    public getSchemaObjectFromRootSchema(schema: ValidationSchema): OpenAPIV3_1.SchemaObject | undefined {
         if (schema.$$root !== true) {
             throw new Error('this function only support $$root objects');
         }
@@ -86,7 +87,7 @@ export class FastestValidatorConverter implements IConverter {
         pRule: ValidationRule,
         parentProperties?: Partial<ValidationRuleObject>,
         parentSchema?: ObjectRules
-    ): OA3_1.SchemaObject | undefined {
+    ): OpenAPIV3_1.SchemaObject | undefined {
         if (!this.validator || !this.mappers?.string) {
             throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
         }
@@ -95,7 +96,7 @@ export class FastestValidatorConverter implements IConverter {
         const clonedRule: ValidationRule = typeof pRule === 'object' ? (Array.isArray(pRule) ? [...pRule] : { ...pRule }) : pRule;
 
         //extract known params extensions
-        const extensions: Array<[string, string | boolean | undefined]> =
+        const extensions: Array<[string, EOASchemaExtensionsValueTypes]> =
             Array.isArray(clonedRule) || typeof clonedRule !== 'object' || !clonedRule.$$oa
                 ? []
                 : (
@@ -112,7 +113,7 @@ export class FastestValidatorConverter implements IConverter {
                               property: 'deprecated',
                               extension: EOAExtensions.deprecated
                           }
-                      ] as Array<{ property: keyof FVOARuleMetaKeys; extension: EOAExtensions }>
+                      ] as Array<{ property: keyof FVOARuleMetaKeys; extension: EOAExtensionsValues }>
                   ).map(({ property, extension }) => [extension, clonedRule.$$oa?.[property]]);
 
         const baseRule = this.validator.getRuleFromSchema(clonedRule)?.schema as ValidationRuleObject;
@@ -132,7 +133,8 @@ export class FastestValidatorConverter implements IConverter {
             schema[EOAExtensions.optional] = true;
         }
 
-        extensions.forEach(([k, v]) => {
+        // @ts-ignore
+        extensions.forEach(([k, v]: [EOASchemaExtensionsValues, any]) => {
             schema[k] = v;
         });
 
@@ -149,7 +151,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         array: (rule: RuleArray): ReturnType<Mapper<RuleArray>> => {
             const itemsSchema = (rule.items ? getSchemaObjectFromRule(rule.items, { enum: rule.enum }) : undefined) ?? {};
 
-            const schema: OA.ArraySchemaObject = {
+            const schema: OpenAPIV3_1.ArraySchemaObject = {
                 type: 'array',
                 examples: rule.default ? [rule.default] : undefined,
                 uniqueItems: rule.unique,
@@ -241,7 +243,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 return getSchemaObjectFromRule(parent?.[rule.field]);
             }
 
-            const type: OA.NonArraySchemaObjectType | OA.ArraySchemaObjectType | undefined = rule.strict
+            const type: OpenAPIV3_1.NonArraySchemaObjectType | OpenAPIV3_1.ArraySchemaObjectType | undefined = rule.strict
                 ? getOpenApiType(rule.value)
                 : 'string';
 
@@ -250,7 +252,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 default: rule.default,
                 examples: rule.default ? [rule.default] : undefined,
                 enum: rule.value ? [rule.value] : undefined
-            } as OA.ArraySchemaObject | OA.NonArraySchemaObject;
+            } as OpenAPIV3_1.ArraySchemaObject | OpenAPIV3_1.NonArraySchemaObject;
         },
         forbidden: () => undefined,
         function: () => undefined,
@@ -279,7 +281,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
 
             const schemas = rule.rules
                 .map((rule: ValidationRuleObject | string) => getSchemaObjectFromRule(rule))
-                .filter(Boolean) as Array<OA.SchemaObject>;
+                .filter(Boolean) as Array<OpenAPIV3_1.SchemaObject>;
 
             return {
                 oneOf: schemas,
@@ -289,7 +291,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         },
         number: (rule: RuleNumber): ReturnType<Mapper<RuleNumber>> => {
             const example = rule.default ?? rule.enum?.[0] ?? rule.min ?? rule.max;
-            const schema: OA.NonArraySchemaObject = {
+            const schema: OpenAPIV3_1.NonArraySchemaObject = {
                 type: 'number',
                 default: rule.default,
                 examples: example ? [example] : undefined
@@ -334,7 +336,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         record: (fvRule: RuleRecord) => {
             const valueSchema = fvRule.value ? getSchemaObjectFromRule(fvRule.value) : undefined;
 
-            let schema: OA.SchemaObject = {
+            let schema: OpenAPIV3_1.SchemaObject = {
                 type: 'object',
                 default: fvRule.default,
                 additionalProperties: valueSchema
@@ -343,7 +345,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return schema;
         },
         string: (fvRule: RuleString): ReturnType<Mapper<RuleString>> => {
-            let schema: OA.NonArraySchemaObject = {
+            let schema: OpenAPIV3_1.NonArraySchemaObject = {
                 default: fvRule.default,
                 type: 'string'
             };
@@ -408,11 +410,11 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 type: 'array',
                 default: rule.default,
                 length: 2
-            } as RuleArray) as OA.ArraySchemaObject;
+            } as RuleArray) as OpenAPIV3_1.ArraySchemaObject;
 
             if (rule.items) {
                 baseSchema.items = {
-                    oneOf: rule.items.map((rule) => getSchemaObjectFromRule(rule)).filter(Boolean) as Array<OA.SchemaObject>
+                    oneOf: rule.items.map((rule) => getSchemaObjectFromRule(rule)).filter(Boolean) as Array<OpenAPIV3_1.SchemaObject>
                 };
             }
 
