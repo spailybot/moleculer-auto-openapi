@@ -7,82 +7,86 @@ settings:
 overrides:
   fastest-validator: github:thib3113/fastest-validator#fork
 
-devDependencies:
-  '@jest/globals':
-    specifier: ^29.7.0
-    version: 29.7.0
-  '@seriousme/openapi-schema-validator':
-    specifier: ^2.1.5
-    version: 2.1.5
-  '@tsconfig/node-lts':
-    specifier: ^18.12.5
-    version: 18.12.5
-  '@types/body-parser':
-    specifier: ^1.19.5
-    version: 1.19.5
-  '@types/node':
-    specifier: ^20.9.2
-    version: 20.9.2
-  '@types/qs':
-    specifier: ^6.9.10
-    version: 6.9.10
-  '@types/swagger-ui-dist':
-    specifier: ^3.30.4
-    version: 3.30.4
-  '@typescript-eslint/parser':
-    specifier: 6.10.0
-    version: 6.10.0(eslint@8.53.0)(typescript@5.2.2)
-  axios:
-    specifier: ^1.6.2
-    version: 1.6.2
-  esbuild:
-    specifier: ^0.19.6
-    version: 0.19.6
-  eslint:
-    specifier: 8.53.0
-    version: 8.53.0
-  eslint-config-prettier:
-    specifier: 9.0.0
-    version: 9.0.0(eslint@8.53.0)
-  eslint-plugin-prettier:
-    specifier: 5.0.1
-    version: 5.0.1(eslint-config-prettier@9.0.0)(eslint@8.53.0)(prettier@3.0.3)
-  fastest-validator:
-    specifier: github:thib3113/fastest-validator#fork
-    version: github.com/thib3113/fastest-validator/10891026508e26e67d99f618527db31cd57715b1
-  jest:
-    specifier: ^29.7.0
-    version: 29.7.0(@types/node@20.9.2)
-  jest-sonar:
-    specifier: ^0.2.16
-    version: 0.2.16
-  moleculer:
-    specifier: ^0.14.32
-    version: 0.14.32
-  moleculer-web:
-    specifier: ^0.10.7
-    version: 0.10.7(moleculer@0.14.32)
-  openapi-types:
-    specifier: ^12.1.3
-    version: 12.1.3
-  prettier:
-    specifier: 3.0.3
-    version: 3.0.3
-  rimraf:
-    specifier: ^5.0.5
-    version: 5.0.5
-  swagger-ui-dist:
-    specifier: ^5.10.0
-    version: 5.10.0
-  ts-jest:
-    specifier: ^29.1.1
-    version: 29.1.1(@babel/core@7.23.3)(esbuild@0.19.6)(jest@29.7.0)(typescript@5.2.2)
-  typedoc:
-    specifier: ^0.25.3
-    version: 0.25.3(typescript@5.2.2)
-  typescript:
-    specifier: ^5.2.2
-    version: 5.2.2
+importers:
+
+  .:
+    optionalDependencies:
+      swagger-ui-dist:
+        specifier: ^5
+        version: 5.10.0
+    devDependencies:
+      '@jest/globals':
+        specifier: ^29.7.0
+        version: 29.7.0
+      '@seriousme/openapi-schema-validator':
+        specifier: ^2.1.5
+        version: 2.1.5
+      '@tsconfig/node-lts':
+        specifier: ^18.12.5
+        version: 18.12.5
+      '@types/body-parser':
+        specifier: ^1.19.5
+        version: 1.19.5
+      '@types/node':
+        specifier: ^20.9.2
+        version: 20.9.2
+      '@types/qs':
+        specifier: ^6.9.10
+        version: 6.9.10
+      '@types/swagger-ui-dist':
+        specifier: ^3.30.4
+        version: 3.30.4
+      '@typescript-eslint/parser':
+        specifier: 6.10.0
+        version: 6.10.0(eslint@8.53.0)(typescript@5.2.2)
+      axios:
+        specifier: ^1.6.2
+        version: 1.6.2
+      esbuild:
+        specifier: ^0.19.6
+        version: 0.19.6
+      eslint:
+        specifier: 8.53.0
+        version: 8.53.0
+      eslint-config-prettier:
+        specifier: 9.0.0
+        version: 9.0.0(eslint@8.53.0)
+      eslint-plugin-prettier:
+        specifier: 5.0.1
+        version: 5.0.1(eslint-config-prettier@9.0.0)(eslint@8.53.0)(prettier@3.0.3)
+      fastest-validator:
+        specifier: github:thib3113/fastest-validator#fork
+        version: github.com/thib3113/fastest-validator/10891026508e26e67d99f618527db31cd57715b1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.9.2)
+      jest-sonar:
+        specifier: ^0.2.16
+        version: 0.2.16
+      moleculer:
+        specifier: ^0.14.32
+        version: 0.14.32
+      moleculer-web:
+        specifier: ^0.10.7
+        version: 0.10.7(moleculer@0.14.32)
+      openapi-types:
+        specifier: ^12.1.3
+        version: 12.1.3
+      prettier:
+        specifier: 3.0.3
+        version: 3.0.3
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.5
+      ts-jest:
+        specifier: ^29.1.1
+        version: 29.1.1(@babel/core@7.23.3)(esbuild@0.19.6)(jest@29.7.0)(typescript@5.2.2)
+      typedoc:
+        specifier: ^0.25.3
+        version: 0.25.3(typescript@5.2.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
 
 packages:
 
@@ -3932,7 +3936,9 @@ packages:
 
   /swagger-ui-dist@5.10.0:
     resolution: {integrity: sha512-PBTn5qDOQVtU29hrx74km86SnK3/mFtF3grI98y575y1aRpxiuStRTIvsfXFudPFkLofHU7H9a+fKrP+Oayc3g==}
-    dev: true
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /synckit@0.8.5:
     resolution: {integrity: sha512-L1dapNV6vu2s/4Sputv8xGsCdAVlb5nRDMFU/E27D44l5U6cw1g0dGd45uLc+OXjNMmF4ntiMdCimzcjFKQI8Q==}
