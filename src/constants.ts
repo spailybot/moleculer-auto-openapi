@@ -58,6 +58,7 @@ export const DISALLOWING_BODY_METHODS: Array<HTTP_METHODS> = Object.values(HTTP_
 export const DEFAULT_CONTENT_TYPE = 'application/json';
 export const DEFAULT_MULTI_PART_FIELD_NAME = 'file';
 export const DEFAULT_SUMMARY_TEMPLATE = '{{summary}}\n            ({{action}}){{autoAlias}}';
+export const DEFAULT_SWAGGER_UI_DIST = '//unpkg.com/swagger-ui-dist';
 
 export const OA_NAME_REGEXP = /^[a-zA-Z0-9._-]+$/;
 

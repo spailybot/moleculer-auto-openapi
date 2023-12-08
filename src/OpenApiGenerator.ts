@@ -138,6 +138,7 @@ export class OpenApiGenerator {
                 const openApiMethod: OpenAPIV3_1.OperationObject & EOAOperationsExtensionTypes = {
                     summary: !alias.isJokerAlias() ? openApi?.summary : undefined,
                     description: !alias.isJokerAlias() ? openApi?.description : undefined,
+                    deprecated: openApi.deprecated,
                     operationId: openApi?.operationId,
                     externalDocs: openApi?.externalDocs,
                     security: openApi?.security,

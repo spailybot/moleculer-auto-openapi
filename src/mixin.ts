@@ -4,16 +4,18 @@ import {
     OA_GENERATE_DOCS_INPUT,
     OA_GENERATE_DOCS_OUTPUT
 } from './MoleculerOpenAPIGenerator.js';
-import { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
+import Moleculer, { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
-import { ECacheMode, OpenApiMixinSettings } from './types/index.js';
-import { getAbsoluteFSPath } from 'swagger-ui-dist';
+import { ECacheMode, OpenApiMixinSettings, OpenApiPaths } from './types/index.js';
 import { RuleString } from 'fastest-validator';
-import { DEFAULT_OPENAPI_VERSION } from './constants.js';
+import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js';
 import path from 'path/posix';
+import MoleculerError = Moleculer.Errors.MoleculerError;
+import { Alias } from './objects/Alias.js';
 
-const swaggerUiAssetPath = getAbsoluteFSPath();
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
+
+const openApiPaths: Partial<OpenApiPaths> = {};
 
 export const mixin: ServiceSchema<ServiceSettingSchema> = {
     name: `openapi`,
@@ -26,6 +28,10 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.${generateDocsAction}`, {}, {}, []);
                 await this.broker.cacher.clean(`${cacheKey}*`);
             }
+
+            this.actions.regenerateOpenApiPaths().catch((e) => {
+                this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
+            });
 
             if (cacheMode === ECacheMode.REFRESH) {
                 await this.actions[generateDocsAction]();
@@ -89,7 +95,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     ]
                 }
             },
-            handler(this: openApiService, ctx: Context<{ file: string }, { $responseType: string }>) {
+            async handler(ctx: Context<{ file: string }, { $responseType: string }>) {
                 const { file } = ctx.params;
 
                 if (file.indexOf('.css') > -1) {
@@ -100,7 +106,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     ctx.meta.$responseType = 'application/octet-stream';
                 }
 
-                const filePath = `${swaggerUiAssetPath}/${file}`;
+                const filePath = `${await this.getSwaggerPath()}/${file}`;
                 if (this.settings.returnAssetsAsStream) {
                     return fs.createReadStream(filePath);
                 } else {
@@ -130,143 +136,23 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             async handler(this: openApiService, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
 
-                const assetsURL = this.settings.assetsPath;
+                const paths: OpenApiPaths = await this.getOpenApiPaths();
+
+                const assetsURL = paths.assetsPath;
                 const swaggerSettings = {
                     deepLinking: true,
                     showExtensions: true,
                     layout: 'StandaloneLayout',
-                    ...this.settings.swaggerUiOptions,
-                    url: ctx.params.url || this.settings.schemaPath,
+                    ...this.settings.UIOptions,
+                    url: ctx.params.url || paths.schemaPath,
                     dom_id: '#swagger-ui',
-                    //TODO
-                    oauth2RedirectUrl: path.dirname(this.settings.schemaPath) + '/oauth2-redirect'
+                    oauth2RedirectUrl: paths.oauth2RedirectPath
                 };
 
                 return `
-<html lang="en">
-  <head>
-    <title>OpenAPI UI</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="swagger-ui">
-      <p>Loading...</p>
-      <noscript>If you see json, you need to update your dependencies</noscript>
-    </div>
-
-    <script type="application/json" id="__SWAGGER_SETTINGS__">
-      ${JSON.stringify(swaggerSettings)}
-    </script>
-    <script>
-        var assetsURL = "${assetsURL}"
-
-        var configElement = document.getElementById('__SWAGGER_SETTINGS__');
-        if(!configElement) {
-            throw new Error('fail to load configurations');
-        }
-        var swaggerSettings = JSON.parse(configElement.textContent);
-
-      window.onload = function() {
-        // Create CSS link dynamically
-        var cssLink = document.createElement('link');
-        cssLink.rel = 'stylesheet';
-        cssLink.href = assetsURL + '/swagger-ui.css';
-        document.head.appendChild(cssLink);
-
-        function initSwaggerUIDependentCode() {
-            SwaggerUIBundle(
-                Object.assign(
-                    swaggerSettings,
-                    {
-                        presets: [
-                            SwaggerUIBundle.presets.apis,
-                            SwaggerUIStandalonePreset,
-                        ],
-                        plugins: [
-                            SwaggerUIBundle.plugins.DownloadUrl,
-                        ]
-                    }
-                )
-            )
-        }
-
-        var scripts = [
-          assetsURL + '/swagger-ui-bundle.js',
-          assetsURL + '/swagger-ui-standalone-preset.js'
-        ];
-
-        var scriptsLoaded = 0;
-        // Function to load script
-        function loadScript(script, callback) {
-          var scriptElement = document.createElement('script');
-          scriptElement.src = script;
-          scriptElement.onload = () => {
-            scriptsLoaded++;
-
-            // Verify if all scripts have been loaded
-            if (scriptsLoaded === scripts.length) {
-              callback();
-            }
-          };
-          document.body.appendChild(scriptElement);
-        }
-
-        // Load all scripts
-        for (var i = 0; i < scripts.length; i++) {
-          loadScript(scripts[i], initSwaggerUIDependentCode);
-        }
-      };
-    </script>
-
-  </body>
-</html>`;
-                //           return `
-                // <html lang="en">
-                //   <head>
-                //      <title>OpenAPI UI</title>
-                //      <link rel="stylesheet" href="${this.settings.assetsPath}/swagger-ui.css"/>
-                //      <style>
-                //          body {
-                //           margin: 0;
-                //          }
-                //       </style>
-                //   </head>
-                //   <body>
-                //
-                //     <div id="swagger-ui">
-                //       <p>Loading...</p>
-                //       <noscript>If you see json, you need to update your dependencies</noscript>
-                //     </div>
-                //
-                //     <script src="${this.settings.assetsPath}/swagger-ui-bundle.js"></script>
-                //     <script src="${this.settings.assetsPath}/swagger-ui-standalone-preset.js"></script>
-                //     <script>
-                //       window.onload = function() {
-                //        SwaggerUIBundle({
-                //          url: "${ctx.params.url || this.settings.schemaPath}",
-                //          dom_id: '#swagger-ui',
-                //          oauth2RedirectUrl: "${this.settings.assetsPath}/oauth2-redirect.html",
-                //          deepLinking: true,
-                //          showExtensions: true,
-                //          presets: [
-                //            SwaggerUIBundle.presets.apis,
-                //            SwaggerUIStandalonePreset,
-                //          ],
-                //          plugins: [
-                //            SwaggerUIBundle.plugins.DownloadUrl
-                //          ],
-                //          layout: "StandaloneLayout",
-                //        });
-                //       }
-                //     </script>
-                //
-                //   </body>
-                // </html>`;
+<html lang="en"><head><title>OpenAPI UI</title><style>body{ margin: 0;} </style></head><body><div id="swagger-ui"><p>Loading...</p><noscript>If you see json, you need to update your dependencies</noscript></div><script type="application/json" id="__SWAGGER_SETTINGS__">${JSON.stringify(
+                    swaggerSettings
+                )} </script><script>var assetsURL="${assetsURL}"; var configElement=document.getElementById('__SWAGGER_SETTINGS__'); if(!configElement){ throw new Error('fail to load configurations');} var swaggerSettings=JSON.parse(configElement.textContent); window.onload=function(){var cssLink=document.createElement('link'); cssLink.rel='stylesheet'; cssLink.href=assetsURL + '/swagger-ui.css'; document.head.appendChild(cssLink); function initSwaggerUIDependentCode(){ SwaggerUIBundle( Object.assign( swaggerSettings, { presets: [ SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset, ], plugins: [ SwaggerUIBundle.plugins.DownloadUrl, ]} ) )} var scripts=[ assetsURL + '/swagger-ui-bundle.js', assetsURL + '/swagger-ui-standalone-preset.js' ]; var scriptsLoaded=0; function loadScript(script, callback){ var scriptElement=document.createElement('script'); scriptElement.src=script; scriptElement.onload=()=>{ scriptsLoaded++; if (scriptsLoaded===scripts.length){ callback();}}; document.body.appendChild(scriptElement);} for (var i=0; i < scripts.length; i++){ loadScript(scripts[i], initSwaggerUIDependentCode);}}; </script></body></html>`;
             }
         },
         oauth2Redirect: {
@@ -280,13 +166,86 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 tags: ['OpenApi']
             },
             cache: false,
-            handler: (ctx) => {
+            async handler(ctx) {
+                if (!this) {
+                    throw new MoleculerError('unknown error');
+                }
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
-                return fs.promises.readFile(`${swaggerUiAssetPath}/oauth2-redirect.html`);
+                return fs.promises.readFile(`${await this?.getSwaggerPath()}/oauth2-redirect.html`);
+            }
+        },
+        regenerateOpenApiPaths: {
+            visibility: 'private',
+            async handler(this: openApiService, ctx: Context) {
+                const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
+                    (alias) => alias.service?.name === this.name
+                );
+
+                openApiAliases.forEach((alias) => {
+                    if (alias.action === `${this.name}.ui`) {
+                        openApiPaths.uiPath = alias.fullPath;
+                    }
+                    if (alias.action === `${this.name}.assets`) {
+                        openApiPaths.assetsPath = alias.fullPath;
+                    }
+                    if (alias.action === `${this.name}.oauth2Redirect`) {
+                        openApiPaths.oauth2RedirectPath = alias.fullPath;
+                    }
+                    if (alias.action === `${this.name}.generateDocs`) {
+                        openApiPaths.schemaPath = alias.fullPath;
+                    }
+                });
+
+                //call the getter to throw an error if a path is not set
+                this.getOpenApiPaths();
             }
         }
     },
     methods: {
+        getOpenApiPaths(this: openApiService): OpenApiPaths {
+            if (this.settings.schemaPath) {
+                this.logger.warn(`settings.schemaPath is deprecated, use settings.openApiPaths.schemaPath instead`);
+            }
+            if (this.settings.assetsPath) {
+                this.logger.warn(`settings.assetsPath is deprecated, use settings.openApiPaths.assetsPath instead`);
+            }
+
+            if (typeof this.settings.openApiPaths === 'string') {
+                this.settings.openApiPaths = {
+                    schemaPath: path.join(this.settings.openApiPaths, 'openapi.json'),
+                    uiPath: path.join(this.settings.openApiPaths, 'ui'),
+                    oauth2RedirectPath: path.join(this.settings.openApiPaths, 'oauth2-redirect'),
+                    assetsPath: path.join(this.settings.openApiPaths, 'assets')
+                };
+            }
+
+            const paths: Partial<OpenApiPaths> = {
+                assetsPath:
+                    this.settings.assetsPath ??
+                    this.settings.openApiPaths?.assetsPath ??
+                    openApiPaths.assetsPath ??
+                    DEFAULT_SWAGGER_UI_DIST,
+                schemaPath: this.settings.schemaPath ?? this.settings.openApiPaths?.schemaPath ?? openApiPaths.schemaPath,
+                uiPath: this.settings.openApiPaths?.uiPath ?? openApiPaths.uiPath,
+                oauth2RedirectPath: this.settings.openApiPaths?.oauth2RedirectPath ?? openApiPaths.oauth2RedirectPath
+            };
+
+            (['assetsPath', 'schemaPath', 'uiPath', 'oauth2RedirectPath'] as Array<keyof OpenApiPaths>).forEach((k) => {
+                if (!paths[k]) {
+                    throw new MoleculerError(`fail to get path for settings ${k}`);
+                }
+            });
+
+            return paths as OpenApiPaths;
+        },
+        getSwaggerPath: async (): Promise<string> => {
+            try {
+                const swaggerUi = await import('swagger-ui-dist');
+                return swaggerUi.getAbsoluteFSPath();
+            } catch (e) {
+                throw new MoleculerError('fail to load swagger ui');
+            }
+        },
         getGenerator() {
             if (!this.generator) {
                 throw new Error('no generator, bad initialization');

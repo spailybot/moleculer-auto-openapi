@@ -54,13 +54,7 @@ export enum ECacheMode {
     TIMEOUT = 'timeout'
 }
 
-export type OpenApiMixinSettings = {
-    /**
-     * map only local services (on the same node) ?
-     * @default false
-     */
-    onlyLocal?: boolean;
-    //TODO replace this paths by "openapiServicePath", holding a rest path, or an object with multiple paths ... if empty, try to resolve it
+export interface OpenApiPaths {
     /**
      * path to openapi.json / to the openapi generation action
      */
@@ -70,13 +64,44 @@ export type OpenApiMixinSettings = {
      *
      * You can use unpkg CDN by setting //unpkg.com/swagger-ui-dist[@<version>] :
      *
+     * @default //unpkg.com/swagger-ui-dist (if openApiPaths is an object)
+     */
+    assetsPath: string;
+    /**
+     * path to serve the swagger UI
+     */
+    uiPath: string;
+    /**
+     * path to oauth2Redirect or to a custom oauth2Redirect
+     */
+    oauth2RedirectPath: string;
+}
+
+export type OpenApiMixinSettings = {
+    /**
+     * map only local services (on the same node) ?
+     * @default false
+     */
+    onlyLocal?: boolean;
+    openApiPaths?: string | Partial<OpenApiPaths>;
+    /**
+     * path to openapi.json / to the openapi generation action
+     * @deprecated
+     */
+    schemaPath?: string;
+    /**
+     * path you configured to point to open api assets
+     *
+     * You can use unpkg CDN by setting //unpkg.com/swagger-ui-dist[@<version>] :
+     *
      * @default //unpkg.com/swagger-ui-dist
+     * @deprecated
      */
     assetsPath?: string;
     /**
      * Configure the base of the openApi Document . {@link https://spec.openapis.org/oas/v3.1.0#openapi-object | documentation}
      */
-    openapi: openApiServiceOpenApi;
+    openapi?: openApiServiceOpenApi;
     /**
      * allow to skip unresolved actions
      *
@@ -138,7 +163,7 @@ export type OpenApiMixinSettings = {
     /**
      * set some swaggerUi options
      */
-    swaggerUiOptions?: SwaggerUiOptions;
+    UIOptions?: SwaggerUiOptions;
 };
 
 export { ApiRouteSchema };

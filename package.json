@@ -89,7 +89,9 @@
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
-    "moleculer": "^0.14.31",
+    "moleculer": "^0.14.31"
+  },
+  "optionalDependencies": {
     "swagger-ui-dist": "^5"
   },
   "engines": {

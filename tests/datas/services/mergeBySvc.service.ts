@@ -1,11 +1,11 @@
 import { ServiceSchema } from 'moleculer';
 
-export const MergeService: ServiceSchema = {
-    name: 'merge',
+export const MergeBySvcService: ServiceSchema = {
+    name: 'merge-service',
     //version: 2,
 
     settings: {
-        rest: 'merge/',
+        rest: 'mergeByService/',
         openapi: {
             components: {
                 schemas: {
@@ -24,7 +24,8 @@ export const MergeService: ServiceSchema = {
                 '403': {
                     description: 'service response'
                 }
-            }
+            },
+            deprecated: true
         }
     },
 
@@ -54,22 +55,6 @@ export const MergeService: ServiceSchema = {
                 }
             },
             handler(ctx) {}
-        },
-        mergeNoResponse: {
-            openapi: {
-                responses: {
-                    //remove route and alias responses . But keep the service one
-                    '401': false,
-                    '402': false
-                }
-            },
-            handler: () => {}
-        },
-        mergeByAction: {
-            openapi: {
-                deprecated: true
-            },
-            handler: () => {}
         }
     },
 

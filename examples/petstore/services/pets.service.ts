@@ -6,7 +6,6 @@ import { RuleArray, RuleMulti, RuleNumber, RuleObject, RuleString } from 'fastes
 import ApiGateway from 'moleculer-web';
 import { EStatus } from './objects/EStatus';
 import { ITag } from './objects/ITag';
-import { OpenAPIV3_1 } from 'openapi-types';
 
 let fakePets: Array<IPet> = generatePets(5);
 
@@ -332,6 +331,47 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                         };
                     }
                 },
+                findByTags: {
+                    rest: 'GET /findByTags',
+                    openapi: {
+                        summary: 'Pet Listing',
+                        description: 'Allow to list all the pets',
+                        deprecated: true,
+                        response: {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    data: {
+                                        type: 'array',
+                                        items: {
+                                            $ref: '#/components/schemas/Pet'
+                                        }
+                                    },
+                                    current_page: {
+                                        type: 'number'
+                                    },
+                                    per_page: {
+                                        type: 'number'
+                                    },
+                                    total_pages: {
+                                        type: 'number'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    params: {
+                        tags: {
+                            type: 'array',
+                            items: 'string'
+                        } as RuleArray
+                    },
+                    handler: (ctx: Context<{ tags?: Array<string> }>) => {
+                        const { tags } = ctx.params;
+
+                        return ctx.call('pets.list', { filters: { tags } });
+                    }
+                },
                 create: {
                     rest: 'POST /',
                     openapi: {
@@ -343,18 +383,17 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                                 OAuth2: ['write_pets']
                             }
                         ],
-                        responses: {
-                            '200': false,
-                            '201': {
-                                description: 'created',
-                                content: {
-                                    'application/json': {
-                                        schema: {
-                                            $ref: '#/components/schemas/Pet'
-                                        }
-                                    }
+                        response: {
+                            statusCode: 201,
+                            description: 'created',
+                            content: {
+                                schema: {
+                                    $ref: '#/components/schemas/Pet'
                                 }
-                            } as OpenAPIV3_1.ResponseObject
+                            }
+                        },
+                        responses: {
+                            '200': false
                         }
                     } as ActionOpenApi,
                     params: {

@@ -45,16 +45,25 @@ export class AliasCreator {
         if (isAliasRouteSchema(infos)) {
             return infos;
         } else if (Array.isArray(infos)) {
-            const cleansInfos = infos.map((info) => this.extractAliasSubInformations(info)).filter(Boolean);
-            const tmpAction = cleansInfos[cleansInfos.length - 1];
+            const tmpAction: string | undefined = infos.reduce((info, currentInfo) => {
+                /**
+                 * do same logic as moleculer-web
+                 * https://github.com/moleculerjs/moleculer-web/blob/master/src/alias.js#L63
+                 * loop on each item of the array, use string as a configuration, replace previous one
+                 */
+                if (!currentInfo || typeof currentInfo != 'string') {
+                    return info;
+                }
 
-            if (!cleansInfos?.length && this.skipUnresolvedActions) {
+                return currentInfo;
+            }, undefined);
+
+            if (!tmpAction && this.skipUnresolvedActions) {
                 return;
             }
 
             return {
-                ...tmpAction,
-                action: tmpAction?.action
+                action: tmpAction
             };
         } else if (typeof infos !== 'string') {
             if (this.skipUnresolvedActions) {

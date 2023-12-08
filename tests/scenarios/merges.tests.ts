@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { ServiceBroker } from 'moleculer';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 import { routes } from '../datas/routes.js';
@@ -37,7 +37,7 @@ describe('merge tests', () => {
             });
 
             beforeAll(async () => {
-                await setupBroker(broker, undefined, [routes.merge]);
+                await setupBroker(broker, undefined, [routes.merge, routes.mergeRoute]);
             });
 
             afterAll(() => broker.stop());
@@ -102,6 +102,24 @@ describe('merge tests', () => {
 
                     expect(responses['401']).toBeUndefined();
                     expect(responses['402']).toBeUndefined();
+                });
+            });
+            describe('test deprecated', () => {
+                let schema: OA_GENERATE_DOCS_OUTPUT;
+                beforeEach(async () => {
+                    schema = await broker.call<OA_GENERATE_DOCS_OUTPUT, OA_GENERATE_DOCS_INPUT>(`${OpenapiService.name}.generateDocs`, {
+                        version: '3.1'
+                    });
+                });
+
+                it('should not set deprecated by default', async () => {
+                    expect(schema.paths?.['/api/merge/control']?.get).toBeDefined();
+                    expect(schema.paths?.['/api/merge/control']?.get?.deprecated).not.toBeDefined();
+                });
+
+                it.each(['mergeAction', 'mergeAlias', 'mergeService'])('should merge deprecated in path : %s', async (path) => {
+                    expect(schema.paths?.[`/api/merge/${path}`]?.get).toBeDefined();
+                    expect(schema.paths?.[`/api/merge/${path}`]?.get?.deprecated).toBeTruthy();
                 });
             });
         });

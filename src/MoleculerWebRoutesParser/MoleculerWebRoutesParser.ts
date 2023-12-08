@@ -20,8 +20,6 @@ export class MoleculerWebRoutesParser {
         const actionsMap = new Map<string, { service: ServiceSchema; action: ActionSchema }>();
         const routes = new Map<string, Route>();
 
-        // TODO map the current OA server (moleculer service), to route, to add the "server" field
-
         services.forEach((svc) =>
             Object.values(svc.actions ?? {}).forEach((action) => {
                 if (typeof action === 'boolean' || typeof action === 'function' || !action.name) {

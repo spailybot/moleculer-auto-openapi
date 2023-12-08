@@ -23,7 +23,7 @@ describe('AliasCreator', () => {
             path: 'testPath'
         },
         // 'GET custom': fakeFn,
-        'GET /middleware': [fakeFn, fakeFn, 'test.greeter']
+        'GET /middleware': [fakeFn, fakeFn, 'test.greeter1', 'test.greeter', fakeFn]
         // 'GET /wrong-middleware': [fakeFn],
         // 'REST posts': 'posts'
     } as const;
@@ -85,7 +85,7 @@ describe('AliasCreator', () => {
                 path: '/custom'
             }
         ],
-        //take information from last middleware
+        //take information from last string
         'GET /middleware': [
             {
                 action: 'test.greeter',

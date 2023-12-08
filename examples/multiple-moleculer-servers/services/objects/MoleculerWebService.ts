@@ -20,7 +20,7 @@ export default class MoleculerWebService extends Service<IWebServiceSettings> {
     ) {
         super(broker);
 
-        if(!schemaMod.settings?.port || ! schemaMod.name) {
+        if (!schemaMod.settings?.port || !schemaMod.name) {
             throw new Error('bad initialization');
         }
 
@@ -33,8 +33,8 @@ export default class MoleculerWebService extends Service<IWebServiceSettings> {
                     folder: 'public'
                 },
                 cors: {
-                    methods: ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"],
-                    origin: "*",
+                    methods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
+                    origin: '*'
                 },
                 openapi: {
                     server: {
@@ -63,8 +63,7 @@ export default class MoleculerWebService extends Service<IWebServiceSettings> {
                             json: true,
                             text: true
                         }
-                    },
-
+                    }
                 ]
             }
         });

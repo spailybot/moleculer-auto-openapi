@@ -378,11 +378,8 @@ Remember, the journey of mastering any tool involves experimentation, learning f
   - allow to define a ref, and use the ref instead of creating a new one
   - allow to define a "to ref", and create the ref with this name
   - allow to define examples
-  - allow to force the optional / required (edge case / multipart)
 - investigate the needs of requestBodyAndResponseBodyAreSameOnMethods / requestBodyAndResponseBodyAreSameDescription
 - support multiple openapi version on generator ? (will need converters)
-- doesn't support named action ... moleculer-web support it ?
-- allow to specify response code
 
 ## 📄 License
 

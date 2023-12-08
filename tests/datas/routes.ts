@@ -107,10 +107,28 @@ export const routes = {
                     next();
                 }
             ],
+            // encloseWithMiddlewares
+            encloseWithMiddlewares: [
+                function (req, res, next) {
+                    // @ts-ignore
+                    this.logger.info('Middleware 1');
+                    // @ts-ignore
+                    next();
+                },
+                'some.go',
+                function (req, res, next) {
+                    // @ts-ignore
+                    this.logger.info('Middleware 2');
+                    // @ts-ignore
+                    next();
+                }
+            ],
             // REST
             'REST posts': 'posts',
             // invalid action name
             invalidName: '$node.health',
+            //an action with a name
+            named: 'edge.named',
             // joker method
             health: 'api.health',
             // function
@@ -221,6 +239,62 @@ export const routes = {
                     description: 'route response'
                 }
             }
+        },
+        aliases: {
+            'GET control': {
+                action: 'merge.action'
+            },
+            'GET merge': {
+                openapi: {
+                    components: {
+                        schemas: {
+                            AliasLevelComponent: {
+                                type: 'object',
+                                properties: {
+                                    _id: {
+                                        type: 'integer',
+                                        format: 'int64'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        '402': {
+                            description: 'alias response'
+                        }
+                    }
+                },
+                action: 'merge.action'
+            } as AliasRouteSchemaOpenApi,
+            'GET mergeAlias': {
+                openapi: {
+                    deprecated: true
+                },
+                action: 'merge.action'
+            } as AliasRouteSchemaOpenApi,
+            'GET mergeService': {
+                action: 'merge-service.action'
+            } as AliasRouteSchemaOpenApi,
+            'GET mergeAction': {
+                action: 'merge.mergeByAction'
+            } as AliasRouteSchemaOpenApi,
+            'GET mergeNoResponse': {
+                openapi: {
+                    responses: {
+                        '402': {
+                            description: 'alias response'
+                        }
+                    }
+                },
+                action: 'merge.mergeNoResponse'
+            } as AliasRouteSchemaOpenApi
+        }
+    } as ApiRouteSchema,
+    mergeRoute: {
+        path: '/mergeRoute',
+        openapi: {
+            deprecated: true
         },
         aliases: {
             'GET merge': {

@@ -14,6 +14,8 @@ import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index
 import { MergeService } from '../datas/services/merge.service.js';
 import { FalseService } from '../datas/services/false.service.js';
 import { OpenApiVersionsSupported } from '../../src/constants.js';
+import { EdgeService } from '../datas/services/edge.service.js';
+import { MergeBySvcService } from '../datas/services/mergeBySvc.service.js';
 
 const testServices = [
     testMappersService,
@@ -24,7 +26,9 @@ const testServices = [
     PostsService,
     testOpenApiService,
     MergeService,
-    FalseService
+    MergeBySvcService,
+    FalseService,
+    EdgeService
 ] as unknown as Array<Service>;
 
 export const setupBroker = async (

@@ -8,7 +8,22 @@ import type { ActionSchema, ServiceSettingSchema } from 'moleculer';
  * describe an openapi response .
  * by default it use default content type {@link OpenApiMixinSettings.defaultResponseContentType}
  */
-export type actionOpenApiResponse = Omit<OpenAPIV3_1.ResponseObject, 'content'> & { content?: OpenAPIV3_1.MediaTypeObject; type?: string };
+export type actionOpenApiResponse = Omit<OpenAPIV3_1.ResponseObject, 'content'> & {
+    /**
+     * the content of the response
+     */
+    content?: OpenAPIV3_1.MediaTypeObject;
+    /**
+     * an override of the content-type
+     */
+    type?: string;
+    /**
+     * an override of the default status code
+     *
+     * @default 200
+     */
+    statusCode?: number;
+};
 
 export type openApiTag = string | OpenAPIV3_1.TagObject | null;
 
@@ -51,10 +66,6 @@ export interface ActionOpenApi extends commonOpenApi {
      * add a list of servers to this operation
      */
     servers?: Array<OpenAPIV3_1.ServerObject>;
-    /**
-     * set this endpoint as deprecated
-     */
-    deprecated?: boolean;
     /**
      * specify the security needed to call this endpoint
      */
@@ -104,6 +115,10 @@ export interface commonOpenApi {
      * Merged by levels
      */
     responses?: OptionalOrFalse<OpenAPIV3_1.ResponsesObject>;
+    /**
+     * set this endpoint as deprecated
+     */
+    deprecated?: boolean;
 }
 
 export type openApiServiceOpenApi = Omit<OpenAPIV3_1.Document, 'openapi' | keyof commonOpenApi> & commonOpenApi;

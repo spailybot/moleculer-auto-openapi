@@ -12,9 +12,9 @@ import { OpenApiGenerator } from './OpenApiGenerator.js';
 import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, OpenApiVersionsSupported } from './constants.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 
-export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings>> & Partial<OpenApiMixinSettings> = {
+export const defaultSettings: Required<ExcludeRequiredProps<Omit<OpenApiMixinSettings, 'assetsPath' | 'schemaPath' | 'openApiPaths'>>> &
+    Partial<OpenApiMixinSettings> = {
     onlyLocal: false, // build schema from only local services
-    assetsPath: '//unpkg.com/swagger-ui-dist',
     // commonPathItemObjectResponses: {
     //     200: {
     //         $ref: '#/components/responses/ReturnedData'
@@ -73,7 +73,7 @@ export const defaultSettings: Required<ExcludeRequiredProps<OpenApiMixinSettings
     defaultResponseContentType: DEFAULT_CONTENT_TYPE,
     multiPartFileFieldName: DEFAULT_MULTI_PART_FIELD_NAME,
     addServiceNameToTags: false,
-    swaggerUiOptions: {}
+    UIOptions: {}
 };
 
 export type OA_GENERATE_DOCS_INPUT = {
@@ -115,12 +115,12 @@ export class MoleculerOpenAPIGenerator {
         });
     }
 
-    private async getAliases(ctx: Context, services: Array<ServiceSchema<ApiSettingsSchema>>): Promise<Array<Alias>> {
-        this.logger.debug(`getAliases()`);
+    private async mapAliases(ctx: Context, services: Array<ServiceSchema<ApiSettingsSchema>>): Promise<Array<Alias>> {
+        this.logger.debug(`mapAliases()`);
         //only moleculer-web service
         const apiServices = services.filter((service) => service?.settings?.routes) as Array<ServiceSchema<ApiSettingsSchemaOpenApi>>;
 
-        this.logger.debug(`getAliases() : ${apiServices?.length ?? 0} moleculer-web services found`);
+        this.logger.debug(`mapAliases() : ${apiServices?.length ?? 0} moleculer-web services found`);
         if (!apiServices?.length) {
             throw new MoleculerError('fail to identify service hosting moleculer-web');
         }
@@ -134,14 +134,18 @@ export class MoleculerOpenAPIGenerator {
         ).flat();
     }
 
+    public async getAliases(ctx: Context): Promise<Array<Alias>> {
+        const services = await this.fetchServicesWithActions(ctx);
+
+        return this.mapAliases(ctx, services);
+    }
+
     public async generateSchema(ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
         //TODO allow to pass version from ctx ?
         // const { version } = ctx.params;
         const version = '3.1';
 
-        const services = await this.fetchServicesWithActions(ctx);
-
-        const aliases = await this.getAliases(ctx, services);
+        const aliases = await this.getAliases(ctx);
 
         return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(
             version,

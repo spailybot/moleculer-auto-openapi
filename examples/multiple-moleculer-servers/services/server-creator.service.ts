@@ -11,12 +11,13 @@ export default class ServerCreatorService extends Service {
         this.parseServiceSchema({
             name: 'server-creator',
             settings: {
-              rest: '/'
+                rest: '/'
             },
             actions: {
                 create: {
                     openapi: {
-                        description: 'call this action, wait a little, and ask swagger to update the openapi (or refresh) . And you will see a new server available'
+                        description:
+                            'call this action, wait a little, and ask swagger to update the openapi (or refresh) . And you will see a new server available'
                     },
                     rest: 'POST /create',
                     params: {
@@ -80,7 +81,7 @@ export default class ServerCreatorService extends Service {
                             }
                         });
 
-                        return {}
+                        return {};
                     }
                 }
             },

@@ -18,6 +18,8 @@ export class OpenApiMerger {
     ): OptionalOrFalse<OpenAPIV3_1.ResponsesObject> {
         const responses = actionOpenApi.responses ?? {};
 
+        let responseCode = '200';
+
         if (actionOpenApi.response) {
             const response: OpenAPIV3_1.ResponseObject = {
                 description: ''
@@ -31,6 +33,7 @@ export class OpenApiMerger {
                 response.description = actionResponse.description;
                 response.headers = actionResponse.headers;
                 response.links = actionResponse.links;
+                responseCode = actionResponse.statusCode?.toString() ?? responseCode;
                 if (actionResponse.content) {
                     response.content = {
                         [actionResponse.type ?? defaultContentType]: actionResponse.content
@@ -38,7 +41,7 @@ export class OpenApiMerger {
                 }
             }
 
-            responses['200'] = response;
+            responses[responseCode] = response;
         }
 
         return responses;
@@ -131,7 +134,7 @@ export class OpenApiMerger {
                 }
 
                 // false = remove previous configuration
-                if (currentValue[k] === false) {
+                if (currentValue[k] === false && typeof previousValue[k] !== 'boolean') {
                     delete previousValue[k];
                     return;
                 }
