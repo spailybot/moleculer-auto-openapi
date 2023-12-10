@@ -6,8 +6,8 @@
 
 import { OPENAPI_VERSIONS_SUPPORTED } from './constants.js';
 import { mixin } from './mixin.js';
-import type { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from './MoleculerOpenAPIGenerator.js';
 import type * as MoleculerWebTypes from './types/moleculer-web.js';
+import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from './types/openapi.js';
 
 export * from './types/index.js';
 

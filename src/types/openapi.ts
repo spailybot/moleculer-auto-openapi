@@ -2,7 +2,18 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
 import type { AliasRouteSchema } from './moleculer-web.js';
 import type { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
-import type { ActionSchema, ServiceSettingSchema } from 'moleculer';
+import type { ActionSchema, Context, ServiceSettingSchema } from 'moleculer';
+import { OpenApiVersionsSupported } from '../constants.js';
+import { Alias } from '../objects/Alias.js';
+
+export type OA_GENERATE_DOCS_INPUT = {
+    /**
+     * maybe a future option ?
+     * @hidden
+     */
+    version?: OpenApiVersionsSupported;
+};
+export type OA_GENERATE_DOCS_OUTPUT = OpenAPIV3_1.Document;
 
 /**
  * describe an openapi response .
@@ -177,3 +188,5 @@ export type definedApiRouteSchema = OpenApiDefined<ApiRouteSchema>;
 export type definedServiceSettingSchema = OpenApiDefined<ServiceSettingSchema>;
 export type definedActionSchema = OpenApiDefined<ActionSchema>;
 export type definedAliasRouteSchemaOpenApi = OpenApiDefined<AliasRouteSchemaOpenApi>;
+
+export type filterAliasesFn = (ctx: Context<OA_GENERATE_DOCS_INPUT>, aliases: Array<Alias>) => Array<Alias> | Promise<Array<Alias>>;

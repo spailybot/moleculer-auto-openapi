@@ -21,6 +21,7 @@ Here are some things you can see on this example :
  - `users.update/get/list/create/delete` is an example of crud "automatic" with `REST users`
  - `api` service hold the configuration with an authorization example based on the security needed by the openapi
  - `oauth2` server to show how the Oauth2 works on openapi
+ - `admin` service endpoint are filtered if you don't add ?admin at the end of the openapi.json . To demonstrate how you can filter aliases depending on your conditions
 
 
 ## OAuth2 service

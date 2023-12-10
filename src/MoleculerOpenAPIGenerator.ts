@@ -1,15 +1,21 @@
 import type { Context, LoggerInstance, Service, ServiceBroker, ServiceSchema } from 'moleculer';
 import Moleculer from 'moleculer';
-import type { OpenAPIV3_1 } from 'openapi-types';
-import type { FastestValidatorType, OpenApiMixinSettings } from './types/index.js';
-import { ApiSettingsSchemaOpenApi, ECacheMode } from './types/index.js';
+import {
+    ApiSettingsSchemaOpenApi,
+    ECacheMode,
+    FastestValidatorType,
+    filterAliasesFn,
+    OA_GENERATE_DOCS_INPUT,
+    OA_GENERATE_DOCS_OUTPUT,
+    OpenApiMixinSettings
+} from './types/index.js';
 import type { ApiSettingsSchema } from 'moleculer-web';
 import type { ExcludeRequiredProps } from './types/utils.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
 import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { Alias } from './objects/Alias.js';
 import { OpenApiGenerator } from './OpenApiGenerator.js';
-import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, OpenApiVersionsSupported } from './constants.js';
+import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME } from './constants.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 
 export const defaultSettings: Required<ExcludeRequiredProps<Omit<OpenApiMixinSettings, 'assetsPath' | 'schemaPath' | 'openApiPaths'>>> &
@@ -76,15 +82,6 @@ export const defaultSettings: Required<ExcludeRequiredProps<Omit<OpenApiMixinSet
     UIOptions: {}
 };
 
-export type OA_GENERATE_DOCS_INPUT = {
-    /**
-     * maybe a future option ?
-     * @hidden
-     */
-    version?: OpenApiVersionsSupported;
-};
-export type OA_GENERATE_DOCS_OUTPUT = OpenAPIV3_1.Document;
-
 export class MoleculerOpenAPIGenerator {
     private readonly broker: ServiceBroker;
 
@@ -140,12 +137,15 @@ export class MoleculerOpenAPIGenerator {
         return this.mapAliases(ctx, services);
     }
 
-    public async generateSchema(ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
+    public async generateSchema(
+        ctx: Context<OA_GENERATE_DOCS_INPUT>,
+        { filterAliasesFn }: { filterAliasesFn: filterAliasesFn }
+    ): Promise<OA_GENERATE_DOCS_OUTPUT> {
         //TODO allow to pass version from ctx ?
         // const { version } = ctx.params;
         const version = '3.1';
 
-        const aliases = await this.getAliases(ctx);
+        const aliases = await filterAliasesFn(ctx, await this.getAliases(ctx));
 
         return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(
             version,

@@ -50,6 +50,11 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                         }
                     },
                     {
+                        path: '/admin',
+                        whitelist: ['admin.*'],
+                        autoAliases: true
+                    },
+                    {
                         path: '/',
                         whitelist: ['hidden.*', 'pets.*'],
                         autoAliases: true,

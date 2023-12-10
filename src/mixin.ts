@@ -1,12 +1,14 @@
-import {
-    defaultSettings,
-    MoleculerOpenAPIGenerator,
-    OA_GENERATE_DOCS_INPUT,
-    OA_GENERATE_DOCS_OUTPUT
-} from './MoleculerOpenAPIGenerator.js';
-import Moleculer, { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
+import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGenerator.js';
+import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
-import { ECacheMode, OpenApiMixinSettings, OpenApiPaths } from './types/index.js';
+import {
+    ECacheMode,
+    filterAliasesFn,
+    OA_GENERATE_DOCS_INPUT,
+    OA_GENERATE_DOCS_OUTPUT,
+    OpenApiMixinSettings,
+    OpenApiPaths
+} from './types/index.js';
 import { RuleString } from 'fastest-validator';
 import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js';
 import path from 'path/posix';
@@ -69,7 +71,9 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             //     }
             // },
             handler(this: openApiService, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
-                return this.getGenerator().generateSchema(ctx);
+                return this.getGenerator().generateSchema(ctx, {
+                    filterAliasesFn: this.filterAliases
+                });
             }
         },
         assets: {
@@ -252,8 +256,11 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             }
 
             return this.generator;
+        },
+        filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT>, aliases: Array<Alias>): Array<Alias> => {
+            return aliases;
         }
-    },
+    } as ServiceMethods & { filterAliases: filterAliasesFn },
     created() {
         this.generator = new MoleculerOpenAPIGenerator(this.broker, this.settings as OpenApiMixinSettings);
     },
