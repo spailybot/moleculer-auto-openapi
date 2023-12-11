@@ -1,7 +1,15 @@
 import { type MoleculerWebTypes, OpenApiMixin, type OpenApiMixinSettings } from '@spailybot/moleculer-auto-openapi';
 import {Context, Service, ServiceMethods, type ServiceBroker } from 'moleculer';
-import {filterAliasesFn, OA_GENERATE_DOCS_INPUT} from "../../../src/index.js";
+import {
+    addMappersFn,
+    filterAliasesFn, Mapper,
+    OA_GENERATE_DOCS_INPUT,
+    RuleToSchemaFunction,
+    SchemaToRules
+} from "../../../src/index.js";
 import {Alias} from "../../../src/objects/Alias.js";
+import {ReturnOrResolve} from "../../../src/types/utils.js";
+import { RuleCustom } from 'fastest-validator';
 
 /**
  * MoleculerWebTypes are typings created from moleculer-web to enhance included typings; their use is totally optional.
@@ -14,7 +22,6 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
             name: 'openapi',
             mixins: [OpenApiMixin],
             settings: {
-                openApiPaths: '',
                 rest: '/',
                 openapi: {
                     info: {
@@ -36,8 +43,21 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
             methods: {
                 filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & {admin?:string}>, aliases: Array<Alias>): Array<Alias> => {
                     return aliases.filter(alias => ctx.params?.admin !== undefined ? alias.service?.name === "admin" : alias.service?.name !== "admin")
+                },
+                addMappers: (
+                    getSchemaObjectFromRule: RuleToSchemaFunction,
+                    getSchemaObjectFromSchema: SchemaToRules
+                ): Record<string, Mapper<RuleCustom>> => {
+                    return {
+                        even: rule => {
+                            return {
+                                type: 'number',
+                                examples: [2,4,6,8,10]
+                            }
+                        }
+                    }
                 }
-            } as ServiceMethods & { filterAliases: filterAliasesFn },
+            } as ServiceMethods & { filterAliases: filterAliasesFn; addMappers: addMappersFn },
         });
     }
 }

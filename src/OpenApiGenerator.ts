@@ -1,6 +1,13 @@
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { ValidationRule, ValidationRuleObject, ValidationSchema, ValidationSchemaMetaKeys } from 'fastest-validator';
-import { commonOpenApi, FastestValidatorType, openApiServiceOpenApi, TemplateVariables, tSystemParams } from './types/index.js';
+import {
+    addMappersFn,
+    commonOpenApi,
+    FastestValidatorType,
+    openApiServiceOpenApi,
+    TemplateVariables,
+    tSystemParams
+} from './types/index.js';
 import { getAlphabeticSorter, matchAll, normalizePath } from './commons.js';
 import { LoggerInstance } from 'moleculer';
 import { Alias } from './objects/Alias.js';
@@ -45,14 +52,27 @@ export class OpenApiGenerator {
     constructor(
         private readonly logger: LoggerInstance,
         validator: FastestValidatorType,
-        baseDocument: openApiServiceOpenApi
+        baseDocument: openApiServiceOpenApi,
+        addMappersFn: addMappersFn
     ) {
-        this.converter = new FastestValidatorConverter(validator);
+        this.converter = new FastestValidatorConverter(validator, addMappersFn);
 
         this.document = baseDocument;
     }
 
+    private isLoaded?: boolean;
+
+    public async load(): Promise<void> {
+        await this.converter.load();
+
+        this.isLoaded = true;
+    }
+
     public generate(openApiVersion: OpenApiVersionsSupported, aliases: Array<Alias>): OpenAPIV3_1.Document {
+        if (!this.isLoaded) {
+            this.logger.warn('generator : converter is not loaded, custom mapper can be not be enabled');
+        }
+
         const tagsMap: Map<string, OpenAPIV3_1.TagObject> = new Map<string, OpenAPIV3_1.TagObject>();
 
         if ((this.document as { openapi?: string }).openapi) {

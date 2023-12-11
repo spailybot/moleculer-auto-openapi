@@ -15,4 +15,5 @@ export interface IConverter {
         parentProperties?: Partial<ValidationRuleObject>,
         parentSchema?: ObjectRules
     ): OpenAPIV3_1.SchemaObject | undefined;
+    load(): Promise<void>;
 }

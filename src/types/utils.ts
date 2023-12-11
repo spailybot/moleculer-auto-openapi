@@ -61,3 +61,8 @@ export type ExcludeOptionalProps<T> = Pick<T, RequiredKeys<T>>;
  * allow to exclude required props from a type
  */
 export type ExcludeRequiredProps<T> = Pick<T, OptionalKeys<T>>;
+
+/**
+ * allow to return a promise or not
+ */
+export type ReturnOrResolve<T> = T | Promise<T>;

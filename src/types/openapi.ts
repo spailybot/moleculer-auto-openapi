@@ -1,10 +1,12 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ApiRouteSchema, ApiSettingsSchema } from 'moleculer-web';
 import type { AliasRouteSchema } from './moleculer-web.js';
-import type { OpenApiDefined, OptionalOrFalse, SubOptionalOrFalse } from './utils.js';
+import { OpenApiDefined, OptionalOrFalse, ReturnOrResolve, SubOptionalOrFalse } from './utils.js';
 import type { ActionSchema, Context, ServiceSettingSchema } from 'moleculer';
 import { OpenApiVersionsSupported } from '../constants.js';
 import { Alias } from '../objects/Alias.js';
+import { Mapper, RuleToSchemaFunction, SchemaToRules } from './converters/index.js';
+import { RuleCustom } from 'fastest-validator';
 
 export type OA_GENERATE_DOCS_INPUT = {
     /**
@@ -189,4 +191,14 @@ export type definedServiceSettingSchema = OpenApiDefined<ServiceSettingSchema>;
 export type definedActionSchema = OpenApiDefined<ActionSchema>;
 export type definedAliasRouteSchemaOpenApi = OpenApiDefined<AliasRouteSchemaOpenApi>;
 
-export type filterAliasesFn = (ctx: Context<OA_GENERATE_DOCS_INPUT>, aliases: Array<Alias>) => Array<Alias> | Promise<Array<Alias>>;
+/**
+ * allow to filter aliases
+ */
+export type filterAliasesFn = (ctx: Context<OA_GENERATE_DOCS_INPUT>, aliases: Array<Alias>) => ReturnOrResolve<Array<Alias>>;
+/**
+ * Allow to add custom mappers
+ */
+export type addMappersFn = (
+    getSchemaObjectFromRule: RuleToSchemaFunction,
+    getSchemaObjectFromSchema: SchemaToRules
+) => ReturnOrResolve<Record<string, Mapper<RuleCustom>>>;

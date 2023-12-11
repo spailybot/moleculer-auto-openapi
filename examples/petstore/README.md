@@ -22,6 +22,7 @@ Here are some things you can see on this example :
  - `api` service hold the configuration with an authorization example based on the security needed by the openapi
  - `oauth2` server to show how the Oauth2 works on openapi
  - `admin` service endpoint are filtered if you don't add ?admin at the end of the openapi.json . To demonstrate how you can filter aliases depending on your conditions
+ - `pets.group` allow to define a custom params validator `even` . The
 
 
 ## OAuth2 service
@@ -50,3 +51,12 @@ sequenceDiagram
     A->>US: call users.me
     US->>User: Return about the user
 ```
+
+
+## Adding a custom validator
+
+As described in fastest-validator, you can [add custom validator](https://github.com/icebob/fastest-validator?tab=readme-ov-file#custom-validator), also, moleculer allow to set [customRules to fastest-validator](https://moleculer.services/docs/0.14/validating.html#Fastest-Validator) (you can pass options, that can contains customRules) .
+
+1. this example create a custom rules `even` in [moleculer.config.ts](./moleculer.config.ts)
+2. create a custom mapper to handle `even` rule in [openapi.service.ts](./services/openapi.service.ts)
+3. use the custom rule in [pets.service.ts](./services/pets.service.ts)

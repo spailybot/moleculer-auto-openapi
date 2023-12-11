@@ -1,4 +1,4 @@
-import { FastestValidatorType, FVOARuleMetaKeys, Mapper, Mappers, ObjectRules } from '../types/index.js';
+import { addMappersFn, FastestValidatorType, FVOARuleMetaKeys, Mapper, Mappers, ObjectRules } from '../types/index.js';
 import { getOpenApiType, MappersOptions } from '../mappers.js';
 import type {
     RuleAny,
@@ -37,18 +37,42 @@ export class FastestValidatorConverter implements IConverter {
 
     constructor(
         private readonly validator: FastestValidatorType,
-        additionalMappersFn?: (functions: MappersOptions) => Mappers | undefined
+        private readonly additionalMappersFn?: addMappersFn
     ) {
-        const mapperFn: MappersOptions = {
+        this.mappers = getFastestValidatorMappers(this.getMapperFn());
+        this.load();
+    }
+
+    private getMapperFn(): MappersOptions {
+        return {
             getSchemaObjectFromSchema: (...args) => this.getSchemaObjectFromSchema(...args),
             getSchemaObjectFromRule: (...args) => this.getSchemaObjectFromRule(...args)
         };
-        const defaultMappers = getFastestValidatorMappers(mapperFn);
+    }
 
-        this.mappers = {
-            ...defaultMappers,
-            ...(additionalMappersFn?.(mapperFn) ?? {})
-        };
+    private _loadingPromise?: Promise<void>;
+
+    public async load(): Promise<void> {
+        if (this._loadingPromise) {
+            return this._loadingPromise;
+        }
+
+        this._loadingPromise = new Promise(async (resolve, reject) => {
+            try {
+                const mapperFn = this.getMapperFn();
+
+                Object.entries(
+                    (await this.additionalMappersFn?.(mapperFn.getSchemaObjectFromRule, mapperFn.getSchemaObjectFromSchema)) ?? {}
+                ).forEach(([k, v]) => {
+                    this.mappers[k] = v;
+                });
+                resolve();
+            } catch (e) {
+                reject(e);
+            }
+        });
+
+        await this._loadingPromise;
     }
 
     public getValidationRules(schema: ValidationSchema): Record<string, ValidationRule> {

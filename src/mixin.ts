@@ -2,6 +2,7 @@ import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGe
 import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
 import {
+    addMappersFn,
     ECacheMode,
     filterAliasesFn,
     OA_GENERATE_DOCS_INPUT,
@@ -72,7 +73,8 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             // },
             handler(this: openApiService, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
                 return this.getGenerator().generateSchema(ctx, {
-                    filterAliasesFn: this.filterAliases
+                    filterAliasesFn: this.filterAliases,
+                    addMappers: this.addMappers
                 });
             }
         },
@@ -190,7 +192,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                         openApiPaths.uiPath = alias.fullPath;
                     }
                     if (alias.action === `${this.name}.assets`) {
-                        openApiPaths.assetsPath = alias.fullPath;
+                        openApiPaths.assetsPath = alias.fullPath?.replace('/:file', '');
                     }
                     if (alias.action === `${this.name}.oauth2Redirect`) {
                         openApiPaths.oauth2RedirectPath = alias.fullPath;
@@ -259,8 +261,11 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
         },
         filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT>, aliases: Array<Alias>): Array<Alias> => {
             return aliases;
+        },
+        addMappers: (getSchemaObjectFromRule, getSchemaObjectFromSchema) => {
+            return {};
         }
-    } as ServiceMethods & { filterAliases: filterAliasesFn },
+    } as ServiceMethods & { filterAliases: filterAliasesFn; addMappers: addMappersFn },
     created() {
         this.generator = new MoleculerOpenAPIGenerator(this.broker, this.settings as OpenApiMixinSettings);
     },

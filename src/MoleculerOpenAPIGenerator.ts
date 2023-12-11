@@ -1,6 +1,7 @@
 import type { Context, LoggerInstance, Service, ServiceBroker, ServiceSchema } from 'moleculer';
 import Moleculer from 'moleculer';
 import {
+    addMappersFn,
     ApiSettingsSchemaOpenApi,
     ECacheMode,
     FastestValidatorType,
@@ -139,7 +140,7 @@ export class MoleculerOpenAPIGenerator {
 
     public async generateSchema(
         ctx: Context<OA_GENERATE_DOCS_INPUT>,
-        { filterAliasesFn }: { filterAliasesFn: filterAliasesFn }
+        { filterAliasesFn, addMappers }: { filterAliasesFn: filterAliasesFn; addMappers: addMappersFn }
     ): Promise<OA_GENERATE_DOCS_OUTPUT> {
         //TODO allow to pass version from ctx ?
         // const { version } = ctx.params;
@@ -147,9 +148,9 @@ export class MoleculerOpenAPIGenerator {
 
         const aliases = await filterAliasesFn(ctx, await this.getAliases(ctx));
 
-        return new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi))).generate(
-            version,
-            aliases
-        );
+        const generator = new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi)), addMappers);
+        await generator.load();
+
+        return generator.generate(version, aliases);
     }
 }

@@ -521,6 +521,18 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                             });
                         });
                     }
+                },
+                group: {
+                    rest: 'POST /group',
+                    params: {
+                        members: {
+                            $$oa: {
+                                description: 'need to be an even number'
+                            },
+                            type: 'even'
+                        }
+                    },
+                    handler() {}
                 }
             }
         });

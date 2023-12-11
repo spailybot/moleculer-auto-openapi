@@ -15,6 +15,10 @@ export class NoopConverter implements IConverter {
         return {};
     }
 
+    async load(): Promise<void> {
+        return;
+    }
+
     getSchemaObjectFromRule(
         pRule: ValidationRule,
         parentProperties?: Partial<ValidationRuleObject>,

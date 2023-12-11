@@ -373,7 +373,6 @@ Remember, the journey of mastering any tool involves experimentation, learning f
 
 ### 📝 TODO
 
-- allow to add custom mappers
 - $$oa
   - allow to define a ref, and use the ref instead of creating a new one
   - allow to define a "to ref", and create the ref with this name
