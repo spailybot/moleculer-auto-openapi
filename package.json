@@ -1,6 +1,6 @@
 {
   "name": "@spailybot/moleculer-auto-openapi",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Generate openapi scheme for moleculer",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
