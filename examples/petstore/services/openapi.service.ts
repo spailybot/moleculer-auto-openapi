@@ -34,8 +34,8 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                 skipUnresolvedActions: true
             },
             methods: {
-                filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & {admin?:boolean}>, aliases: Array<Alias>): Array<Alias> => {
-                    return aliases.filter(alias => ctx.params?.admin !== undefined ? alias.action?.startsWith('admin') : !alias.action?.startsWith('admin'))
+                filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & {admin?:string}>, aliases: Array<Alias>): Array<Alias> => {
+                    return aliases.filter(alias => ctx.params?.admin !== undefined ? alias.service?.name === "admin" : alias.service?.name !== "admin")
                 }
             } as ServiceMethods & { filterAliases: filterAliasesFn },
         });
