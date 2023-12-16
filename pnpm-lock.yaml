@@ -12,7 +12,7 @@ importers:
   .:
     optionalDependencies:
       swagger-ui-dist:
-        specifier: ^5.10.5
+        specifier: ^5
         version: 5.10.5
     devDependencies:
       '@jest/globals':
@@ -3937,6 +3937,7 @@ packages:
   /swagger-ui-dist@5.10.5:
     resolution: {integrity: sha512-Uv8E7hV/nXALQKgW86X1i58gl1O6DFg+Uq54sDwhYqucBBxj/47dLNw872TNILNlOTuPA6dRvUMGQdmlpaX8qQ==}
     requiresBuild: true
+    dev: false
     optional: true
 
   /synckit@0.8.5:
