@@ -245,10 +245,10 @@ describe('Fastest Validator Mappers', () => {
             expect(
                 mapperFn({
                     ...baseRule,
-                    default: [true]
+                    default: true
                 })
             ).toEqual({
-                default: [true],
+                default: true,
                 examples: [true],
                 type: 'boolean'
             });

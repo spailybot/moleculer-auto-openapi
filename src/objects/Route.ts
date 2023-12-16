@@ -5,6 +5,7 @@ import path from 'path/posix';
 import { bodyParserOptions, BusboyConfig, routeAlias } from '../types/moleculer-web.js';
 import { AliasCreator } from './AliasCreator.js';
 import { LoggerInstance, ServiceSchema } from 'moleculer';
+import { JOKER_METHOD } from '../constants.js';
 
 export class Route {
     public readonly aliases: Array<Alias>;
@@ -41,7 +42,7 @@ export class Route {
     public searchAlias(alias: routeAlias): Alias | undefined {
         return this.aliases.find(
             (a) =>
-                a.method?.toLowerCase() === alias.methods?.toLowerCase() &&
+                (a.method.toLowerCase() === JOKER_METHOD || a.method?.toLowerCase() === alias.methods?.toLowerCase()) &&
                 normalizePath(a.path?.toLowerCase()) === normalizePath(alias.path?.toLowerCase())
         );
     }

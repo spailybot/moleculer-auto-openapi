@@ -15,27 +15,31 @@ export class AliasCreator {
     ) {}
 
     public getAliases(): Array<Alias> {
-        return Object.entries(this.aliases ?? {})
-            .flatMap(([name, config]) => {
-                const aliasInformations = this.extractAliasInformation(name, config);
+        return Object.entries(this.aliases ?? {}).flatMap(([name, config]) => {
+            const aliasInformations = this.extractAliasInformation(name, config);
 
-                if (!aliasInformations) {
-                    this.logger.warn(`alias "${name}" from route "${this.route.path}" is skipped`);
-                    return;
-                }
+            const skippedAliases = this.getSubAliases(aliasInformations ?? {}).map((a) => {
+                const skippedAlias = new Alias(a, this.route);
+                skippedAlias.skipped = true;
+                return skippedAlias;
+            });
 
-                if (aliasInformations.action && !aliasInformations.action.match(OA_NAME_REGEXP)) {
-                    this.logger.error(
-                        `alias "${name}" from route "${this.route.path}" can't be added ton openapi . because the name "${
-                            aliasInformations.action
-                        }" need to match pattern ${OA_NAME_REGEXP.toString()}`
-                    );
-                    return;
-                }
+            if (!aliasInformations) {
+                this.logger.warn(`alias "${name}" from route "${this.route.path}" is skipped`);
+                return skippedAliases;
+            }
 
-                return this.getSubAliases(aliasInformations).map((alias) => new Alias(alias, this.route));
-            })
-            .filter(Boolean) as Array<Alias>;
+            if (aliasInformations.action && !aliasInformations.action.match(OA_NAME_REGEXP)) {
+                this.logger.error(
+                    `alias "${name}" from route "${this.route.path}" can't be added ton openapi . because the name "${
+                        aliasInformations.action
+                    }" need to match pattern ${OA_NAME_REGEXP.toString()}`
+                );
+                return skippedAliases;
+            }
+
+            return this.getSubAliases(aliasInformations).map((alias) => new Alias(alias, this.route));
+        });
     }
 
     private extractAliasSubInformations(infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {

@@ -196,7 +196,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
         boolean: (rule: RuleBoolean): ReturnType<Mapper<RuleBoolean>> => ({
             type: 'boolean',
             default: rule.default,
-            examples: rule.default ?? [true, false]
+            examples: rule.default !== undefined ? [rule.default] : [true, false]
         }),
         class: () => undefined,
         currency: (rule: RuleCurrency): ReturnType<Mapper<RuleCurrency>> => {

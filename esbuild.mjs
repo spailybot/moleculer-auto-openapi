@@ -65,4 +65,4 @@ fs.writeFileSync(path.join(dist, 'index.cjs'), "module.exports = require('./cjs/
 fs.writeFileSync(path.join(dist, 'index.js'), "module.exports = require('./cjs/index.cjs');");
 
 fs.writeFileSync(path.join(dist, 'index.d.ts'), "export * from './types/index.js';");
-// fs.writeFileSync(path.join(dist, 'index.d.cts'), "export * from './types/index.js';");
+fs.writeFileSync(path.join(dist, 'index.d.cts'), "export * from './types/index.js';");
