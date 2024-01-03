@@ -199,3 +199,15 @@ export interface SwaggerUiOptions {
         persistAuthorization?: boolean;
     };
 }
+
+export interface SwaggerUiOauthOptions {
+    clientId?: string;
+    clientSecret?: string;
+    realm?: string;
+    appName?: string;
+    scopeSeparator?: string;
+    scopes?: string;
+    additionalQueryStringParams?: Record<string, string>;
+    useBasicAuthenticationWithAccessCodeGrant?: boolean;
+    usePkceWithAuthorizationCodeGrant?: boolean;
+}

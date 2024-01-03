@@ -146,19 +146,21 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
 
                 const assetsURL = paths.assetsPath;
                 const swaggerSettings = {
-                    deepLinking: true,
-                    showExtensions: true,
-                    layout: 'StandaloneLayout',
-                    ...this.settings.UIOptions,
-                    url: ctx.params.url || paths.schemaPath,
-                    dom_id: '#swagger-ui',
-                    oauth2RedirectUrl: paths.oauth2RedirectPath
+                    swaggerSettings: {
+                        deepLinking: true,
+                        showExtensions: true,
+                        layout: 'StandaloneLayout',
+                        ...this.settings.UIOptions,
+                        url: ctx.params.url || paths.schemaPath,
+                        dom_id: '#swagger-ui',
+                        oauth2RedirectUrl: paths.oauth2RedirectPath
+                    },
+                    oauth: this.settings.UIOauthOptions
                 };
 
-                return `
-<html lang="en"><head><title>OpenAPI UI</title><style>body{ margin: 0;} </style></head><body><div id="swagger-ui"><p>Loading...</p><noscript>If you see json, you need to update your dependencies</noscript></div><script type="application/json" id="__SWAGGER_SETTINGS__">${JSON.stringify(
+                return `<html lang="en"><head><title>OpenAPI UI</title><style>body{ margin: 0;} </style></head><body><div id="swagger-ui"><p>Loading...</p><noscript>If you see json, you need to update your dependencies</noscript></div><script type="application/json" id="__SWAGGER_SETTINGS__">${JSON.stringify(
                     swaggerSettings
-                )} </script><script>var assetsURL="${assetsURL}"; var configElement=document.getElementById('__SWAGGER_SETTINGS__'); if(!configElement){ throw new Error('fail to load configurations');} var swaggerSettings=JSON.parse(configElement.textContent); window.onload=function(){var cssLink=document.createElement('link'); cssLink.rel='stylesheet'; cssLink.href=assetsURL + '/swagger-ui.css'; document.head.appendChild(cssLink); function initSwaggerUIDependentCode(){ SwaggerUIBundle( Object.assign( swaggerSettings, { presets: [ SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset, ], plugins: [ SwaggerUIBundle.plugins.DownloadUrl, ]} ) )} var scripts=[ assetsURL + '/swagger-ui-bundle.js', assetsURL + '/swagger-ui-standalone-preset.js' ]; var scriptsLoaded=0; function loadScript(script, callback){ var scriptElement=document.createElement('script'); scriptElement.src=script; scriptElement.onload=()=>{ scriptsLoaded++; if (scriptsLoaded===scripts.length){ callback();}}; document.body.appendChild(scriptElement);} for (var i=0; i < scripts.length; i++){ loadScript(scripts[i], initSwaggerUIDependentCode);}}; </script></body></html>`;
+                )} </script><script>var assetsURL="${assetsURL}"; var configElement=document.getElementById("__SWAGGER_SETTINGS__"); if (!configElement){ throw new Error("fail to load configurations");} var settings=JSON.parse(configElement.textContent); window.onload=function (){ var cssLink=document.createElement("link"); cssLink.rel="stylesheet"; cssLink.href=assetsURL + "/swagger-ui.css"; document.head.appendChild(cssLink); function initSwaggerUIDependentCode(){ var ui=SwaggerUIBundle( Object.assign(settings.swaggerSettings,{ presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset], plugins: [SwaggerUIBundle.plugins.DownloadUrl],}) ); if(settings.oauth){ ui.initOAuth(settings.oauth)}} var scripts=[assetsURL + "/swagger-ui-bundle.js", assetsURL + "/swagger-ui-standalone-preset.js"]; var scriptsLoaded=0; function loadScript(script, callback){ var scriptElement=document.createElement("script"); scriptElement.src=script; scriptElement.onload=()=>{ scriptsLoaded++; if (scriptsLoaded===scripts.length){ callback();}}; document.body.appendChild(scriptElement);} for (var i=0; i < scripts.length; i++){ loadScript(scripts[i], initSwaggerUIDependentCode);}}; </script></body></html>`;
             }
         },
         oauth2Redirect: {
@@ -182,6 +184,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
         },
         regenerateOpenApiPaths: {
             visibility: 'private',
+            throttle: 10000,
             async handler(this: openApiService, ctx: Context) {
                 const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
                     (alias) => alias.service?.name === this.name

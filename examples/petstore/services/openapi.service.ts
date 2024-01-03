@@ -18,6 +18,8 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
     public constructor(public broker: ServiceBroker) {
         super(broker);
 
+        const APP_NAME = process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API'
+
         this.parseServiceSchema({
             name: 'openapi',
             mixins: [OpenApiMixin],
@@ -25,7 +27,7 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                 rest: '/',
                 openapi: {
                     info: {
-                        title: process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API',
+                        title: APP_NAME,
                         version: process.env.npm_package_version ? `${process.env.npm_package_version}` : '0.0.1'
                     },
                     components: {
@@ -38,7 +40,12 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                         }
                     }
                 },
-                skipUnresolvedActions: true
+                skipUnresolvedActions: true,
+                UIOauthOptions: {
+                    appName: APP_NAME,
+                    clientId: 'myClientId',
+                    clientSecret: 'myClientSecret'
+                }
             },
             methods: {
                 filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & {admin?:string}>, aliases: Array<Alias>): Array<Alias> => {

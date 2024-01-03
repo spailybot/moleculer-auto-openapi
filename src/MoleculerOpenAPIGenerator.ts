@@ -19,7 +19,9 @@ import { OpenApiGenerator } from './OpenApiGenerator.js';
 import { DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME } from './constants.js';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 
-export const defaultSettings: Required<ExcludeRequiredProps<Omit<OpenApiMixinSettings, 'assetsPath' | 'schemaPath' | 'openApiPaths'>>> &
+export const defaultSettings: Required<
+    ExcludeRequiredProps<Omit<OpenApiMixinSettings, 'assetsPath' | 'schemaPath' | 'openApiPaths' | 'UIOauthOptions'>>
+> &
     Partial<OpenApiMixinSettings> = {
     onlyLocal: false, // build schema from only local services
     // commonPathItemObjectResponses: {

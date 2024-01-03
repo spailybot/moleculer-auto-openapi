@@ -1,6 +1,6 @@
 import type { ApiRouteSchema } from 'moleculer-web';
 import type { openApiServiceOpenApi } from './openapi.js';
-import { SwaggerUiOptions } from './swaggerUiOptions.js';
+import { SwaggerUiOauthOptions, SwaggerUiOptions } from './swaggerUiOptions.js';
 
 export type tSystemParams = {
     description?: string;
@@ -164,6 +164,7 @@ export type OpenApiMixinSettings = {
      * set some swaggerUi options
      */
     UIOptions?: SwaggerUiOptions;
+    UIOauthOptions?: SwaggerUiOauthOptions;
 };
 
 export { ApiRouteSchema };
