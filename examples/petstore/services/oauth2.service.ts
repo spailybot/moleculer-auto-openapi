@@ -23,8 +23,6 @@ export default class Oauth2Service extends Service<ServiceSettingSchema & Molecu
             name: 'oauth2',
             settings: {
                 rest: '/',
-                //want to use jwe instead of jws ? set to true ! (better security, but unreadable outside)
-                // jwe: false,
                 openapi: {
                     tags: [
                         {
