@@ -1,14 +1,16 @@
-import { type MoleculerWebTypes, OpenApiMixin, type OpenApiMixinSettings } from '@spailybot/moleculer-auto-openapi';
-import {Context, Service, ServiceMethods, type ServiceBroker } from 'moleculer';
 import {
-    addMappersFn,
-    filterAliasesFn, Mapper,
-    OA_GENERATE_DOCS_INPUT,
-    RuleToSchemaFunction,
-    SchemaToRules
-} from "../../../src/index.js";
-import {Alias} from "../../../src/objects/Alias.js";
-import {ReturnOrResolve} from "../../../src/types/utils.js";
+    type addMappersFn,
+    type Alias,
+    type filterAliasesFn,
+    type Mapper,
+    type MoleculerWebTypes,
+    type OA_GENERATE_DOCS_INPUT,
+    OpenApiMixin,
+    type OpenApiMixinSettings,
+    type RuleToSchemaFunction,
+    type SchemaToRules
+} from '@spailybot/moleculer-auto-openapi';
+import { Context, Service, type ServiceBroker, ServiceMethods } from 'moleculer';
 import { RuleCustom } from 'fastest-validator';
 
 /**
@@ -18,7 +20,7 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
     public constructor(public broker: ServiceBroker) {
         super(broker);
 
-        const APP_NAME = process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API'
+        const APP_NAME = process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API';
 
         this.parseServiceSchema({
             name: 'openapi',
@@ -48,23 +50,25 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                 }
             },
             methods: {
-                filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & {admin?:string}>, aliases: Array<Alias>): Array<Alias> => {
-                    return aliases.filter(alias => ctx.params?.admin !== undefined ? alias.service?.name === "admin" : alias.service?.name !== "admin")
+                filterAliases: (ctx: Context<OA_GENERATE_DOCS_INPUT & { admin?: string }>, aliases: Array<Alias>): Array<Alias> => {
+                    return aliases.filter((alias) =>
+                        ctx.params?.admin !== undefined ? alias.service?.name === 'admin' : alias.service?.name !== 'admin'
+                    );
                 },
                 addMappers: (
                     getSchemaObjectFromRule: RuleToSchemaFunction,
                     getSchemaObjectFromSchema: SchemaToRules
                 ): Record<string, Mapper<RuleCustom>> => {
                     return {
-                        even: rule => {
+                        even: (rule) => {
                             return {
                                 type: 'number',
-                                examples: [2,4,6,8,10]
-                            }
+                                examples: [2, 4, 6, 8, 10]
+                            };
                         }
-                    }
+                    };
                 }
-            } as ServiceMethods & { filterAliases: filterAliasesFn; addMappers: addMappersFn },
+            } as ServiceMethods & { filterAliases: filterAliasesFn; addMappers: addMappersFn }
         });
     }
 }

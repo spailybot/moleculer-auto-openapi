@@ -1,5 +1,4 @@
-import { Context, Service, ServiceBroker } from 'moleculer';
-import type { MoleculerWebMetas } from './objects/commons';
+import { Service, ServiceBroker } from 'moleculer';
 
 export default class AdminService extends Service {
     constructor(broker: ServiceBroker) {
@@ -8,13 +7,12 @@ export default class AdminService extends Service {
         this.parseServiceSchema({
             name: 'admin',
             settings: {
-              rest: '/'
+                rest: '/'
             },
             actions: {
                 action: {
                     rest: 'GET /action',
-                    handler: () => {
-                    }
+                    handler: () => {}
                 }
             }
         });

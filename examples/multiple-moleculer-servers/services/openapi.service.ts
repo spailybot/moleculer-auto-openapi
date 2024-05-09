@@ -13,7 +13,9 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
             mixins: [OpenApiMixin],
             settings: {
                 rest: '/',
-                schemaPath: '/openapi/openapi.json',
+                openApiPaths: {
+                    schemaPath: '/openapi/openapi.json'
+                },
                 openapi: {
                     info: {
                         title: process.env.npm_package_name ? `${process.env.npm_package_name} API` : 'My API',

@@ -174,6 +174,37 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                     openapi: {
                         summary: "Get a pet by it's ID",
                         operationId: 'getPet',
+                        parameters: [
+                            {
+                                name: 'version',
+                                in: 'header',
+                                description: 'API version',
+                                required: true,
+                                default: '1.0.0',
+                                examples: {
+                                    'version1.0.0': {
+                                        type: 'string',
+                                        value: '1.0.0'
+                                    },
+                                    'version2.0.0': {
+                                        type: 'string',
+                                        value: '2.0.0'
+                                    }
+                                },
+                                schema: {
+                                    type: 'string'
+                                }
+                            },
+                            {
+                                name: 'state',
+                                in: 'cookie',
+                                description: 'the state',
+                                required: false,
+                                schema: {
+                                    type: 'string'
+                                }
+                            }
+                        ],
                         response: {
                             schema: {
                                 $ref: '#/components/schemas/Pet'
