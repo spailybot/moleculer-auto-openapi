@@ -153,6 +153,10 @@ export class OpenApiGenerator {
                 // TODO need to pass merged openApi to parameter extraction !
                 const { parameters, requestBody } = this.extractParameters(method, openapiPath, alias) ?? {};
 
+                if (openApi?.parameters) {
+                    parameters.push(...openApi.parameters);
+                }
+
                 this.components = this.mergeComponents(this.components, this.cleanComponents(openApi.components));
 
                 const openApiMethod: OpenAPIV3_1.OperationObject & EOAOperationsExtensionTypes = {

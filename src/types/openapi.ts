@@ -60,6 +60,15 @@ export interface ActionOpenApi extends commonOpenApi {
      */
     pathParameters?: Array<Omit<OpenAPIV3_1.ParameterObject, 'in'>>;
     /**
+     * allow to pass header or cookies parameters
+     */
+    parameters?: Array<
+        Omit<OpenAPIV3_1.ParameterObject, 'in'> & { in: 'cookie' | 'header' } & (
+                | Required<Pick<OpenAPIV3_1.ParameterObject, 'schema'>>
+                | Required<Pick<OpenAPIV3_1.ParameterObject, 'content'>>
+            )
+    >;
+    /**
      * add a description to this operation
      */
     description?: string;
