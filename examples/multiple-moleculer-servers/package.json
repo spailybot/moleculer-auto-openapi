@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@spailybot/moleculer-auto-openapi": "^0.1.12",
-    "fastest-validator": "github:thib3113/fastest-validator#fork",
+    "fastest-validator": "^1.18.0",
     "find-free-ports": "^3.1.1",
     "moleculer": "^0.14.32",
     "moleculer-web": "^0.10.7"

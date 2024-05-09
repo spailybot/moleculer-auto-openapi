@@ -137,6 +137,24 @@
                                 }
                             ]
                         }
+                    },
+                    {
+                        "description": "API version",
+                        "in": "header",
+                        "name": "version",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "the state",
+                        "in": "cookie",
+                        "name": "state",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

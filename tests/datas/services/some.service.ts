@@ -118,7 +118,28 @@ export const SomeService: ServiceSchema = {
          * Action from moleculer-db mixin
          */
         find: {
-            openapi: {},
+            openapi: {
+                parameters: [
+                    {
+                        name: 'version',
+                        in: 'header',
+                        description: 'API version',
+                        required: true,
+                        schema: {
+                            type: 'string'
+                        }
+                    },
+                    {
+                        name: 'state',
+                        in: 'cookie',
+                        description: 'the state',
+                        required: true,
+                        schema: {
+                            type: 'string'
+                        }
+                    }
+                ]
+            },
             cache: {
                 keys: ['populate', 'fields', 'limit', 'offset', 'sort', 'search', 'searchFields', 'query']
             },
