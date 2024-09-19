@@ -83,7 +83,7 @@ export class OpenApiGenerator {
         const document: OpenAPIV3_1.Document & { servers: Array<OpenAPIV3_1.ServerObject> } = {
             openapi: `${openApiVersion}.0`,
             ...this.document,
-            servers: [],
+            servers: this.document.servers ?? [],
             tags: [],
             components: this.cleanComponents(this.document.components)
         };
