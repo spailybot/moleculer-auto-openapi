@@ -105,7 +105,7 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
                 // Set the path as you prefer
                 rest: '/openapi',
                 // Path to the endpoint that returns the JSON
-                // With autoalias, it's exposed on /openapi.json
+                // With auto-alias, it's exposed on /openapi.json
                 schemaPath: '/openapi/openapi.json',
                 // This will be the root of your document
                 // use it to define some default informations
@@ -135,7 +135,7 @@ const OpenApiService: ServiceSchema<OpenApiMixinSettings & MoleculerWebTypes.Res
         // Set the path as you prefer
         rest: '/openapi',
         // Path to the endpoint that returns the JSON
-        // With autoalias, it's exposed on /openapi.json
+        // With auto-alias, it's exposed on /openapi.json
         schemaPath: '/openapi/openapi.json',
         // This will be the root of your document
         // use it to define some default informations
@@ -171,7 +171,7 @@ export default class OpenApiService extends Service {
                 // Set the path as you prefer
                 rest: '/openapi',
                 // Path to the endpoint that returns the JSON
-                // With autoalias, it's exposed on /openapi.json
+                // With auto-alias, it's exposed on /openapi.json
                 schemaPath: '/openapi/openapi.json',
                 // This will be the root of your document
                 // use it to define some default informations
@@ -191,20 +191,19 @@ export default class OpenApiService extends Service {
 
 ````javascript
 import { OpenApiMixin } from '@spailybot/moleculer-auto-openapi';
-import { Service } from 'moleculer';
 
 const OpenApiService = {
   // Choose your preferred name
   name: 'openapi',
-  mixins: [mixin],
+  mixins: [OpenApiMixin],
   settings: {
     // Set the path as you prefer
     rest: '/openapi',
     // Path to the endpoint that returns the JSON
-    // With autoalias, it's exposed on /openapi.json
+    // With auto-alias, it's exposed on /openapi.json
     schemaPath: '/openapi/openapi.json',
     // This will be the root of your document
-    // use it to define some default informations
+    // use it to define some default information
     openapi: {
       info: {
         title: "My API",
@@ -223,28 +222,28 @@ export default OpenApiService;
 const OpenApiMixin = require('@spailybot/moleculer-auto-openapi');
 // or
 // const { OpenApiMixin } = require('@spailybot/moleculer-auto-openapi');
-import { Service } from 'moleculer';
 
 module.exports = {
-   // Choose your preferred name
-   name: 'openapi',
-   mixins: [mixin],
-   settings: {
-       // Set the path as you prefer
-       rest: '/openapi',
-       // Path to the endpoint that returns the JSON
-       // With autoalias, it's exposed on /openapi.json
-       schemaPath: '/openapi/openapi.json',
-       // This will be the root of your document
-       // use it to define some default informations
-       openapi: {
-         info: {
-           title: "My API",
-           version: "0.0.1"
-         }
-       }
-   }
+    // Choose your preferred name
+    name: "openapi",
+    mixins: [OpenApiMixin],
+    settings: {
+        // Set the path as you prefer
+        rest: "/openapi",
+        // Path to the endpoint that returns the JSON
+        // With auto-alias, it's exposed on /openapi.json
+        schemaPath: "/openapi/openapi.json",
+        // This will be the root of your document
+        // use it to define some default information
+        openapi: {
+            info: {
+                title: "My API",
+                version: "0.0.1",
+            },
+        },
+    },
 };
+
 ````
 </details>
 </details>
