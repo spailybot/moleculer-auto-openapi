@@ -104,9 +104,23 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
             settings: {
                 // Set the path as you prefer
                 rest: '/openapi',
-                // Path to the endpoint that returns the JSON
-                // With auto-alias, it's exposed on /openapi.json
-                schemaPath: '/openapi/openapi.json',
+
+                // will set
+                // - ui at /openapi/ui
+                // - json at /openapi/openapi.json
+                // - assets at /openapi/assets/*
+                // - oauth2redirection at /openapi/oauth2-redirect
+                openApiPaths: "/openapi",
+                // you cal also do it manually
+                /**
+                 openApiPaths: {
+                 schemaPath: "/openapi/openapi.json"
+                 uiPath: "/openapi/ui"
+                 oauth2RedirectPath: "/openapi/oauth2-redirect"
+                 assetsPath: "/openapi/assets"
+                 }
+                 */
+
                 // This will be the root of your document
                 // use it to define some default informations
                 openapi: {
@@ -134,16 +148,30 @@ const OpenApiService: ServiceSchema<OpenApiMixinSettings & MoleculerWebTypes.Res
     settings: {
         // Set the path as you prefer
         rest: '/openapi',
-        // Path to the endpoint that returns the JSON
-        // With auto-alias, it's exposed on /openapi.json
-        schemaPath: '/openapi/openapi.json',
+
+        // will set
+        // - ui at /openapi/ui
+        // - json at /openapi/openapi.json
+        // - assets at /openapi/assets/*
+        // - oauth2redirection at /openapi/oauth2-redirect
+        openApiPaths: "/openapi",
+        // you cal also do it manually
+        /**
+         openApiPaths: {
+         schemaPath: "/openapi/openapi.json"
+         uiPath: "/openapi/ui"
+         oauth2RedirectPath: "/openapi/oauth2-redirect"
+         assetsPath: "/openapi/assets"
+         }
+         */
+
         // This will be the root of your document
         // use it to define some default informations
         openapi: {
-          info: {
-            title: "My API",
-            version: "0.0.1"
-          }
+            info: {
+                title: "My API",
+                version: "0.0.1"
+            }
         }
     }
 };
@@ -170,9 +198,23 @@ export default class OpenApiService extends Service {
             settings: {
                 // Set the path as you prefer
                 rest: '/openapi',
-                // Path to the endpoint that returns the JSON
-                // With auto-alias, it's exposed on /openapi.json
-                schemaPath: '/openapi/openapi.json',
+
+                // will set
+                // - ui at /openapi/ui
+                // - json at /openapi/openapi.json
+                // - assets at /openapi/assets/*
+                // - oauth2redirection at /openapi/oauth2-redirect
+                openApiPaths: "/openapi",
+                // you cal also do it manually
+                /**
+                openApiPaths: {
+                    schemaPath: "/openapi/openapi.json"
+                    uiPath: "/openapi/ui"
+                    oauth2RedirectPath: "/openapi/oauth2-redirect"
+                    assetsPath: "/openapi/assets"
+                }
+                */
+
                 // This will be the root of your document
                 // use it to define some default informations
                 openapi: {
@@ -197,20 +239,34 @@ const OpenApiService = {
   name: 'openapi',
   mixins: [OpenApiMixin],
   settings: {
-    // Set the path as you prefer
-    rest: '/openapi',
-    // Path to the endpoint that returns the JSON
-    // With auto-alias, it's exposed on /openapi.json
-    schemaPath: '/openapi/openapi.json',
-    // This will be the root of your document
-    // use it to define some default information
-    openapi: {
-      info: {
-        title: "My API",
-        version: "0.0.1"
-      }
-    }
-  }
+        // Set the path as you prefer
+        rest: '/openapi',
+
+        // will set
+        // - ui at /openapi/ui
+        // - json at /openapi/openapi.json
+        // - assets at /openapi/assets/*
+        // - oauth2redirection at /openapi/oauth2-redirect
+        openApiPaths: "/openapi",
+        // you cal also do it manually
+        /**
+         openApiPaths: {
+         schemaPath: "/openapi/openapi.json"
+         uiPath: "/openapi/ui"
+         oauth2RedirectPath: "/openapi/oauth2-redirect"
+         assetsPath: "/openapi/assets"
+         }
+         */
+
+        // This will be the root of your document
+        // use it to define some default informations
+        openapi: {
+            info: {
+                title: "My API",
+                version: "0.0.1"
+            }
+        }
+}
 };
 export default OpenApiService;
 ````
@@ -229,19 +285,33 @@ module.exports = {
     mixins: [OpenApiMixin],
     settings: {
         // Set the path as you prefer
-        rest: "/openapi",
-        // Path to the endpoint that returns the JSON
-        // With auto-alias, it's exposed on /openapi.json
-        schemaPath: "/openapi/openapi.json",
+        rest: '/openapi',
+
+        // will set
+        // - ui at /openapi/ui
+        // - json at /openapi/openapi.json
+        // - assets at /openapi/assets/*
+        // - oauth2redirection at /openapi/oauth2-redirect
+        openApiPaths: "/openapi",
+        // you cal also do it manually
+        /**
+         openApiPaths: {
+         schemaPath: "/openapi/openapi.json"
+         uiPath: "/openapi/ui"
+         oauth2RedirectPath: "/openapi/oauth2-redirect"
+         assetsPath: "/openapi/assets"
+         }
+         */
+
         // This will be the root of your document
-        // use it to define some default information
+        // use it to define some default informations
         openapi: {
             info: {
                 title: "My API",
-                version: "0.0.1",
-            },
-        },
-    },
+                version: "0.0.1"
+            }
+        }
+    }
 };
 
 ````
@@ -378,6 +448,9 @@ Remember, the journey of mastering any tool involves experimentation, learning f
   - allow to define examples
 - investigate the needs of requestBodyAndResponseBodyAreSameOnMethods / requestBodyAndResponseBodyAreSameDescription
 - support multiple openapi version on generator ? (will need converters)
+
+### ⚠️ Known Limitations
+- Functions used directly in parameters (e.g., dynamic `default`) might not execute reliably or as expected, and will be called without arguments.
 
 ## 📄 License
 

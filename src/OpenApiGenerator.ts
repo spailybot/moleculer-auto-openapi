@@ -47,7 +47,7 @@ export class OpenApiGenerator {
         pathItems: {}
     };
     private readonly document: openApiServiceOpenApi;
-    private converter: FastestValidatorConverter;
+    private readonly converter: FastestValidatorConverter;
 
     constructor(
         private readonly logger: LoggerInstance,

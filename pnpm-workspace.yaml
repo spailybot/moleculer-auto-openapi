@@ -1,3 +1,5 @@
 packages:
-#     exclude packages from examples
-    - '!examples/**'
+  - '!examples/**'
+
+onlyBuiltDependencies:
+  - esbuild
