@@ -1,5 +1,5 @@
 import { addMappersFn, FastestValidatorType, FVOARuleMetaKeys, Mapper, Mappers, ObjectRules } from '../types/index.js';
-import { getOpenApiType, MappersOptions } from '../mappers.js';
+import { getDefaultFromRule, getOpenApiType, MappersOptions } from '../mappers.js';
 import type {
     RuleAny,
     RuleArray,
@@ -22,7 +22,6 @@ import type {
     RuleURL,
     RuleUUID,
     ValidationRule,
-    ValidationRuleName,
     ValidationRuleObject,
     ValidationSchema,
     ValidationSchemaMetaKeys
@@ -146,7 +145,7 @@ export class FastestValidatorConverter implements IConverter {
             ...baseRule
         };
 
-        const typeMapper = (this.mappers[rule.type as ValidationRuleName] as Mapper<RuleCustom>) || this.mappers.string; // Utilise le mapper pour string par défaut
+        const typeMapper = (this.mappers[rule.type] as Mapper<RuleCustom>) || this.mappers.string; // Utilise le mapper pour string par défaut
         const schema = typeMapper(rule, parentSchema);
 
         if (!schema) {
@@ -168,18 +167,23 @@ export class FastestValidatorConverter implements IConverter {
 
 export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaObjectFromSchema }: MappersOptions): Mappers => {
     return {
-        any: (rule: RuleAny): ReturnType<Mapper<RuleAny>> => ({
-            default: rule.default,
-            examples: rule.default ? [rule.default] : undefined
-        }),
+        any: (rule: RuleAny): ReturnType<Mapper<RuleAny>> => {
+            const ruleDefault = getDefaultFromRule(rule);
+
+            return {
+                default: ruleDefault,
+                examples: ruleDefault ? [ruleDefault] : undefined
+            };
+        },
         array: (rule: RuleArray): ReturnType<Mapper<RuleArray>> => {
             const itemsSchema = (rule.items ? getSchemaObjectFromRule(rule.items, { enum: rule.enum }) : undefined) ?? {};
+            const ruleDefault = getDefaultFromRule(rule);
 
             const schema: OpenAPIV3_1.ArraySchemaObject = {
                 type: 'array',
-                examples: rule.default ? [rule.default] : undefined,
+                examples: ruleDefault ? [ruleDefault] : undefined,
                 uniqueItems: rule.unique,
-                default: rule.default,
+                default: ruleDefault,
                 items: itemsSchema
             };
 
@@ -193,21 +197,26 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
 
             return schema;
         },
-        boolean: (rule: RuleBoolean): ReturnType<Mapper<RuleBoolean>> => ({
-            type: 'boolean',
-            default: rule.default,
-            examples: rule.default !== undefined ? [rule.default] : [true, false]
-        }),
+        boolean: (rule: RuleBoolean): ReturnType<Mapper<RuleBoolean>> => {
+            const ruleDefault = getDefaultFromRule(rule);
+            return {
+                type: 'boolean',
+                default: ruleDefault,
+                examples: ruleDefault !== undefined ? [ruleDefault] : [true, false]
+            };
+        },
         class: () => undefined,
         currency: (rule: RuleCurrency): ReturnType<Mapper<RuleCurrency>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             let pattern: string;
             if (rule.customRegex) {
                 pattern = rule.customRegex.toString();
             } else {
-                const currencySymbol = rule.currencySymbol || null;
-                const thousandSeparator = rule.thousandSeparator || ',';
-                const decimalSeparator = rule.decimalSeparator || '.';
-                const currencyPart = currencySymbol ? `\\${currencySymbol}${rule.symbolOptional ? '?' : ''}` : '';
+                const currencySymbol = rule.currencySymbol ?? null;
+                const thousandSeparator = rule.thousandSeparator ?? ',';
+                const decimalSeparator = rule.decimalSeparator ?? '.';
+                const symbolOptionalStr = rule.symbolOptional ? '?' : '';
+                const currencyPart = currencySymbol ? `\\${currencySymbol}${symbolOptionalStr}` : '';
 
                 const finalPattern = '(?=.*\\d)^(-?~1|~1-?)(([0-9]\\d{0,2}(~2\\d{3})*)|0)?(\\~3\\d{1,2})?$'
                     .replace(/~1/g, currencyPart)
@@ -219,28 +228,32 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return {
                 type: 'string',
                 pattern: pattern,
-                default: rule.default,
-                examples: rule.default ? [rule.default] : undefined,
+                default: ruleDefault,
+                examples: ruleDefault ? [ruleDefault] : undefined,
                 format: 'currency'
             };
         },
         date: (rule: RuleDate): ReturnType<Mapper<RuleDate>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             //without convert, date can't be sent handled
             if (!rule.convert) {
                 return undefined;
             }
 
-            const example = new Date(rule.default ?? Date.now());
+            const defaultDate = new Date(ruleDefault?.toString() ?? '');
+
+            const example = isNaN(defaultDate.getTime()) ? new Date() : defaultDate;
             const examples = [example.toISOString(), example.getTime()];
 
             return {
                 type: 'string',
-                default: rule.default,
+                default: ruleDefault,
                 format: 'date-time',
                 examples
             };
         },
         email: (rule: RuleEmail): ReturnType<Mapper<RuleEmail>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             const PRECISE_PATTERN =
                 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             const BASIC_PATTERN = /^\S+@\S+\.\S+$/;
@@ -250,11 +263,11 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return {
                 type: 'string',
                 format: 'email',
-                default: rule.default,
+                default: ruleDefault,
                 pattern: new RegExp(pattern).source,
                 maxLength: rule.max,
                 minLength: rule.min,
-                examples: [rule.default ?? 'foo@bar.com']
+                examples: [ruleDefault ?? 'foo@bar.com']
             };
         },
         enum: (rule: RuleEnum): ReturnType<Mapper<RuleEnum>> =>
@@ -263,6 +276,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 enum: rule.values
             }),
         equal: (rule: RuleEqual, parent: ObjectRules): ReturnType<Mapper<RuleEqual>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             if (rule.field && parent?.[rule.field]) {
                 return getSchemaObjectFromRule(parent?.[rule.field]);
             }
@@ -273,32 +287,37 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
 
             return {
                 type,
-                default: rule.default,
-                examples: rule.default ? [rule.default] : undefined,
+                default: ruleDefault,
+                examples: ruleDefault ? [ruleDefault] : undefined,
                 enum: rule.value ? [rule.value] : undefined
             } as OpenAPIV3_1.ArraySchemaObject | OpenAPIV3_1.NonArraySchemaObject;
         },
         forbidden: () => undefined,
         function: () => undefined,
-        luhn: (rule: RuleLuhn): ReturnType<Mapper<RuleLuhn>> => ({
-            type: 'string',
-            default: rule.default,
-            pattern: '^(\\d{1,4} ){3}\\d{1,4}$',
-            examples: rule.default ? [rule.default] : undefined,
-            format: 'luhn'
-        }),
+        luhn: (rule: RuleLuhn): ReturnType<Mapper<RuleLuhn>> => {
+            const ruleDefault = getDefaultFromRule(rule);
+            return {
+                type: 'string',
+                default: ruleDefault,
+                pattern: '^(\\d{1,4} ){3}\\d{1,4}$',
+                examples: ruleDefault ? [ruleDefault] : undefined,
+                format: 'luhn'
+            };
+        },
         mac: (rule: RuleMac): ReturnType<Mapper<RuleMac>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             const PATTERN =
                 /^((([a-f0-9][a-f0-9]+-){5}|([a-f0-9][a-f0-9]+:){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$/i;
             return {
                 type: 'string',
-                default: rule.default,
+                default: ruleDefault,
                 pattern: new RegExp(PATTERN).source,
-                examples: rule.default ? [rule.default] : ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
+                examples: ruleDefault ? [ruleDefault] : ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac'
             };
         },
         multi: (rule: RuleMulti): ReturnType<Mapper<RuleMulti>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             if (!Array.isArray(rule.rules)) {
                 return undefined;
             }
@@ -309,15 +328,16 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
 
             return {
                 oneOf: schemas,
-                default: rule.default,
-                examples: rule.default ? [rule.default] : undefined
+                default: ruleDefault,
+                examples: ruleDefault ? [ruleDefault] : undefined
             };
         },
         number: (rule: RuleNumber): ReturnType<Mapper<RuleNumber>> => {
-            const example = rule.default ?? rule.enum?.[0] ?? rule.min ?? rule.max;
+            const ruleDefault = getDefaultFromRule(rule);
+            const example = ruleDefault ?? rule.enum?.[0] ?? rule.min ?? rule.max;
             const schema: OpenAPIV3_1.NonArraySchemaObject = {
                 type: 'number',
-                default: rule.default,
+                default: ruleDefault,
                 examples: example ? [example] : undefined
             };
 
@@ -345,6 +365,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return schema;
         },
         object: (rule: RuleObject): ReturnType<Mapper<RuleObject>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             const props = rule.props ?? rule.properties;
             const properties = props ? getSchemaObjectFromSchema(props) : undefined;
 
@@ -352,25 +373,27 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 type: 'object',
                 minProperties: rule.minProps,
                 maxProperties: rule.maxProps,
-                default: rule.default,
+                default: ruleDefault,
                 properties,
-                examples: rule.default ? [rule.default] : undefined
+                examples: ruleDefault ? [ruleDefault] : undefined
             };
         },
         record: (fvRule: RuleRecord) => {
+            const ruleDefault = getDefaultFromRule(fvRule);
             const valueSchema = fvRule.value ? getSchemaObjectFromRule(fvRule.value) : undefined;
 
             let schema: OpenAPIV3_1.SchemaObject = {
                 type: 'object',
-                default: fvRule.default,
+                default: ruleDefault,
                 additionalProperties: valueSchema
             };
 
             return schema;
         },
         string: (fvRule: RuleString): ReturnType<Mapper<RuleString>> => {
+            const ruleDefault = getDefaultFromRule(fvRule);
             let schema: OpenAPIV3_1.NonArraySchemaObject = {
-                default: fvRule.default,
+                default: ruleDefault,
                 type: 'string'
             };
 
@@ -421,7 +444,7 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
 
             schema.enum = fvRule.enum;
 
-            const example = fvRule.default ?? fvRule.enum?.[0] ?? defaultExample;
+            const example = ruleDefault ?? fvRule.enum?.[0] ?? defaultExample;
 
             if (example) {
                 schema.examples = [example];
@@ -430,9 +453,10 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return schema;
         },
         tuple: (rule: RuleTuple): ReturnType<Mapper<RuleTuple>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             const baseSchema = getSchemaObjectFromRule({
                 type: 'array',
-                default: rule.default,
+                default: ruleDefault,
                 length: 2
             } as RuleArray) as OpenAPIV3_1.ArraySchemaObject;
 
@@ -442,19 +466,23 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
                 };
             }
 
-            if (rule.default) {
-                baseSchema.examples = [rule.default];
+            if (ruleDefault) {
+                baseSchema.examples = [ruleDefault];
             }
 
             return baseSchema;
         },
-        url: (rule: RuleURL): ReturnType<Mapper<RuleURL>> => ({
-            type: 'string',
-            format: 'url',
-            default: rule.default,
-            examples: [rule.default ?? 'https://foobar.com']
-        }),
+        url: (rule: RuleURL): ReturnType<Mapper<RuleURL>> => {
+            const ruleDefault = getDefaultFromRule(rule);
+            return {
+                type: 'string',
+                format: 'url',
+                default: ruleDefault,
+                examples: [ruleDefault ?? 'https://foobar.com']
+            };
+        },
         uuid: (rule: RuleUUID): ReturnType<Mapper<RuleUUID>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             let example = undefined;
 
             switch (rule.version) {
@@ -485,20 +513,21 @@ export const getFastestValidatorMappers = ({ getSchemaObjectFromRule, getSchemaO
             return {
                 type: 'string',
                 format: 'uuid',
-                default: rule.default,
-                examples: rule.default ? [rule.default] : [example]
+                default: ruleDefault,
+                examples: ruleDefault ? [ruleDefault] : [example]
             };
         },
         objectID: (rule: RuleObjectID): ReturnType<Mapper<RuleObjectID>> => {
+            const ruleDefault = getDefaultFromRule(rule);
             const defaultObjectId = '507f1f77bcf86cd799439011';
 
             return {
                 type: 'string',
                 format: 'ObjectId',
-                default: rule.default,
+                default: ruleDefault,
                 minLength: defaultObjectId.length,
                 maxLength: defaultObjectId.length,
-                examples: rule.default ? [rule.default] : [defaultObjectId]
+                examples: ruleDefault ? [ruleDefault] : [defaultObjectId]
             };
         },
         custom: () => undefined

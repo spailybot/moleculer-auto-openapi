@@ -76,6 +76,17 @@ describe('Fastest Validator Mappers', () => {
                 examples: ['test']
             });
         });
+        it('should map any rule, withDefaultFn', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: 'test'
+                })
+            ).toEqual({
+                default: 'test',
+                examples: ['test']
+            });
+        });
     });
 
     describe('array mapper', () => {
@@ -193,6 +204,12 @@ describe('Fastest Validator Mappers', () => {
                 items: {}
             });
         });
+        it('should map array rule withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, type: 'array', default: () => ['test1', 'test2'] })).toEqual({
+                type: 'array',
+                items: {}
+            });
+        });
         it('should map array rule withSubObject', () => {
             mockGetSchemaObjectFromRule.mockReturnValueOnce({
                 $ref: '#/components/schemas/tests-mappers.array.withSubObject'
@@ -253,6 +270,14 @@ describe('Fastest Validator Mappers', () => {
                 type: 'boolean'
             });
         });
+        it('should map boolean rule, withDefaultFn', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: () => true
+                })
+            ).toEqual({ examples: [true, false], type: 'boolean' });
+        });
     });
 
     describe('class mapper', () => {
@@ -272,6 +297,14 @@ describe('Fastest Validator Mappers', () => {
         });
 
         it('should map class rule, withDefault', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: Buffer.from('test')
+                })
+            ).toEqual(undefined);
+        });
+        it('should map class rule, withDefaultFn', () => {
             expect(
                 mapperFn({
                     ...baseRule,
@@ -303,6 +336,13 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, type: 'currency', default: '$12,222.2' })).toEqual({
                 default: '$12,222.2',
                 examples: ['$12,222.2'],
+                format: 'currency',
+                pattern: '(?=.*\\d)^(-?|-?)(([0-9]\\d{0,2}(,\\d{3})*)|0)?(\\.\\d{1,2})?$',
+                type: 'string'
+            });
+        });
+        it('should map currency rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, type: 'currency', default: () => '$12,222.2' })).toEqual({
                 format: 'currency',
                 pattern: '(?=.*\\d)^(-?|-?)(([0-9]\\d{0,2}(,\\d{3})*)|0)?(\\.\\d{1,2})?$',
                 type: 'string'
@@ -387,6 +427,19 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string'
             });
         });
+        it('should map date rule, withDefaultFn', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: '1998-01-10T13:00:00.000Z'
+                })
+            ).toEqual({
+                default: '1998-01-10T13:00:00.000Z',
+                examples: ['1998-01-10T13:00:00.000Z', 884437200000],
+                format: 'date-time',
+                type: 'string'
+            });
+        });
     });
 
     describe('email mapper', () => {
@@ -412,6 +465,14 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, default: 'email@foobar.com' })).toEqual({
                 default: 'email@foobar.com',
                 examples: ['email@foobar.com'],
+                format: 'email',
+                pattern: '^\\S+@\\S+\\.\\S+$',
+                type: 'string'
+            });
+        });
+        it('should map email, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => 'email@foobar.com' })).toEqual({
+                examples: ['foo@bar.com'],
                 format: 'email',
                 pattern: '^\\S+@\\S+\\.\\S+$',
                 type: 'string'
@@ -520,6 +581,12 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string'
             });
         });
+        it('should map equal rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, value: 'test', default: () => 'test' }, testParent)).toEqual({
+                enum: ['test'],
+                type: 'string'
+            });
+        });
         it('should map equal rule, withValue', () => {
             expect(mapperFn({ ...baseRule, value: 'test' }, testParent)).toEqual({
                 enum: ['test'],
@@ -609,6 +676,13 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string'
             });
         });
+        it('should map luhn rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => '4242424242424242' })).toEqual({
+                format: 'luhn',
+                pattern: '^(\\d{1,4} ){3}\\d{1,4}$',
+                type: 'string'
+            });
+        });
     });
 
     describe('mac mapper', () => {
@@ -636,6 +710,15 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, default: '00:B0:D0:63:C2:26' })).toEqual({
                 default: '00:B0:D0:63:C2:26',
                 examples: ['00:B0:D0:63:C2:26'],
+                format: 'mac',
+                pattern:
+                    '^((([a-f0-9][a-f0-9]+-){5}|([a-f0-9][a-f0-9]+:){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$',
+                type: 'string'
+            });
+        });
+        it('should map mac rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => '00:B0:D0:63:C2:26' })).toEqual({
+                examples: ['01:C8:95:4B:65:FE', '01C8.954B.65FE', '01-C8-95-4B-65-FE'],
                 format: 'mac',
                 pattern:
                     '^((([a-f0-9][a-f0-9]+-){5}|([a-f0-9][a-f0-9]+:){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$',
@@ -680,6 +763,19 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, rules: ['string'], default: 'test' })).toEqual({
                 default: 'test',
                 examples: ['test'],
+                oneOf: [
+                    {
+                        type: 'string'
+                    }
+                ]
+            });
+            expect(mockGetSchemaObjectFromRule).toHaveBeenCalledWith('string');
+        });
+        it('should map multi rule, withDefaultFn', () => {
+            mockGetSchemaObjectFromRule.mockReturnValueOnce({
+                type: 'string'
+            });
+            expect(mapperFn({ ...baseRule, rules: ['string'], default: () => 'test' })).toEqual({
                 oneOf: [
                     {
                         type: 'string'
@@ -756,6 +852,11 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, default: 1 })).toEqual({
                 default: 1,
                 examples: [1],
+                type: 'number'
+            });
+        });
+        it('should map number rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => 1 })).toEqual({
                 type: 'number'
             });
         });
@@ -844,6 +945,18 @@ describe('Fastest Validator Mappers', () => {
                         foo: 'bar'
                     }
                 ],
+                type: 'object'
+            });
+        });
+        it('should map object rule, withDefaultFn', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: () => {
+                        foo: 'bar';
+                    }
+                })
+            ).toEqual({
                 type: 'object'
             });
         });
@@ -959,6 +1072,18 @@ describe('Fastest Validator Mappers', () => {
                 default: {
                     foo: 'bar'
                 },
+                type: 'object'
+            });
+        });
+        it('should map record rule, withDefaultFn', () => {
+            expect(
+                mapperFn({
+                    ...baseRule,
+                    default: () => {
+                        foo: 'bar';
+                    }
+                })
+            ).toEqual({
                 type: 'object'
             });
         });
@@ -1160,6 +1285,18 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string'
             });
         });
+        it('should map string rule, withDefault', () => {
+            expect(mapperFn({ ...baseRule, default: 'text' })).toEqual({
+                default: 'text',
+                examples: ['text'],
+                type: 'string'
+            });
+        });
+        it('should map string rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => 'text' })).toEqual({
+                type: 'string'
+            });
+        });
     });
 
     describe('tuple mapper', () => {
@@ -1194,6 +1331,26 @@ describe('Fastest Validator Mappers', () => {
             });
             expect(mockGetSchemaObjectFromRule).toHaveBeenCalledWith({
                 default: [1, 'test'],
+                length: 2,
+                type: 'array'
+            });
+        });
+        it('should map tuple rule, withDefaultFn', () => {
+            mockGetSchemaObjectFromRule.mockReturnValueOnce({
+                default: [1, 'test'],
+                examples: [[1, 'test']],
+                maxItems: 2,
+                minItems: 2,
+                type: 'array'
+            });
+            expect(mapperFn({ ...baseRule, default: () => [1, 'test'] })).toEqual({
+                default: [1, 'test'],
+                examples: [[1, 'test']],
+                maxItems: 2,
+                minItems: 2,
+                type: 'array'
+            });
+            expect(mockGetSchemaObjectFromRule).toHaveBeenCalledWith({
                 length: 2,
                 type: 'array'
             });
@@ -1274,6 +1431,13 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string'
             });
         });
+        it('should map url rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => 'https://mysite.com' })).toEqual({
+                examples: ['https://foobar.com'],
+                format: 'url',
+                type: 'string'
+            });
+        });
         it('should map url rule, withEmpty', () => {
             expect(mapperFn({ ...baseRule, empty: true })).toEqual({
                 examples: ['https://foobar.com'],
@@ -1306,6 +1470,13 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, default: '6a6e3331-4e5f-4c5b-9b78-782d60426cc6' })).toEqual({
                 default: '6a6e3331-4e5f-4c5b-9b78-782d60426cc6',
                 examples: ['6a6e3331-4e5f-4c5b-9b78-782d60426cc6'],
+                format: 'uuid',
+                type: 'string'
+            });
+        });
+        it('should map uuid rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => '6a6e3331-4e5f-4c5b-9b78-782d60426cc6' })).toEqual({
+                examples: ['10ba038e-48da-487b-96e8-8d3b99b6d18a'],
                 format: 'uuid',
                 type: 'string'
             });
@@ -1386,6 +1557,15 @@ describe('Fastest Validator Mappers', () => {
             expect(mapperFn({ ...baseRule, default: '507f1f77bcf86cd799439012' })).toEqual({
                 default: '507f1f77bcf86cd799439012',
                 examples: ['507f1f77bcf86cd799439012'],
+                format: 'ObjectId',
+                maxLength: 24,
+                minLength: 24,
+                type: 'string'
+            });
+        });
+        it('should map objectID rule, withDefaultFn', () => {
+            expect(mapperFn({ ...baseRule, default: () => '507f1f77bcf86cd799439012' })).toEqual({
+                examples: ['507f1f77bcf86cd799439011'],
                 format: 'ObjectId',
                 maxLength: 24,
                 minLength: 24,
