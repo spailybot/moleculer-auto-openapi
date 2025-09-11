@@ -73,11 +73,14 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     return this.settings.cacheOpenApi ?? true;
                 },
                 keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
+                    // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
+                    const name = typeof actionName === 'string' ? actionName : actionName.name;
+
                     if (!params.version) {
-                        return actionName;
+                        return name;
                     }
 
-                    return `${actionName}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
+                    return `${name}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
                 },
                 ttl: 600
             },
