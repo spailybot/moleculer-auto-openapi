@@ -1,5 +1,15 @@
 import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGenerator.js';
-import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
+import Moleculer, {
+    ActionEndpoint,
+    ActionSchema,
+    Context,
+    EndpointList,
+    Service,
+    ServiceAction,
+    ServiceMethods,
+    ServiceSchema,
+    ServiceSettingSchema
+} from 'moleculer';
 import fs from 'fs';
 import {
     addMappersFn,
@@ -15,6 +25,7 @@ import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js
 import path from 'path/posix';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 import { Alias } from './objects/Alias.js';
+import semver from 'semver';
 
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
 
@@ -28,7 +39,17 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             const generateDocsAction = 'generateDocs';
             const { cacheMode } = this.settings;
             if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
-                const cacheKey = this.broker.cacher.getCacheKey(`${this.fullName}.${generateDocsAction}`, {}, {}, []);
+                let cacheKeyFirstParam: string | ActionSchema = `${this.fullName}.${generateDocsAction}`;
+                if (semver.gt('0.15.0', this.broker.MOLECULER_VERSION)) {
+                    const endpoint = this.broker.findNextActionEndpoint(cacheKeyFirstParam);
+                    if (!(endpoint as ActionEndpoint).action) {
+                        throw new Error('fail to find endpoint');
+                    }
+                    cacheKeyFirstParam = (endpoint as ActionEndpoint).action;
+                }
+                // force cacheKeyFirstParam as string to avoid error with moleculer < 0.15.0 .
+                // moleculer 0.15.0 need an action, and not a string
+                const cacheKey = this.broker.cacher.getCacheKey(cacheKeyFirstParam as string, {}, {}, []);
                 await this.broker.cacher.clean(`${cacheKey}*`);
             }
 
