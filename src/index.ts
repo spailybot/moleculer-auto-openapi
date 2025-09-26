@@ -12,7 +12,7 @@ import { PathAction } from './objects/PathAction.js';
 import { HTTP_METHODS, rawHttpMethod, JOKER_METHOD } from './constants.js';
 import type * as MoleculerWebTypes from './types/moleculer-web.js';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from './types/openapi.js';
-import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js'
+import Converters from './Converters/index.js';
 
 export * from './types/index.js';
 
@@ -34,5 +34,5 @@ export {
     PathAction,
     rawHttpMethod,
     JOKER_METHOD,
-		FastestValidatorConverter
+		Converters
 };
