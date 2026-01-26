@@ -651,7 +651,7 @@ export class OpenApiGenerator {
             return obj.map((item) => this.removeExtensions(item)) as T;
         }
 
-        if (typeof obj === 'object') {
+        if (typeof obj === 'object' && obj !== null) {
             Object.values(EOAExtensions).forEach((extension) => {
                 delete (obj as Record<string, unknown>)[extension];
             });
