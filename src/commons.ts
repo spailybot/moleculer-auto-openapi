@@ -54,3 +54,19 @@ export function getAlphabeticSorter(key?: string) {
 
     return (a: Record<string, any>, b: Record<string, any>): number => a[key]?.localeCompare(b[key], 'en', { sensitivity: 'base' }) ?? -1;
 }
+
+/**
+ * Deep clone an object using structuredClone if available,
+ * falling back to JSON.parse(JSON.stringify()) for compatibility.
+ * @param val
+ */
+export function deepClone<T>(val: T): T {
+    if (typeof structuredClone === 'function') {
+        try {
+            return structuredClone(val);
+        } catch (e) {
+            // Fallback for objects that cannot be cloned by structuredClone (e.g. containing functions)
+        }
+    }
+    return JSON.parse(JSON.stringify(val));
+}
