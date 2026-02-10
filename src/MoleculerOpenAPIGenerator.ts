@@ -13,6 +13,7 @@ import {
 import type { ApiSettingsSchema } from 'moleculer-web';
 import type { ExcludeRequiredProps } from './types/utils.js';
 import { moleculerOpenAPITypes } from './moleculer.js';
+import { deepClone } from './commons.js';
 import { MoleculerWebRoutesParser } from './MoleculerWebRoutesParser/MoleculerWebRoutesParser.js';
 import { Alias } from './objects/Alias.js';
 import { OpenApiGenerator } from './OpenApiGenerator.js';
@@ -150,7 +151,7 @@ export class MoleculerOpenAPIGenerator {
 
         const aliases = await filterAliasesFn(ctx, await this.getAliases(ctx));
 
-        const generator = new OpenApiGenerator(this.logger, this.validator, JSON.parse(JSON.stringify(this.settings.openapi)), addMappers);
+        const generator = new OpenApiGenerator(this.logger, this.validator, deepClone(this.settings.openapi!), addMappers);
         await generator.load();
 
         return generator.generate(version, aliases);
