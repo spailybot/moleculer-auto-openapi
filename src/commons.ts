@@ -61,6 +61,9 @@ export function getAlphabeticSorter(key?: string) {
  * @param val
  */
 export function deepClone<T>(val: T): T {
+    if (val === null || val === undefined) {
+        return val;
+    }
     if (typeof structuredClone === 'function') {
         try {
             return structuredClone(val);

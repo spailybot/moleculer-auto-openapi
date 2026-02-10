@@ -151,7 +151,7 @@ export class MoleculerOpenAPIGenerator {
 
         const aliases = await filterAliasesFn(ctx, await this.getAliases(ctx));
 
-        const generator = new OpenApiGenerator(this.logger, this.validator, deepClone(this.settings.openapi), addMappers);
+        const generator = new OpenApiGenerator(this.logger, this.validator, deepClone(this.settings.openapi!), addMappers);
         await generator.load();
 
         return generator.generate(version, aliases);
