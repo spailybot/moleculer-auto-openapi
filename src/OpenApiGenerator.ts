@@ -9,7 +9,7 @@ import {
     tSystemParams
 } from './types/index.js';
 import { getAlphabeticSorter, matchAll, normalizePath } from './commons.js';
-import { LoggerInstance } from 'moleculer';
+import { Logger } from 'moleculer';
 import { Alias } from './objects/Alias.js';
 import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
 import {
@@ -50,7 +50,7 @@ export class OpenApiGenerator {
     private readonly converter: FastestValidatorConverter;
 
     constructor(
-        private readonly logger: LoggerInstance,
+        private readonly logger: Logger,
         validator: FastestValidatorType,
         baseDocument: openApiServiceOpenApi,
         addMappersFn: addMappersFn

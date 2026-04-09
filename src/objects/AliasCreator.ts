@@ -2,13 +2,13 @@ import { AliasRouteSchemaOpenApi, ApiRouteSchema } from '../types/index.js';
 import { Alias } from './Alias.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../types/moleculer-web.js';
 import { Route } from './Route.js';
-import { LoggerInstance } from 'moleculer';
+import { Logger } from 'moleculer';
 import { isRawHttpMethodFromMWeb } from '../commons.js';
 import { HTTP_METHODS, JOKER_METHOD, OA_NAME_REGEXP, REST_METHOD } from '../constants.js';
 
 export class AliasCreator {
     constructor(
-        private readonly logger: LoggerInstance,
+        private readonly logger: Logger,
         private readonly route: Route,
         private readonly aliases: ApiRouteSchema['aliases'] = {},
         private readonly skipUnresolvedActions: boolean = true

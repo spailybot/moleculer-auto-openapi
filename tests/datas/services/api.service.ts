@@ -3,7 +3,8 @@ import { ApiRouteSchema } from 'moleculer-web';
 import { ServiceSchema } from 'moleculer';
 import type { ApiSettingsSchemaOpenApi } from '../../../src/index.js';
 
-const ApiGateway = moleculerWeb.default;
+// @ts-ignore moleculer web types issue
+const ApiGateway = typeof moleculerWeb === 'function' ? moleculerWeb : moleculerWeb.default || moleculerWeb;
 
 export const ApiService = {
     name: 'api',

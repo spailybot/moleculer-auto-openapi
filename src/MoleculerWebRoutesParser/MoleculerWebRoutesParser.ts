@@ -1,12 +1,12 @@
 import { ApiSettingsSchemaOpenApi, definedActionSchema, definedApiRouteSchema, OpenApiMixinSettings } from '../types/index.js';
 import { MOLECULER_WEB_LIST_ALIASES_INPUT, MOLECULER_WEB_LIST_ALIASES_OUTPUT, routeAlias } from '../types/moleculer-web.js';
-import { ActionSchema, Context, LoggerInstance, Service, ServiceSchema } from 'moleculer';
+import { ActionSchema, Context, Logger, Service, ServiceSchema } from 'moleculer';
 import { getServiceName, normalizePath } from '../commons.js';
 import { Route } from '../objects/Route.js';
 import { Alias } from '../objects/Alias.js';
 
 export class MoleculerWebRoutesParser {
-    constructor(private readonly logger: LoggerInstance) {
+    constructor(private readonly logger: Logger) {
         this.logger.debug(`RoutesParser.constructor()`);
     }
 

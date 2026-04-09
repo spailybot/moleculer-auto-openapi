@@ -6,6 +6,8 @@
 
 import { OPENAPI_VERSIONS_SUPPORTED } from './constants.js';
 import { mixin } from './mixin.js';
+import type { ServiceSchema } from 'moleculer';
+import type { OpenApiMixinSettings } from './types/index.js';
 import { Alias } from './objects/Alias.js';
 import { Route } from './objects/Route.js';
 import { PathAction } from './objects/PathAction.js';
@@ -21,7 +23,7 @@ export * from './types/index.js';
  */
 export default mixin;
 export { mixin };
-export const OpenApiMixin = mixin;
+export const OpenApiMixin: ServiceSchema<OpenApiMixinSettings> = mixin as any;
 
 export {
     OA_GENERATE_DOCS_INPUT,

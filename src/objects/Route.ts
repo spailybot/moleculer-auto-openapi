@@ -4,7 +4,7 @@ import { normalizePath } from '../commons.js';
 import path from 'path/posix';
 import { bodyParserOptions, BusboyConfig, routeAlias } from '../types/moleculer-web.js';
 import { AliasCreator } from './AliasCreator.js';
-import { LoggerInstance, ServiceSchema } from 'moleculer';
+import { Logger, ServiceSchema } from 'moleculer';
 import { JOKER_METHOD } from '../constants.js';
 
 export class Route {
@@ -18,7 +18,7 @@ export class Route {
     public readonly busboyConfig?: BusboyConfig<unknown>;
 
     constructor(
-        private readonly logger: LoggerInstance,
+        private readonly logger: Logger,
         route: definedApiRouteSchema,
         apiService: ServiceSchema<ApiSettingsSchemaOpenApi>,
         openApiService?: ServiceSchema<OpenApiMixinSettings>,

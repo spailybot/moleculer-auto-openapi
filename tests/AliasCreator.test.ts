@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { LoggerInstance, Service } from 'moleculer';
+import { Logger, Service } from 'moleculer';
 import { Route } from '../src/objects/Route.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../src/types/moleculer-web.js';
 import { AliasCreator } from '../src/objects/AliasCreator.js';
@@ -9,7 +9,7 @@ describe('AliasCreator', () => {
     const logger = {
         warn: console.warn,
         error: console.error
-    } as LoggerInstance;
+    } as Logger;
 
     const fakeFn = jest.fn();
     const aliases: Record<string, ApiSchemaAlias> = {

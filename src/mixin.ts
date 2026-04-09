@@ -31,7 +31,7 @@ type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpe
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<ServiceSettingSchema> = {
+export const mixin: ServiceSchema<OpenApiMixinSettings> & { methods: any } = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
@@ -49,7 +49,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 }
                 // force cacheKeyFirstParam as string to avoid error with moleculer < 0.15.0 .
                 // moleculer 0.15.0 need an action, and not a string
-                const cacheKey = this.broker.cacher.getCacheKey(cacheKeyFirstParam as string, {}, {}, []);
+                const cacheKey = this.broker.cacher.getCacheKey(cacheKeyFirstParam as string, {}, {} as Context);
                 await this.broker.cacher.clean(`${cacheKey}*`);
             }
 
@@ -72,12 +72,12 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 enabled(this: openApiService) {
                     return this.settings.cacheOpenApi ?? true;
                 },
-                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
+                keygen: (actionName: string | ActionSchema, params: any, ctx: Context<any>) => {
                     // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
                     const name = typeof actionName === 'string' ? actionName : actionName.name;
 
-                    if (!params.version) {
-                        return name;
+                    if (!ctx?.params?.version) {
+                        return name as string;
                     }
 
                     return `${name}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
@@ -95,7 +95,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             //         enum: openApiVersionsSupported
             //     }
             // },
-            handler(this: openApiService, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
+            handler(this: any, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
                 return this.getGenerator().generateSchema(ctx, {
                     filterAliasesFn: this.filterAliases,
                     addMappers: this.addMappers
@@ -163,7 +163,7 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     optional: true
                 } as RuleString
             },
-            async handler(this: openApiService, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
+            async handler(this: any, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
 
                 const paths: OpenApiPaths = await this.getOpenApiPaths();
@@ -208,8 +208,9 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
         },
         regenerateOpenApiPaths: {
             visibility: 'private',
+            // @ts-ignore moleculer 0.15 does not have throttle
             throttle: 10000,
-            async handler(this: openApiService, ctx: Context) {
+            async handler(this: any, ctx: Context) {
                 const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
                     (alias) => alias.service?.name === this.name
                 );
