@@ -16,7 +16,7 @@ export type bodyParserOptions = {
 
 // BusboyConfig
 export interface BusboyConfig<T> {
-    headers?: any;
+    headers?: Record<string, unknown>;
     highWaterMark?: number | undefined;
     fileHwm?: number | undefined;
     defCharset?: string | undefined;
@@ -108,7 +108,7 @@ export interface ServeStaticOptions {
      * path the file path that is being sent
      * stat the stat object of the file that is being sent
      */
-    setHeaders?: ((res: ServerResponse, path: string, stat: any) => any) | undefined;
+    setHeaders?: ((res: ServerResponse, path: string, stat: unknown) => unknown) | undefined;
 }
 
 export type AssetsConfig = {
@@ -149,7 +149,7 @@ export interface Alias {
 }
 
 export interface Route {
-    callOptions: any;
+    callOptions: CallingOptions;
     cors: CorsOptions;
     etag: boolean | 'weak' | 'strong' | Function;
     hasWhitelist: boolean;
@@ -158,7 +158,7 @@ export interface Route {
     middlewares: Function[];
     onBeforeCall?: onBeforeCall;
     onAfterCall?: onAfterCall;
-    opts: any;
+    opts: unknown;
     path: string;
     whitelist: string[];
 }
@@ -172,7 +172,7 @@ export type onAfterCall = unknown;
  * @see https://www.npmjs.com/package/@types/express-serve-static-core
  */
 export interface NextFunction {
-    (err?: any): void;
+    (err?: unknown): void;
     /**
      * "Break-out" of a router by calling {next('router')};
      * @see https://expressjs.com/en/guide/using-middleware.html#middleware.router

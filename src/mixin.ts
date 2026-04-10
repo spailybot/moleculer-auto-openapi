@@ -107,7 +107,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings, TOpenApiMixinMethods, TO
             //         enum: openApiVersionsSupported
             //     }
             // },
-            handler(this: any, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
+            handler(this: openApiService, ctx: Context<OA_GENERATE_DOCS_INPUT>): Promise<OA_GENERATE_DOCS_OUTPUT> {
                 return this.getGenerator().generateSchema(ctx, {
                     filterAliasesFn: this.filterAliases,
                     addMappers: this.addMappers
@@ -175,7 +175,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings, TOpenApiMixinMethods, TO
                     optional: true
                 } as RuleString
             },
-            async handler(this: any, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
+            async handler(this: openApiService, ctx: Context<{ url: string }, { $responseType: string }>): Promise<string> {
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
 
                 const paths: OpenApiPaths = await this.getOpenApiPaths();
@@ -222,7 +222,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings, TOpenApiMixinMethods, TO
             visibility: 'private',
             // @ts-ignore moleculer 0.15 does not have throttle
             throttle: 10000,
-            async handler(this: any, ctx: Context) {
+            async handler(this: openApiService, ctx: Context) {
                 const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
                     (alias) => alias.service?.name === this.name
                 );

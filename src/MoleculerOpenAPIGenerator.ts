@@ -95,13 +95,13 @@ export class MoleculerOpenAPIGenerator {
 
     constructor(broker: ServiceBroker, settings: OpenApiMixinSettings) {
         this.broker = broker;
-        const validator = this.broker.validator as unknown as { validator: any };
+        const validator = this.broker.validator as unknown as { validator: unknown };
         if (validator.constructor.name != 'FastestValidator' && validator.validator) {
             throw new Error('only fastest validator is allowed');
         }
 
         this.logger = this.broker.getLogger('moleculer-openapi-generator');
-        this.validator = validator.validator;
+        this.validator = validator.validator as FastestValidatorType;
 
         this.settings = {
             ...defaultSettings,

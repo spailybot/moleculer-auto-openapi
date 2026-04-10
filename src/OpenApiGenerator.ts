@@ -459,7 +459,7 @@ export class OpenApiGenerator {
         } as OpenAPIV3_1.RequestBodyObject;
     }
 
-    private isReferenceObject(component: any): component is OpenAPIV3_1.ReferenceObject {
+    private isReferenceObject(component: unknown): component is OpenAPIV3_1.ReferenceObject {
         return !!(component as OpenAPIV3_1.ReferenceObject)?.$ref;
     }
 
@@ -497,7 +497,7 @@ export class OpenApiGenerator {
         rootSchemeName: string,
         obj: ValidationSchema,
         exclude: Array<string> = [],
-        parentNode: { default?: any } = {}
+        parentNode: { default?: unknown } = {}
     ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject | undefined {
         if (obj.$$root === true) {
             return this.converter.getSchemaObjectFromRootSchema(obj);
@@ -534,7 +534,7 @@ export class OpenApiGenerator {
     _createSchemaComponentFromObject(
         schemeName: string,
         obj: Record<string, OpenAPIV3_1.SchemaObject>,
-        customProperties: { default?: any } = {}
+        customProperties: { default?: unknown } = {}
     ): OpenAPIV3_1.ReferenceObject {
         if (!this.components.schemas) {
             this.components.schemas = {};
