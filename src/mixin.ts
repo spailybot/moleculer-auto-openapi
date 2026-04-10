@@ -31,7 +31,7 @@ type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpe
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<OpenApiMixinSettings> = {
+export const mixin: ServiceSchema<OpenApiMixinSettings> & { methods: any } = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
@@ -53,7 +53,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
                 await this.broker.cacher.clean(`${cacheKey}*`);
             }
 
-            this.actions.regenerateOpenApiPaths().catch((e) => {
+            this.actions.regenerateOpenApiPaths().catch((e: Error) => {
                 this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
             });
 
@@ -72,15 +72,15 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
                 enabled(this: openApiService) {
                     return this.settings.cacheOpenApi ?? true;
                 },
-                keygen: (actionName: string | ActionSchema, params: any, ctx: Context<any>) => {
+                keygen: (actionName: string | ActionSchema, params: unknown, ctx: Context<unknown>) => {
                     // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
                     const name = typeof actionName === 'string' ? actionName : actionName.name;
 
-                    if (!ctx?.params?.version) {
+                    if (!(ctx?.params as Record<string, unknown>)?.version) {
                         return name as string;
                     }
 
-                    return `${name}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
+                    return `${name}|${(params as Record<string, unknown>)?.version || DEFAULT_OPENAPI_VERSION}`;
                 },
                 ttl: 600
             },
@@ -276,7 +276,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> = {
             try {
                 const swaggerUi = await import('swagger-ui-dist');
                 return swaggerUi.getAbsoluteFSPath();
-            } catch (e) {
+            } catch (e: unknown) {
                 throw new MoleculerError('fail to load swagger ui');
             }
         },

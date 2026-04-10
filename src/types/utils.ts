@@ -45,11 +45,11 @@ export type SubOptionalOrFalse<T> = {
     [P in keyof T]?: OptionalOrFalse<T[P]>;
 };
 
-export type ExcludeFalse<T extends { openapi?: false | any }> = Exclude<T['openapi'], false>;
+export type ExcludeFalse<T extends { openapi?: false | unknown }> = Exclude<T['openapi'], false>;
 /**
  * just to remove the | false on openapi keys . ( allow input "| false" , but need without "| false" when used )
  */
-export type OpenApiDefined<T extends { openapi?: false | any }> = Omit<T, 'openapi'> & { openapi?: ExcludeFalse<T> };
+export type OpenApiDefined<T extends { openapi?: false | unknown }> = Omit<T, 'openapi'> & { openapi?: ExcludeFalse<T> };
 
 export type RequiredKeys<T> = { [K in keyof T]-?: {} extends { [P in K]: T[K] } ? never : K }[keyof T];
 export type OptionalKeys<T> = { [K in keyof T]-?: {} extends { [P in K]: T[K] } ? K : never }[keyof T];
