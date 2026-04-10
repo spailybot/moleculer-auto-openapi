@@ -31,7 +31,7 @@ type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpe
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<OpenApiMixinSettings> & { methods: any } = {
+export const mixin: ServiceSchema<OpenApiMixinSettings> = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
@@ -293,7 +293,7 @@ export const mixin: ServiceSchema<OpenApiMixinSettings> & { methods: any } = {
         addMappers: (getSchemaObjectFromRule, getSchemaObjectFromSchema) => {
             return {};
         }
-    } as ServiceMethods & { filterAliases: filterAliasesFn; addMappers: addMappersFn },
+    } as ServiceMethods,
     created() {
         this.generator = new MoleculerOpenAPIGenerator(this.broker, this.settings as OpenApiMixinSettings);
     },

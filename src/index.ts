@@ -23,7 +23,7 @@ export * from './types/index.js';
  */
 export default mixin;
 export { mixin };
-export const OpenApiMixin: ServiceSchema<OpenApiMixinSettings> = mixin as any;
+export const OpenApiMixin = mixin;
 
 export {
     OA_GENERATE_DOCS_INPUT,
