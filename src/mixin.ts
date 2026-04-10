@@ -27,11 +27,23 @@ import MoleculerError = Moleculer.Errors.MoleculerError;
 import { Alias } from './objects/Alias.js';
 import semver from 'semver';
 
-type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
+type openApiService = Service<OpenApiMixinSettings> & TOpenApiMixinVars & TOpenApiMixinMethods;
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<OpenApiMixinSettings> & { methods: any } = {
+type TOpenApiMixinMethods = {
+    getGenerator: () => MoleculerOpenAPIGenerator;
+    getOpenApiPaths: () => OpenApiPaths;
+    filterAliases: filterAliasesFn;
+    addMappers: addMappersFn;
+    getSwaggerPath: () => Promise<string>;
+};
+
+type TOpenApiMixinVars = {
+    generator?: MoleculerOpenAPIGenerator;
+};
+
+export const mixin: ServiceSchema<OpenApiMixinSettings, TOpenApiMixinMethods, TOpenApiMixinVars> = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
