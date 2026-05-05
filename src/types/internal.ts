@@ -7,9 +7,6 @@ export type EOASchemaExtensionTypes = {
     [K in (typeof EOASchemaExtensions)[keyof typeof EOASchemaExtensions]]?: unknown;
 } & {
     [EOASchemaExtensions.optional]?: boolean;
-    [EOASchemaExtensions.description]?: string;
-    [EOASchemaExtensions.summary]?: string;
-    [EOASchemaExtensions.deprecated]?: boolean;
 };
 
 export type EOAOperationsExtensionTypes = {

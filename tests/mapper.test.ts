@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest, beforeAll } from '@jest/globals';
+import { FastestValidatorConverter } from '../src/Converters/FastestValidatorConverter.js';
+import FastestValidator from 'fastest-validator';
 import { MappersOptions } from '../src/mappers.js';
 import {
     RuleAny,
@@ -1110,6 +1112,35 @@ describe('Fastest Validator Mappers', () => {
                 type: 'object'
             });
             expect(mockGetSchemaObjectFromRule).toHaveBeenCalledWith({ type: 'number' });
+        });
+    });
+
+    describe('extensions mapper', () => {
+        let converter: any;
+
+        beforeAll(() => {
+
+            converter = new FastestValidatorConverter(new FastestValidator());
+        });
+
+        it('should map custom global extensions via getSchemaObjectFromRule', () => {
+            const schema = converter.getSchemaObjectFromRule({
+                type: 'string',
+                // @ts-ignore
+                $$description: "my desc",
+                $$title: "my title",
+                $$oa: {
+                    example: "foo",
+                    description: "my specific desc"
+                }
+            });
+
+            expect(schema).toMatchObject({
+                type: 'string',
+                description: 'my specific desc',
+
+                example: 'foo',
+            });
         });
     });
 

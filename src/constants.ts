@@ -5,24 +5,13 @@ export const EOAOperationsExtensions = {
 } as const;
 
 export const EOASchemaExtensions = {
-    optional: 'x-fastest-optional',
-    description: 'x-fastest-description',
-    summary: 'x-fastest-summary',
-    deprecated: 'x-fastest-deprecated'
+    optional: 'x-fastest-optional'
 } as const;
 
 export const EOAExtensions = {
     ...EOAOperationsExtensions,
     ...EOASchemaExtensions
 } as const;
-
-// export enum EOAExtensions {
-//     optional = 'x-fastest-optional',
-//     description = 'x-fastest-description',
-//     summary = 'x-fastest-summary',
-//     deprecated = 'x-fastest-deprecated',
-//     server = 'x-moleculer-web-server'
-// }
 
 export enum HTTP_METHODS {
     GET = 'get',

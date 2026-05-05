@@ -79,7 +79,14 @@ export class FastestValidatorConverter implements IConverter {
     }
 
     public getMetas(schema: ValidationSchema): ValidationSchemaMetaKeys {
-        return Object.fromEntries(Object.entries(schema).filter(([k]) => k.startsWith('$$')));
+        const metas: ValidationSchemaMetaKeys = {};
+        for (const k in schema) {
+            if (k.startsWith('$')) {
+                // @ts-ignore
+                metas[k] = schema[k];
+            }
+        }
+        return metas;
     }
 
     public getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OpenAPIV3_1.SchemaObject> {
@@ -115,29 +122,8 @@ export class FastestValidatorConverter implements IConverter {
             throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
         }
 
-        //clone the object, else fastestValidator will remove $$oa
+        //clone the object, else fastestValidator will remove $oa
         const clonedRule: ValidationRule = typeof pRule === 'object' ? (Array.isArray(pRule) ? [...pRule] : { ...pRule }) : pRule;
-
-        //extract known params extensions
-        const extensions: Array<[string, EOASchemaExtensionsValueTypes]> =
-            Array.isArray(clonedRule) || typeof clonedRule !== 'object' || !clonedRule.$$oa
-                ? []
-                : (
-                      [
-                          {
-                              property: 'description',
-                              extension: EOAExtensions.description
-                          },
-                          {
-                              property: 'summary',
-                              extension: EOAExtensions.summary
-                          },
-                          {
-                              property: 'deprecated',
-                              extension: EOAExtensions.deprecated
-                          }
-                      ] as Array<{ property: keyof FVOARuleMetaKeys; extension: EOAExtensionsValues }>
-                  ).map(({ property, extension }) => [extension, clonedRule.$$oa?.[property]]);
 
         const baseRule = this.validator.getRuleFromSchema(clonedRule)?.schema as ValidationRuleObject;
         const rule = {
@@ -156,10 +142,27 @@ export class FastestValidatorConverter implements IConverter {
             schema[EOAExtensions.optional] = true;
         }
 
-        // @ts-ignore
-        extensions.forEach(([k, v]: [EOASchemaExtensionsValues, any]) => {
-            schema[k] = v;
-        });
+        if (typeof clonedRule === 'object' && !Array.isArray(clonedRule)) {
+            // Apply supported global $ keys
+            const globalKeys = ['$$title', '$$description', '$$default', '$$example', '$$examples', '$$format', '$$readOnly', '$$writeOnly', '$$deprecated', '$$pattern'];
+            for (const key of globalKeys) {
+                if (key in clonedRule) {
+                    const openApiKey = key.substring(2);
+                    // @ts-ignore
+                    schema[openApiKey] = clonedRule[key];
+                }
+            }
+
+            // Apply all $oa keys
+            if (clonedRule.$$oa) {
+                for (const key in clonedRule.$$oa) {
+                    if (key !== 'in' && key !== 'optional') {
+                        // @ts-ignore
+                        schema[key] = (clonedRule.$$oa as any)[key];
+                    }
+                }
+            }
+        }
 
         return schema;
     }

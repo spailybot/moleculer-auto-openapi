@@ -305,7 +305,24 @@ export class OpenApiGenerator {
             return undefined;
         }
 
-        const openApiMetas = metas?.$$oa ?? {};
+        const openApiMetas: Record<string, any> = {};
+
+        // Extract global keys
+        const globalKeys = ['$$title', '$$description', '$$summary', '$$default', '$$example', '$$$examples'];
+        for (const key of globalKeys) {
+            if (key in metas) {
+                const openApiKey = key.substring(2);
+                // @ts-ignore
+                openApiMetas[openApiKey] = metas[key];
+            }
+        }
+
+        // Overwrite with $oa keys
+        if (metas?.$$oa) {
+            for (const key in metas.$$oa) {
+                openApiMetas[key] = (metas.$$oa as any)[key];
+            }
+        }
 
         const bodyParameters = this.getParameters(method, actionParams, true);
         if (Object.keys(bodyParameters).length > 0) {
@@ -336,14 +353,19 @@ export class OpenApiGenerator {
                 required = (schemaRef.required ?? []).length > 0;
             }
 
-            return {
-                description: openApiMetas.description,
-                summary: openApiMetas.summary,
+            const requestBody: any = {
                 required,
                 content: Object.fromEntries(
                     contentTypes.map((contentType) => [contentType, { schema }]) as Array<[string, OpenAPIV3_1.MediaTypeObject]>
                 )
             };
+
+            // Apply all extracted metas
+            for (const key in openApiMetas) {
+                 requestBody[key] = openApiMetas[key];
+            }
+
+            return requestBody;
         }
     }
 
@@ -640,9 +662,9 @@ export class OpenApiGenerator {
     private extractSystemParams(obj: Record<string, unknown> = {}): tSystemParams {
         return {
             optional: obj?.[EOAExtensions.optional] as boolean,
-            description: obj?.[EOAExtensions.description] as string,
-            summary: obj?.[EOAExtensions.summary] as string,
-            deprecated: obj?.[EOAExtensions.deprecated] as boolean
+            description: obj?.["description"] as string,
+            summary: obj?.["summary"] as string,
+            deprecated: obj?.["deprecated"] as boolean
         };
     }
 
