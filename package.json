@@ -99,11 +99,5 @@
   },
   "dependencies": {
     "semver": "^7.8.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@scarf/scarf",
-      "esbuild"
-    ]
   }
 }
