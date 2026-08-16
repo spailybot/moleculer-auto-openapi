@@ -5,6 +5,8 @@ settings:
   excludeLinksFromLockfile: false
   onlyBuiltDependencies:
     - esbuild
+  neverBuiltDependencies:
+    - '@scarf/scarf'
 
 importers:
 
