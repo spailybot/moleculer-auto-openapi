@@ -1,15 +1,5 @@
 import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGenerator.js';
-import Moleculer, {
-    ActionEndpoint,
-    ActionSchema,
-    Context,
-    EndpointList,
-    Service,
-    ServiceAction,
-    ServiceMethods,
-    ServiceSchema,
-    ServiceSettingSchema
-} from 'moleculer';
+import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import fs from 'fs';
 import {
     addMappersFn,
@@ -25,7 +15,6 @@ import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js
 import path from 'path/posix';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 import { Alias } from './objects/Alias.js';
-import semver from 'semver';
 
 type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
 
@@ -39,18 +28,9 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
             const generateDocsAction = 'generateDocs';
             const { cacheMode } = this.settings;
             if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
-                let cacheKeyFirstParam: string | ActionSchema = `${this.fullName}.${generateDocsAction}`;
-                if (semver.gt('0.15.0', this.broker.MOLECULER_VERSION)) {
-                    const endpoint = this.broker.findNextActionEndpoint(cacheKeyFirstParam);
-                    if (!(endpoint as ActionEndpoint).action) {
-                        throw new Error('fail to find endpoint');
-                    }
-                    cacheKeyFirstParam = (endpoint as ActionEndpoint).action;
-                }
-                // force cacheKeyFirstParam as string to avoid error with moleculer < 0.15.0 .
-                // moleculer 0.15.0 need an action, and not a string
-                const cacheKey = this.broker.cacher.getCacheKey(cacheKeyFirstParam as string, {}, {}, []);
-                await this.broker.cacher.clean(`${cacheKey}*`);
+                // Invalidate every cached generateDocs result (with or without version).
+                // Uses ** (not *) because versioned keys like "...|3.1" contain a dot, which "*" does not match.
+                await this.broker.cacher.clean(`${this.fullName}.${generateDocsAction}**`);
             }
 
             this.actions.regenerateOpenApiPaths().catch((e) => {

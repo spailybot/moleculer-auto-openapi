@@ -8,7 +8,7 @@ import { ApiRouteSchema } from 'moleculer-web';
 describe("Documentation & Test: Parameter Precedence and Overrides", () => {
     const broker = new ServiceBroker({
         logLevel: 'error',
-        cacher: 'memory'
+        cacher: 'Memory'
     });
 
     const demoService = {

@@ -9,7 +9,7 @@ describe("Test 'openapi' mixin edge", () => {
     const broker = new ServiceBroker({
         // logger: false,
         logLevel: 'debug',
-        cacher: 'memory'
+        cacher: 'Memory'
     });
 
     beforeAll(async () => {

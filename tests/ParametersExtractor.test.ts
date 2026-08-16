@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import FastestValidator from 'fastest-validator';
 import { LoggerInstance } from 'moleculer';
+import { createFastestValidator } from './helpers/fastestValidator.js';
 import { ParametersExtractor } from '../src/Generators/ParametersExtractor.js';
 import { FastestValidatorConverter } from '../src/Converters/FastestValidatorConverter.js';
 import { ComponentsManager } from '../src/Generators/ComponentsManager.js';
@@ -15,7 +15,7 @@ describe('ParametersExtractor and Ref Override tests', () => {
         debug: () => {}
     } as unknown as LoggerInstance;
 
-    const validator = new FastestValidator();
+    const validator = createFastestValidator();
     const converter = new FastestValidatorConverter(validator);
     const componentsManager = new ComponentsManager(logger, converter);
     const extractor = new ParametersExtractor(converter, componentsManager);

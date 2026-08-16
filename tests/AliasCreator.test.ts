@@ -221,7 +221,7 @@ describe('AliasCreator', () => {
     });
 
     describe('with skipUnResolved false', () => {
-        it.each<[string, ApiSchemaAlias, AliasRouteSchema | undefined]>(Object.entries(aliases).map(([k, v]) => [k, v, aliasesResult[k]]))(
+        it.each<[string, ApiSchemaAlias, Array<AliasRouteSchema> | undefined]>(Object.entries(aliases).map(([k, v]) => [k, v, aliasesResult[k]]))(
             `test alias %s with skipUnResolved false`,
             (aliasName, alias, result) => {
                 const route = new Route(

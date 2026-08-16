@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import { FastestValidatorConverter } from '../src/Converters/FastestValidatorConverter.js';
-import FastestValidator from 'fastest-validator';
 import { MappersOptions } from '../src/mappers.js';
+import { createFastestValidator } from './helpers/fastestValidator.js';
 import {
     RuleAny,
     RuleArray,
@@ -1120,7 +1120,7 @@ describe('Fastest Validator Mappers', () => {
 
         beforeAll(() => {
 
-            converter = new FastestValidatorConverter(new FastestValidator());
+            converter = new FastestValidatorConverter(createFastestValidator());
         });
 
         it('should map custom global extensions via getSchemaObjectFromRule', () => {

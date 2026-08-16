@@ -5,12 +5,7 @@ import type { ActionOpenApi } from '../types/index.js';
 import type { FastestValidatorConverter } from '../Converters/FastestValidatorConverter.js';
 import type { ComponentsManager } from './ComponentsManager.js';
 import type { ParametersExtractor } from './ParametersExtractor.js';
-import {
-    BODY_PARSERS_CONTENT_TYPE,
-    DEFAULT_CONTENT_TYPE,
-    DEFAULT_MULTI_PART_FIELD_NAME,
-    HTTP_METHODS
-} from '../constants.js';
+import { BODY_PARSERS_CONTENT_TYPE, DEFAULT_CONTENT_TYPE, DEFAULT_MULTI_PART_FIELD_NAME, HTTP_METHODS } from '../constants.js';
 
 export class RequestBodyGenerator {
     constructor(

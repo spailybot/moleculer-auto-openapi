@@ -8,7 +8,7 @@ import { ApiRouteSchema } from 'moleculer-web';
 describe("Test parameter improvements & ref overrides in service broker integration", () => {
     const broker = new ServiceBroker({
         logLevel: 'error',
-        cacher: 'memory'
+        cacher: 'Memory'
     });
 
     const mockService = {

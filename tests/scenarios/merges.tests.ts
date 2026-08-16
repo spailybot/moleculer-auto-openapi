@@ -10,7 +10,7 @@ describe('merge tests', () => {
     describe('Test that a service can be hide by setting openapi to false', () => {
         const broker = new ServiceBroker({
             logger: false,
-            cacher: 'memory'
+            cacher: 'Memory'
         });
 
         beforeAll(async () => {
@@ -33,7 +33,7 @@ describe('merge tests', () => {
         describe('Test that a service can be hide by setting openapi to false', () => {
             const broker = new ServiceBroker({
                 logger: false,
-                cacher: 'memory'
+                cacher: 'Memory'
             });
 
             beforeAll(async () => {

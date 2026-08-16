@@ -4,7 +4,15 @@ import type { Alias } from '../objects/Alias.js';
 import type { ActionOpenApi, FVOARuleMetaKeys } from '../types/index.js';
 import type { FastestValidatorConverter } from '../Converters/FastestValidatorConverter.js';
 import type { ComponentsManager } from './ComponentsManager.js';
-import { EOAExtensions, HTTP_METHODS, ALLOWING_BODY_METHODS, OA_PARAM_IN, OA_REF_PREFIX, OA_TYPE, PARAM_SPECIFIC_KEYS } from '../constants.js';
+import {
+    EOAExtensions,
+    HTTP_METHODS,
+    ALLOWING_BODY_METHODS,
+    OA_PARAM_IN,
+    OA_REF_PREFIX,
+    OA_TYPE,
+    PARAM_SPECIFIC_KEYS
+} from '../constants.js';
 import { matchAll } from '../commons.js';
 
 export class ParametersExtractor {
@@ -35,16 +43,14 @@ export class ParametersExtractor {
         let resultParameters = [...parameters];
         const queryParameters = this.getParameters(method, actionParams, false);
         Object.entries(queryParameters).forEach(([k, v]) => {
-            const ruleObj = (v && typeof v === 'object' && !Array.isArray(v)) ? (v as Record<string, unknown>) : {};
+            const ruleObj = v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
             const openApiParams = (ruleObj.$$oa as FVOARuleMetaKeys | undefined) || {};
 
             if (typeof openApiParams.$ref === 'string' && openApiParams.$ref.startsWith(OA_REF_PREFIX.PARAMETERS)) {
                 const schemaParameter = {
                     $ref: openApiParams.$ref,
                     ...Object.fromEntries(
-                        PARAM_SPECIFIC_KEYS
-                            .filter((key) => openApiParams[key] !== undefined)
-                            .map((key) => [key, openApiParams[key]])
+                        PARAM_SPECIFIC_KEYS.filter((key) => openApiParams[key] !== undefined).map((key) => [key, openApiParams[key]])
                     )
                 } as OpenAPIV3_1.ReferenceObject & OpenAPIV3_1.ParameterBaseObject;
 
@@ -79,12 +85,22 @@ export class ParametersExtractor {
             const schemaParameter: OpenAPIV3_1.ParameterObject = {
                 name: k,
                 in: OA_PARAM_IN.QUERY,
-                style: 'style' in openApiParams ? openApiParams.style : (isObjectType ? 'deepObject' : undefined),
-                explode: 'explode' in openApiParams ? openApiParams.explode : (isObjectType ? true : undefined),
-                required: 'required' in openApiParams ? openApiParams.required : (component[EOAExtensions.optional] !== true || undefined),
-                deprecated: 'deprecated' in openApiParams ? openApiParams.deprecated : (component?.deprecated !== undefined ? component.deprecated : undefined),
-                description: 'description' in openApiParams ? openApiParams.description : (component?.description !== undefined ? component.description : undefined),
-                examples: ('examples' in openApiParams && !Array.isArray(openApiParams.examples)) ? openApiParams.examples : undefined,
+                style: 'style' in openApiParams ? openApiParams.style : isObjectType ? 'deepObject' : undefined,
+                explode: 'explode' in openApiParams ? openApiParams.explode : isObjectType ? true : undefined,
+                required: 'required' in openApiParams ? openApiParams.required : component[EOAExtensions.optional] !== true || undefined,
+                deprecated:
+                    'deprecated' in openApiParams
+                        ? openApiParams.deprecated
+                        : component?.deprecated !== undefined
+                          ? component.deprecated
+                          : undefined,
+                description:
+                    'description' in openApiParams
+                        ? openApiParams.description
+                        : component?.description !== undefined
+                          ? component.description
+                          : undefined,
+                examples: 'examples' in openApiParams && !Array.isArray(openApiParams.examples) ? openApiParams.examples : undefined,
                 allowEmptyValue: 'allowEmptyValue' in openApiParams ? openApiParams.allowEmptyValue : undefined,
                 allowReserved: 'allowReserved' in openApiParams ? openApiParams.allowReserved : undefined,
                 schema: schema as unknown as OpenAPIV3_1.ParameterObject['schema']

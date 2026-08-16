@@ -65,5 +65,36 @@ describe('cache.enabled context binding', () => {
                 await broker.stop();
             }
         });
+
+        it('should clean all cached versions of generateDocs when routes are regenerated', async () => {
+            const broker = new ServiceBroker({
+                logger: false,
+                cacher: 'Memory'
+            });
+
+            try {
+                await setupBroker(broker, undefined, [routes.base]);
+
+                const cacheKeys = [
+                    `${OpenapiService.name}.generateDocs`,
+                    `${OpenapiService.name}.generateDocs|3.1.0`,
+                    `${OpenapiService.name}.generateDocs|3.1`
+                ];
+
+                // Populate the cache with the keys used by the generateDocs keygen
+                for (const key of cacheKeys) {
+                    await broker.cacher!.set(key, { openapi: '3.1.0' });
+                }
+                expect((broker.cacher as any).cache.size).toBe(cacheKeys.length);
+
+                // Emit the event that triggers the cache cleanup
+                await broker.emit('$api.aliases.regenerated');
+
+                // All cached versions must be removed
+                expect((broker.cacher as any).cache.size).toBe(0);
+            } finally {
+                await broker.stop();
+            }
+        });
     });
 });
