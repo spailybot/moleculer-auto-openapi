@@ -43,7 +43,7 @@ export interface FVOASchemaMetaKeys extends Omit<OpenAPIV3_1.RequestBodyObject, 
      //the rest of your schema
  }
  */
-export interface FVOARuleMetaKeys extends Omit<OpenAPIV3_1.SchemaObject, 'type'> {
+export interface FVOARuleMetaKeys extends Omit<OpenAPIV3_1.SchemaObject, 'type' | 'required' | 'examples'> {
     // allow to choose where this key need to be passed ? in url query ? or in body ?
     in?: 'body' | 'query';
     // add a description to this field
@@ -54,5 +54,21 @@ export interface FVOARuleMetaKeys extends Omit<OpenAPIV3_1.SchemaObject, 'type'>
     deprecated?: boolean;
     // allow to set a non-optional field on multipart/stream action
     optional?: boolean;
+    // reference to another schema or parameter component
+    $ref?: string;
+    // parameter serialization style
+    style?: string;
+    // parameter explode setting
+    explode?: boolean;
+    // parameter allowEmptyValue setting
+    allowEmptyValue?: boolean;
+    // parameter allowReserved setting
+    allowReserved?: boolean;
+    // parameter example value
+    example?: any;
+    // parameter examples map
+    examples?: { [media: string]: OpenAPIV3_1.ExampleObject | OpenAPIV3_1.ReferenceObject };
+    // override parameter required setting
+    required?: boolean;
     [key: string]: any;
 }

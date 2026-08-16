@@ -1,5 +1,9 @@
 packages:
   - '!examples/**'
 
+allowBuilds:
+  '@scarf/scarf': true
+  esbuild: true
+
 onlyBuiltDependencies:
   - esbuild

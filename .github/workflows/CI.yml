@@ -118,10 +118,7 @@ jobs:
         run: pnpm install
         shell: bash
 
-      - uses: mattallty/jest-github-action@v1
+      - name: Run tests
+        run: pnpm run test
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CI: true
-        with:
-          test-command: pnpm run test
-          coverage-comment: false

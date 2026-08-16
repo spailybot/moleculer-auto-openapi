@@ -8,7 +8,7 @@ import { PostsService } from '../datas/services/posts.service.js';
 import { testOpenApiService } from '../datas/services/test-openapi.service.js';
 import { ApiRouteSchema } from 'moleculer-web';
 import { getServiceName } from '../../src/commons.js';
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 import { Validator } from '@seriousme/openapi-schema-validator';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';
 import { MergeService } from '../datas/services/merge.service.js';

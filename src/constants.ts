@@ -58,3 +58,51 @@ export const BODY_PARSERS_CONTENT_TYPE = {
     multipart: ['multipart/form-data'],
     stream: ['application/octet-stream']
 };
+
+export const EXCLUDED_OA_KEYS = ['in', 'optional', '$ref', 'style', 'explode', 'allowEmptyValue', 'allowReserved', 'required'] as const;
+
+export const GLOBAL_OA_KEYS = [
+    '$$title',
+    '$$description',
+    '$$default',
+    '$$example',
+    '$$examples',
+    '$$format',
+    '$$readOnly',
+    '$$writeOnly',
+    '$$deprecated',
+    '$$pattern'
+] as const;
+
+export const PARAM_SPECIFIC_KEYS = [
+    'description',
+    'required',
+    'deprecated',
+    'style',
+    'explode',
+    'allowEmptyValue',
+    'allowReserved',
+    'example',
+    'examples'
+] as const;
+
+export const OA_PARAM_IN = {
+    QUERY: 'query',
+    PATH: 'path',
+    HEADER: 'header',
+    COOKIE: 'cookie',
+    BODY: 'body'
+} as const;
+
+export const OA_REF_PREFIX = {
+    PARAMETERS: '#/components/parameters/',
+    SCHEMAS: '#/components/schemas/'
+} as const;
+
+export const OA_TYPE = {
+    OBJECT: 'object',
+    ARRAY: 'array',
+    STRING: 'string',
+    NUMBER: 'number',
+    BOOLEAN: 'boolean'
+} as const;

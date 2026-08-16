@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ServiceBroker } from 'moleculer';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 import { routes } from '../datas/routes.js';

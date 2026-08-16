@@ -46,7 +46,11 @@ export const SomeService: ServiceSchema = {
         },
         update: {
             openapi: {
-                summary: 'Foo bar baz'
+                summary: 'Foo bar baz',
+                requestBody: {
+                    description: 'Custom request body description',
+                    required: false
+                }
             },
             params: {
                 $$strict: 'remove',

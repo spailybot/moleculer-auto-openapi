@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest, beforeAll } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import { FastestValidatorConverter } from '../src/Converters/FastestValidatorConverter.js';
 import FastestValidator from 'fastest-validator';
 import { MappersOptions } from '../src/mappers.js';
@@ -41,8 +41,8 @@ const subObject: RuleObject = {
 describe('Fastest Validator Mappers', () => {
     let mappers: Mappers;
 
-    const mockGetSchemaObjectFromRule = jest.fn();
-    const mockGetSchemaObjectFromSchema = jest.fn();
+    const mockGetSchemaObjectFromRule = vi.fn();
+    const mockGetSchemaObjectFromSchema = vi.fn();
 
     const mappersOptions = {
         getSchemaObjectFromRule: mockGetSchemaObjectFromRule,
@@ -1139,7 +1139,7 @@ describe('Fastest Validator Mappers', () => {
                 type: 'string',
                 description: 'my specific desc',
 
-                example: 'foo',
+                examples: ['foo'],
             });
         });
     });
