@@ -71,10 +71,4 @@ jobs:
         run: pnpm install
 
       - name: publish to NPM
-        run: |
-          npm config set //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
-          pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        working-directory: ${{ matrix.package.path }}
-        if: steps.package_version.outputs.npm_is_greater != 'true'
+        run: pnpm publish --no-git-checks --provenance
