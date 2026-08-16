@@ -16,46 +16,95 @@ export class AliasCreator {
 
     public getAliases(): Array<Alias> {
         return Object.entries(this.aliases ?? {}).flatMap(([name, config]) => {
-            const aliasInformations = this.extractAliasInformation(name, config);
+            const splitName = name.trim().split(/\s+/);
+            const defaultPath = splitName.length === 1 ? splitName[0] : splitName[1];
+            const defaultMethod = splitName.length > 1 ? splitName[0].toLowerCase() : JOKER_METHOD;
 
-            const skippedAliases = this.getSubAliases(aliasInformations ?? {}).map((a) => {
-                const skippedAlias = new Alias(a, this.route);
-                skippedAlias.skipped = true;
-                return skippedAlias;
-            });
+            if (!isRawHttpMethodFromMWeb(defaultMethod)) {
+                this.logger.warn(`"${defaultMethod}" is not a valid http method`);
+                return [];
+            }
+
+            const aliasInformations = this.extractAliasInformation(defaultPath, defaultMethod, config);
 
             if (!aliasInformations) {
                 this.logger.warn(`alias "${name}" from route "${this.route.path}" is skipped`);
-                return skippedAliases;
+                const skippedInfo: AliasRouteSchemaOpenApi = {
+                    method: defaultMethod,
+                    path: defaultPath,
+                    openapi: false
+                };
+                return this.getSubAliases(skippedInfo).map((a) => {
+                    const skippedAlias = new Alias(a, this.route);
+                    skippedAlias.skipped = true;
+                    return skippedAlias;
+                });
             }
 
             if (aliasInformations.action && !aliasInformations.action.match(OA_NAME_REGEXP)) {
                 this.logger.error(
-                    `alias "${name}" from route "${this.route.path}" can't be added ton openapi . because the name "${
+                    `alias "${name}" from route "${this.route.path}" can't be added to openapi . because the name "${
                         aliasInformations.action
                     }" need to match pattern ${OA_NAME_REGEXP.toString()}`
                 );
-                return skippedAliases;
+                return this.getSubAliases(aliasInformations).map((a) => {
+                    const skippedAlias = new Alias(a, this.route);
+                    skippedAlias.skipped = true;
+                    return skippedAlias;
+                });
             }
 
             return this.getSubAliases(aliasInformations).map((alias) => new Alias(alias, this.route));
         });
     }
 
-    private extractAliasSubInformations(infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {
+    private extractAliasInformation(
+        defaultPath: string,
+        defaultMethod: string,
+        infos: ApiSchemaAlias
+    ): AliasRouteSchemaOpenApi | undefined {
         const isAliasRouteSchema = (v: unknown): v is AliasRouteSchemaOpenApi =>
-            !!v && (['action', 'handler'] as Array<keyof AliasRouteSchema>).some((property) => !!(v as AliasRouteSchema)[property]);
+            !!v &&
+            typeof v === 'object' &&
+            !Array.isArray(v) &&
+            (['action', 'handler', 'openapi', 'type', 'method', 'path'] as Array<keyof AliasRouteSchema>).some(
+                (property) => property in (v as AliasRouteSchema)
+            );
 
         if (isAliasRouteSchema(infos)) {
-            return infos;
-        } else if (Array.isArray(infos)) {
+            const res: AliasRouteSchemaOpenApi = {
+                ...infos,
+                path: infos.path ?? defaultPath,
+                method: infos.method ? infos.method.toLowerCase() : defaultMethod
+            };
+
+            if (!res.actionType && res.action?.includes(':')) {
+                const [actionType, action] = res.action.split(':');
+                res.type = actionType;
+                res.action = action;
+            }
+
+            if (!isRawHttpMethodFromMWeb(res.method!)) {
+                this.logger.warn(`"${res.method}" is not a valid http method`);
+                return undefined;
+            }
+
+            // If no action and no openapi metadata are provided, and skipUnresolvedActions is true, mark as skipped
+            if (!res.action && res.openapi === undefined && this.skipUnresolvedActions) {
+                res.openapi = false;
+            }
+
+            return res;
+        }
+
+        if (Array.isArray(infos)) {
             const tmpAction: string | undefined = infos.reduce((info, currentInfo) => {
                 /**
                  * do same logic as moleculer-web
                  * https://github.com/moleculerjs/moleculer-web/blob/master/src/alias.js#L63
                  * loop on each item of the array, use string as a configuration, replace previous one
                  */
-                if (!currentInfo || typeof currentInfo != 'string') {
+                if (!currentInfo || typeof currentInfo !== 'string') {
                     return info;
                 }
 
@@ -63,63 +112,49 @@ export class AliasCreator {
             }, undefined);
 
             if (!tmpAction && this.skipUnresolvedActions) {
-                return;
+                return undefined;
             }
 
-            return {
-                action: tmpAction
+            const res: AliasRouteSchemaOpenApi = {
+                action: tmpAction,
+                path: defaultPath,
+                method: defaultMethod
             };
-        } else if (typeof infos !== 'string') {
-            if (this.skipUnresolvedActions) {
-                return;
+
+            if (!res.actionType && res.action?.includes(':')) {
+                const [actionType, action] = res.action.split(':');
+                res.type = actionType;
+                res.action = action;
             }
 
-            return {
-                action: undefined
+            return res;
+        }
+
+        if (typeof infos === 'string') {
+            const res: AliasRouteSchemaOpenApi = {
+                action: infos,
+                path: defaultPath,
+                method: defaultMethod
             };
-        } else {
-            return {
-                action: infos
-            };
-        }
-    }
 
-    private extractAliasInformation(name: string, infos: ApiSchemaAlias): AliasRouteSchemaOpenApi | undefined {
-        const res = this.extractAliasSubInformations(infos);
+            if (!res.actionType && res.action?.includes(':')) {
+                const [actionType, action] = res.action.split(':');
+                res.type = actionType;
+                res.action = action;
+            }
 
-        if (!res) {
-            return;
+            return res;
         }
 
-        const splitName = name.split(/\s+/);
-        if (splitName.length === 1) {
-            res.path = res.path ?? splitName[0];
+        if (this.skipUnresolvedActions) {
+            return undefined;
         }
 
-        if (splitName.length > 1) {
-            res.path = res.path ?? splitName[1];
-            res.method = res.method ?? splitName[0];
-        }
-
-        // support actions like multipart:import.proceedFile
-        if (!res.actionType && res.action?.includes(':')) {
-            const [actionType, action] = res.action.split(':');
-            res.type = actionType;
-            res.action = action;
-        }
-
-        if (!res.method) {
-            res.method = JOKER_METHOD;
-        } else {
-            res.method = res.method.toLowerCase();
-        }
-
-        if (!isRawHttpMethodFromMWeb(res.method)) {
-            this.logger.warn(`"${res.method}" is not a valid http method`);
-            return;
-        }
-
-        return res;
+        return {
+            action: undefined,
+            path: defaultPath,
+            method: defaultMethod
+        };
     }
 
     private getSubAliases(alias: AliasRouteSchemaOpenApi): Array<AliasRouteSchemaOpenApi> {

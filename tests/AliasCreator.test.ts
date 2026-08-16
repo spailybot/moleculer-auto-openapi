@@ -22,10 +22,23 @@ describe('AliasCreator', () => {
             action: 'test.greeter',
             path: 'testPath'
         },
-        // 'GET custom': fakeFn,
-        'GET /middleware': [fakeFn, fakeFn, 'test.greeter1', 'test.greeter', fakeFn]
-        // 'GET /wrong-middleware': [fakeFn],
-        // 'REST posts': 'posts'
+        'GET custom': fakeFn,
+        'GET /middleware': [fakeFn, fakeFn, 'test.greeter1', 'test.greeter', fakeFn],
+        'GET /wrong-middleware': [fakeFn],
+        'REST posts': 'posts',
+        'GET /raw-disabled': {
+            handler: fakeFn,
+            openapi: false
+        },
+        'GET /raw-auto-skip': {
+            handler: fakeFn
+        },
+        'GET /raw-documented': {
+            handler: fakeFn,
+            openapi: {
+                summary: 'SSE Stream'
+            }
+        }
     } as const;
 
     const aliasesResult: Record<keyof typeof aliases, Array<AliasRouteSchema>> = {
@@ -79,8 +92,6 @@ describe('AliasCreator', () => {
         //skip custom function
         'GET custom': [
             {
-                // @ts-ignore
-                action: null,
                 method: 'get',
                 path: '/custom'
             }
@@ -96,8 +107,6 @@ describe('AliasCreator', () => {
         //handle array without action
         'GET /wrong-middleware': [
             {
-                // @ts-ignore
-                action: null,
                 method: 'get',
                 path: '/wrong-middleware'
             }
@@ -105,9 +114,55 @@ describe('AliasCreator', () => {
         //rest method
         'REST posts': [
             {
-                action: 'posts',
-                method: 'rest',
+                action: 'posts.list',
+                method: 'get',
                 path: '/posts'
+            },
+            {
+                action: 'posts.get',
+                method: 'get',
+                path: '/posts/:id'
+            },
+            {
+                action: 'posts.create',
+                method: 'post',
+                path: '/posts'
+            },
+            {
+                action: 'posts.update',
+                method: 'put',
+                path: '/posts/:id'
+            },
+            {
+                action: 'posts.patch',
+                method: 'patch',
+                path: '/posts/:id'
+            },
+            {
+                action: 'posts.remove',
+                method: 'delete',
+                path: '/posts/:id'
+            }
+        ],
+        'GET /raw-disabled': [
+            {
+                method: 'get',
+                path: '/raw-disabled'
+            }
+        ],
+        'GET /raw-auto-skip': [
+            {
+                method: 'get',
+                path: '/raw-auto-skip'
+            }
+        ],
+        'GET /raw-documented': [
+            {
+                method: 'get',
+                path: '/raw-documented',
+                openapi: {
+                    summary: 'SSE Stream'
+                }
             }
         ]
     };
@@ -134,6 +189,35 @@ describe('AliasCreator', () => {
                 expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result.map(expect.objectContaining)));
             }
         );
+
+        it('marks raw handlers without openapi or with openapi: false as skipped', () => {
+            const route = new Route(logger, { path: '/' }, fakeService, service);
+            const creator = new AliasCreator(
+                logger,
+                route,
+                {
+                    'GET /custom': fakeFn,
+                    'GET /raw-disabled': { handler: fakeFn, openapi: false },
+                    'GET /raw-auto-skip': { handler: fakeFn },
+                    'GET /raw-documented': { handler: fakeFn, openapi: { summary: 'SSE Stream' } }
+                },
+                true
+            );
+            const res = creator.getAliases();
+
+            const customAlias = res.find((a) => a.path === '/custom');
+            expect(customAlias?.skipped).toBe(true);
+
+            const disabledAlias = res.find((a) => a.path === '/raw-disabled');
+            expect(disabledAlias?.skipped).toBe(true);
+
+            const autoSkipAlias = res.find((a) => a.path === '/raw-auto-skip');
+            expect(autoSkipAlias?.skipped).toBe(true);
+
+            const documentedAlias = res.find((a) => a.path === '/raw-documented');
+            expect(documentedAlias?.skipped).toBe(false);
+            expect(documentedAlias?.openapi).toEqual({ summary: 'SSE Stream' });
+        });
     });
 
     describe('with skipUnResolved false', () => {
