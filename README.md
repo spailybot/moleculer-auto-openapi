@@ -38,12 +38,14 @@ Big thanks to [grinat](https://github.com/grinat) for the original work, and als
 ## 🌟 Features
 
 - Supports multiple Moleculer-Web servers, allowing API separation
-- `Fastest-Validator` support for direct OpenAPI generation from parameters, complete with examples
-- OpenAPI 3.1 compatibility
-- Cached OpenAPI with efficient regeneration when needed
-- Granular and reusable configuration
-- TypeScript exports of mixin settings and OpenAPI parameters
-- Get your first openapi in less a minute
+- `Fastest-Validator` integration for direct OpenAPI generation from action parameters
+- Rich OpenAPI 3.1 metadata support with `$$oa` metaparams and global `$$*` shortcuts (`$$title`, `$$description`, `$$default`, `$$examples`, etc.)
+- Schema and parameter reference overrides (`$ref`) directly within parameter definitions
+- Advanced and customizable `requestBody` configuration
+- Cached OpenAPI generation with efficient on-demand regeneration
+- Granular and reusable configuration hierarchy
+- Full TypeScript typings for mixin settings, route schemas, and OpenAPI parameters
+- Get your first OpenAPI documentation in less than a minute
 
 ## 🚀 Getting Started
 
@@ -100,7 +102,7 @@ export default class OpenApiService extends Service<OpenApiMixinSettings & Molec
         this.parseServiceSchema({
             // Choose your preferred name
             name: 'openapi',
-            mixins: [mixin],
+            mixins: [OpenApiMixin],
             settings: {
                 // Set the path as you prefer
                 rest: '/openapi',
@@ -144,7 +146,7 @@ import { Service, type ServiceBroker } from 'moleculer';
 const OpenApiService: ServiceSchema<OpenApiMixinSettings & MoleculerWebTypes.RestServiceSettings> = {
     // Choose your preferred name
     name: 'openapi',
-    mixins: [mixin],
+    mixins: [OpenApiMixin],
     settings: {
         // Set the path as you prefer
         rest: '/openapi',
@@ -340,7 +342,7 @@ export default class WebApiService extends Service<ApiSettingsSchemaOpenApi> {
 
         this.parseServiceSchema({
             name: "api",
-            mixins: [mixin],
+            mixins: [ApiGateway],
             settings: {
                 // Place other settings here
                 openapi: {
@@ -388,7 +390,7 @@ export default class WebApiService extends Service {
 
         this.parseServiceSchema({
             name: "api",
-            mixins: [mixin],
+            mixins: [ApiGateway],
             settings: {
                 // Place other settings here
                 openapi: {
@@ -442,12 +444,9 @@ Remember, the journey of mastering any tool involves experimentation, learning f
 
 ### 📝 TODO
 
-- $$oa
-  - allow to define a ref, and use the ref instead of creating a new one
-  - allow to define a "to ref", and create the ref with this name
-  - allow to define examples
-- investigate the needs of requestBodyAndResponseBodyAreSameOnMethods / requestBodyAndResponseBodyAreSameDescription
-- support multiple openapi version on generator ? (will need converters)
+- Allow defining a "to ref" to create named references
+- Investigate needs of `requestBodyAndResponseBodyAreSameOnMethods` / `requestBodyAndResponseBodyAreSameDescription`
+- Support multiple OpenAPI versions on generator (with version-specific converters)
 
 ### ⚠️ Known Limitations
 - Functions used directly in parameters (e.g., dynamic `default`) might not execute reliably or as expected, and will be called without arguments.
