@@ -69,8 +69,8 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 method: 'GET'
             },
             cache: {
-                enabled(this: openApiService) {
-                    return this.settings.cacheOpenApi ?? true;
+                enabled(this: openApiService | undefined) {
+                    return this?.settings?.cacheOpenApi ?? true;
                 },
                 keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
                     // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
