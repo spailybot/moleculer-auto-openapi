@@ -1,5 +1,8 @@
 packages:
   - '!examples/**'
 
+# Exhaustive allow-list for build scripts (pnpm v9 supply-chain policy).
+# Any package with an install script that is NOT listed here will be silently
+# skipped without raising ERR_PNPM_IGNORED_BUILDS.
 onlyBuiltDependencies:
   - esbuild
