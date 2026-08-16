@@ -26,29 +26,29 @@ export class ComponentsManager {
 
         const refComponent = this.getComponentByRef<OpenAPIV3_1.SchemaObject>(component.$ref);
         if (!refComponent) {
-            throw new Error(`fail to get component "${component.$ref}`);
+            throw new Error(`fail to get component "${component.$ref}"`);
         }
         return refComponent;
     }
 
     public getComponentByRef<T>(path: string): T | undefined {
-        const pathSegments = path.split('/').filter((segment) => segment !== '');
-
-        if (
-            pathSegments.length < 4 ||
-            pathSegments[0] !== '#' ||
-            pathSegments[1] !== 'components' ||
-            !Object.keys(this.components).includes(pathSegments[2])
-        ) {
+        if (!path.startsWith('#/components/')) {
             return undefined;
         }
 
-        return pathSegments.slice(2).reduce((currentObject: Record<string, any> | undefined, segment) => {
-            return currentObject && currentObject.hasOwnProperty(segment) ? currentObject[segment] : undefined;
+        // Strip '#' and 'components' — this.components is already the components object
+        const pathSegments = path.split('/').filter((segment) => segment !== '' && segment !== '#' && segment !== 'components');
+
+        if (pathSegments.length < 1 || !Object.keys(this.components).includes(pathSegments[0])) {
+            return undefined;
+        }
+
+        return pathSegments.reduce((currentObject: Record<string, any> | undefined, segment) => {
+            return currentObject && Object.prototype.hasOwnProperty.call(currentObject, segment) ? currentObject[segment] : undefined;
         }, this.components) as unknown as T;
     }
 
-    public _createSchemaComponentFromObject(
+    public createSchemaComponentFromObject(
         schemeName: string,
         obj: Record<string, OpenAPIV3_1.SchemaObject>,
         customProperties: { default?: any } = {}
@@ -65,7 +65,7 @@ export class ComponentsManager {
                     required.push(fieldName);
                 }
 
-                return [fieldName, this._createSchemaPartFromRule(nextSchemeName, rule)];
+                return [fieldName, this.createSchemaPartFromRule(nextSchemeName, rule)];
             })
         );
 
@@ -85,7 +85,7 @@ export class ComponentsManager {
         };
     }
 
-    public _createSchemaPartFromRule(
+    public createSchemaPartFromRule(
         nextSchemeName: string,
         rule: OpenAPIV3_1.SchemaObject
     ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject {
@@ -100,14 +100,14 @@ export class ComponentsManager {
                 summary: rule.title,
                 deprecated: rule.deprecated,
                 description: rule.description,
-                ...this._createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default })
+                ...this.createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default })
             };
         }
 
         if (rule.type === 'array' && rule.items) {
             return {
                 ...rule,
-                items: this._createSchemaPartFromRule(nextSchemeName, rule.items as OpenAPIV3_1.SchemaObject)
+                items: this.createSchemaPartFromRule(nextSchemeName, rule.items as OpenAPIV3_1.SchemaObject)
             };
         }
 
@@ -125,7 +125,7 @@ export class ComponentsManager {
 
                     const schemeName = `${nextSchemeName}.${i++}`;
 
-                    return this._createSchemaPartFromRule(schemeName, schema);
+                    return this.createSchemaPartFromRule(schemeName, schema);
                 });
             });
         }
@@ -167,10 +167,9 @@ export class ComponentsManager {
             Object.entries(components).map(([k, v]: [string, OptionalOrFalse<OpenAPIV3_1.ComponentsObject>]) => [
                 k,
                 Object.fromEntries(
-                    // @ts-ignore
-                    Object.entries(v)
+                    Object.entries((v || {}) as Record<string, unknown>)
                         .map(([key, value]) => (value === false ? undefined : [key, value]))
-                        .filter(Boolean)
+                        .filter(Boolean) as Array<[string, unknown]>
                 )
             ])
         );
@@ -180,9 +179,15 @@ export class ComponentsManager {
         const result = { ...c1 } as Record<string, unknown>;
 
         for (const [key, value] of Object.entries(c2)) {
+            const valueRecord = value as Record<string, unknown>;
+            // Skip empty component sections (preserves previous behaviour)
+            if (!Object.keys(valueRecord).length) {
+                continue;
+            }
+
             result[key] = {
                 ...(result[key] as Record<string, unknown>),
-                ...(value as Record<string, unknown>)
+                ...valueRecord
             };
         }
 

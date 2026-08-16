@@ -32,6 +32,7 @@ export class ParametersExtractor {
             return alias.openapi.queryParameters.map((param) => ({ ...param, in: OA_PARAM_IN.QUERY }));
         }
 
+        let resultParameters = [...parameters];
         const queryParameters = this.getParameters(method, actionParams, false);
         Object.entries(queryParameters).forEach(([k, v]) => {
             const ruleObj = (v && typeof v === 'object' && !Array.isArray(v)) ? (v as Record<string, unknown>) : {};
@@ -47,12 +48,12 @@ export class ParametersExtractor {
                     )
                 } as OpenAPIV3_1.ReferenceObject & OpenAPIV3_1.ParameterBaseObject;
 
-                if (!parameters.some((p) => p.name === k)) {
-                    parameters.push(schemaParameter as unknown as OpenAPIV3_1.ParameterObject);
+                if (!resultParameters.some((p) => p.name === k)) {
+                    resultParameters.push(schemaParameter as unknown as OpenAPIV3_1.ParameterObject);
                     return;
                 }
 
-                parameters = parameters.map((parameter) => {
+                resultParameters = resultParameters.map((parameter) => {
                     if (parameter.name !== k) {
                         return parameter;
                     }
@@ -86,15 +87,15 @@ export class ParametersExtractor {
                 examples: ('examples' in openApiParams && !Array.isArray(openApiParams.examples)) ? openApiParams.examples : undefined,
                 allowEmptyValue: 'allowEmptyValue' in openApiParams ? openApiParams.allowEmptyValue : undefined,
                 allowReserved: 'allowReserved' in openApiParams ? openApiParams.allowReserved : undefined,
-                schema: schema as any
+                schema: schema as unknown as OpenAPIV3_1.ParameterObject['schema']
             };
 
-            if (!parameters.some((p) => p.name === k)) {
-                parameters.push(schemaParameter);
+            if (!resultParameters.some((p) => p.name === k)) {
+                resultParameters.push(schemaParameter);
                 return;
             }
 
-            parameters = parameters.map((parameter) => {
+            resultParameters = resultParameters.map((parameter) => {
                 if (parameter.name !== k) {
                     return parameter;
                 }
@@ -107,7 +108,7 @@ export class ParametersExtractor {
             });
         });
 
-        return parameters;
+        return resultParameters;
     }
 
     public getParameters(method: HTTP_METHODS, params: ValidationSchema, body: boolean): Record<string, ValidationRule> {

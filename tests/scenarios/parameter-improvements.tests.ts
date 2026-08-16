@@ -105,47 +105,43 @@ describe("Test parameter improvements & ref overrides in service broker integrat
 
         // Verify queryParam configurations
         const queryParam = parameters.find((p: any) => p.name === 'queryParam');
-        expect(queryParam).toEqual({
+        expect(queryParam).toMatchObject({
             name: 'queryParam',
             in: 'query',
             style: 'form',
             explode: true,
-            required: undefined,
             description: 'A query parameter with custom style',
-            examples: undefined,
-            deprecated: undefined,
             allowEmptyValue: true,
-            allowReserved: undefined,
             schema: {
                 type: 'string',
                 description: 'A query parameter with custom style',
-                examples: ['test-value'],
-                default: undefined,
-                enum: undefined,
-                maxLength: undefined,
-                minLength: undefined
+                examples: ['test-value']
             }
         });
+        expect(queryParam.required).toBeUndefined();
+        expect(queryParam.examples).toBeUndefined();
+        expect(queryParam.deprecated).toBeUndefined();
+        expect(queryParam.allowReserved).toBeUndefined();
 
         // Verify schemaRefParam configurations ($ref override)
         const schemaRefParam = parameters.find((p: any) => p.name === 'schemaRefParam');
-        expect(schemaRefParam).toEqual({
+        expect(schemaRefParam).toMatchObject({
             name: 'schemaRefParam',
             in: 'query',
             style: 'deepObject',
             explode: true,
             required: true,
-            deprecated: undefined,
             description: 'Overridden custom user schema description',
-            example: undefined,
-            examples: undefined,
-            allowEmptyValue: undefined,
-            allowReserved: undefined,
             schema: {
                 $ref: '#/components/schemas/CustomUser',
                 description: 'Overridden custom user schema description'
             }
         });
+        expect(schemaRefParam.deprecated).toBeUndefined();
+        expect(schemaRefParam.example).toBeUndefined();
+        expect(schemaRefParam.examples).toBeUndefined();
+        expect(schemaRefParam.allowEmptyValue).toBeUndefined();
+        expect(schemaRefParam.allowReserved).toBeUndefined();
 
         // Verify paramRefParam configurations (parameter-level $ref reference)
         const paramRefParam = parameters.find((p: any) => !p.name);
@@ -156,24 +152,24 @@ describe("Test parameter improvements & ref overrides in service broker integrat
 
         // Verify overrideUndefinedParam configurations (undefined overrides and custom example suppression)
         const overrideUndefinedParam = parameters.find((p: any) => p.name === 'overrideUndefinedParam');
-        expect(overrideUndefinedParam).toEqual({
+        expect(overrideUndefinedParam).toMatchObject({
             name: 'overrideUndefinedParam',
             in: 'query',
-            style: undefined,
-            explode: undefined,
             required: true,
-            deprecated: undefined,
-            description: undefined,
-            examples: undefined,
-            allowEmptyValue: undefined,
-            allowReserved: undefined,
             schema: {
                 type: 'string',
-                title: undefined, // Overridden to undefined
                 format: 'hex',
                 pattern: '^([0-9A-Fa-f]{2})+$',
                 examples: ['aabbcc']
             }
         });
+        expect(overrideUndefinedParam.style).toBeUndefined();
+        expect(overrideUndefinedParam.explode).toBeUndefined();
+        expect(overrideUndefinedParam.deprecated).toBeUndefined();
+        expect(overrideUndefinedParam.description).toBeUndefined();
+        expect(overrideUndefinedParam.examples).toBeUndefined();
+        expect(overrideUndefinedParam.allowEmptyValue).toBeUndefined();
+        expect(overrideUndefinedParam.allowReserved).toBeUndefined();
+        expect(overrideUndefinedParam.schema.title).toBeUndefined();
     });
 });

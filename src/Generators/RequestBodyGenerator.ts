@@ -8,7 +8,8 @@ import type { ParametersExtractor } from './ParametersExtractor.js';
 import {
     BODY_PARSERS_CONTENT_TYPE,
     DEFAULT_CONTENT_TYPE,
-    DEFAULT_MULTI_PART_FIELD_NAME
+    DEFAULT_MULTI_PART_FIELD_NAME,
+    HTTP_METHODS
 } from '../constants.js';
 
 export class RequestBodyGenerator {
@@ -34,12 +35,12 @@ export class RequestBodyGenerator {
             Object.entries(rootRules).filter(([name, rule]) => !exclude.includes(name) && rule)
         );
 
-        return this.componentsManager._createSchemaComponentFromObject(rootSchemeName, rules, parentNode);
+        return this.componentsManager.createSchemaComponentFromObject(rootSchemeName, rules, parentNode);
     }
 
     public getRequestBody(
         alias: Alias,
-        method: any, // HTTP_METHODS
+        method: HTTP_METHODS,
         actionParams: ValidationSchema,
         metas: ValidationSchemaMetaKeys,
         excluded: Array<string> = [],
@@ -51,13 +52,12 @@ export class RequestBodyGenerator {
 
         const openApiMetas: Record<string, any> = {};
 
-        // Extract global keys
-        const globalKeys = ['$$title', '$$description', '$$summary', '$$default', '$$example', '$$$examples'];
+        // Extract global keys (strip leading $$, e.g. $$title → title)
+        const globalKeys = ['$$title', '$$description', '$$summary', '$$default', '$$example', '$$examples'] as const;
         for (const key of globalKeys) {
-            if (key in metas) {
+            if (key in (metas as Record<string, unknown>)) {
                 const openApiKey = key.substring(2);
-                // @ts-ignore
-                openApiMetas[openApiKey] = metas[key];
+                openApiMetas[openApiKey] = (metas as Record<string, unknown>)[key];
             }
         }
 
@@ -105,9 +105,9 @@ export class RequestBodyGenerator {
             };
 
             // Apply all extracted metas
+            const requestBodyRecord = requestBody as Record<string, unknown>;
             for (const key in openApiMetas) {
-                // @ts-ignore
-                requestBody[key] = openApiMetas[key];
+                requestBodyRecord[key] = openApiMetas[key];
             }
 
             if (openApi?.requestBody) {

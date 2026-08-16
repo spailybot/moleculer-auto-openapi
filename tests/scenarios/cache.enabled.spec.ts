@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 import { mixin } from '../../src/mixin.js';
 import { ServiceBroker } from 'moleculer';
 import { OpenapiService } from '../datas/services/openapi.service.js';

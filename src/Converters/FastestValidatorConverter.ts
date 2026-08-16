@@ -80,10 +80,10 @@ export class FastestValidatorConverter implements IConverter {
 
     public getMetas(schema: ValidationSchema): ValidationSchemaMetaKeys {
         const metas: ValidationSchemaMetaKeys = {};
-        for (const k in schema) {
-            if (k.startsWith('$')) {
-                // @ts-ignore
-                metas[k] = schema[k];
+        const schemaRecord = schema as Record<string, unknown>;
+        for (const k in schemaRecord) {
+            if (k.startsWith('$$')) {
+                (metas as Record<string, unknown>)[k] = schemaRecord[k];
             }
         }
         return metas;
@@ -173,12 +173,13 @@ export class FastestValidatorConverter implements IConverter {
         }
 
         if (typeof clonedRule === 'object' && !Array.isArray(clonedRule)) {
+            const schemaRecord = schema as Record<string, unknown>;
+            const clonedRuleRecord = clonedRule as Record<string, unknown>;
             // Apply supported global $ keys
             for (const key of GLOBAL_OA_KEYS) {
-                if (key in clonedRule) {
+                if (key in clonedRuleRecord) {
                     const openApiKey = key.substring(2);
-                    // @ts-ignore
-                    schema[openApiKey] = clonedRule[key];
+                    schemaRecord[openApiKey] = clonedRuleRecord[key];
                 }
             }
 
@@ -190,8 +191,7 @@ export class FastestValidatorConverter implements IConverter {
                 for (const key in oaParams) {
                     const oaKey = key as keyof FVOARuleMetaKeys;
                     if (key !== 'example' && key !== 'examples' && !(EXCLUDED_OA_KEYS as readonly string[]).includes(key)) {
-                        // @ts-ignore
-                        schema[key] = oaParams[oaKey];
+                        schemaRecord[key] = oaParams[oaKey];
                     }
                 }
             }
