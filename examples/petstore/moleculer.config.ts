@@ -168,8 +168,6 @@ const brokerConfig: BrokerOptions = {
         }
     },
 
-    errorHandler: null,
-
     // Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
     metrics: {
         enabled: false,
