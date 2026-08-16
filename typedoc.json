@@ -1,5 +1,15 @@
 {
-  "entryPoints": ["src/index.ts", "src/types/internal.ts"],
+  "tsconfig": "./tsconfig.build.json",
+  "entryPoints": [
+    "src/index.ts",
+    "src/types/internal.ts",
+    "src/constants.ts",
+    "src/types/swaggerUiOptions.ts",
+    "src/Converters/FastestValidatorConverter.ts",
+    "src/Converters/NoopConverter.ts",
+    "src/Converters/IConverter.ts",
+    "src/mappers.ts"
+  ],
   "out": "docs",
   "includeVersion": true,
   "githubPages": true,

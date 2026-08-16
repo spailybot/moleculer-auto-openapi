@@ -129,9 +129,11 @@ export type OpenApiMixinSettings = {
     /**
      * summary template
      * use variable between double accolades : {{summary}}
-     * @var string summary : the actual summary
-     * @var string action : the action name
-     * @var string autoAlias : print [autoAlias] if an auto alias
+     *
+     * Variables:
+     * - `summary`: the actual summary
+     * - `action`: the action name
+     * - `autoAlias`: print [autoAlias] if an auto alias
      * @default {{summary}}\n            ({{action}}){{autoAlias}}
      */
     summaryTemplate?: string | ((variables: TemplateVariables) => string);

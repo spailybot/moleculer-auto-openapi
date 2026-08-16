@@ -99,7 +99,7 @@ describe("Test parameter improvements & ref overrides in service broker integrat
             version: '3.1'
         });
 
-        const parameters = json?.paths?.['/api/mock-route/test']?.get?.parameters;
+        const parameters = json?.paths?.['/api/mock-route/test']?.get?.parameters as Array<any>;
         expect(parameters).toBeDefined();
         expect(parameters).toHaveLength(4);
 

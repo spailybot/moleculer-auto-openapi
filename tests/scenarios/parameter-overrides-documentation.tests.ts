@@ -142,7 +142,7 @@ describe("Documentation & Test: Parameter Precedence and Overrides", () => {
             version: '3.1'
         });
 
-        const parameters = json?.paths?.['/api/demo-route/test']?.get?.parameters;
+        const parameters = json?.paths?.['/api/demo-route/test']?.get?.parameters as Array<any>;
         expect(parameters).toBeDefined();
         expect(parameters).toHaveLength(8); // 7 regular parameters + 1 reference parameter
 
