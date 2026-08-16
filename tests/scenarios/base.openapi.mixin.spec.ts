@@ -1,6 +1,6 @@
 import * as url from 'url';
 import { ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as fs from 'fs';
 
 import * as path from 'path';

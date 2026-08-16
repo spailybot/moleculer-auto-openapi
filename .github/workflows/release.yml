@@ -8,15 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: lts/*
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -24,7 +24,7 @@ jobs:
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -43,16 +43,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: lts/*
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -60,7 +60,7 @@ jobs:
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -78,18 +78,3 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: ${{ matrix.package.path }}
         if: steps.package_version.outputs.npm_is_greater != 'true'
-
-#      - name: publish to GPR
-#        run: |
-#          npx npe name @${{ github.repository_owner }}/${{ matrix.package.name }}
-#
-#          npm config set @${{ github.repository_owner }}:registry=https://npm.pkg.github.com
-#          npm config set //https://npm.pkg.github.com:_authToken=${NODE_AUTH_TOKEN}
-#          npm config set registry https://npm.pkg.github.com
-#          npm config set scope ${{ github.repository_owner }}
-#
-#          pnpm publish --filter @${{ github.repository_owner }}/${{ matrix.package.name }} --no-git-checks
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        working-directory: ${{ matrix.package.path }}
-#        if: steps.package_version.outputs.npm_is_greater != 'true'

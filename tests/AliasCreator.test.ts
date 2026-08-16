@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals';
+import { describe, expect, it, vi } from 'vitest';
 import { LoggerInstance, Service } from 'moleculer';
 import { Route } from '../src/objects/Route.js';
 import { AliasRouteSchema, ApiSchemaAlias } from '../src/types/moleculer-web.js';
@@ -11,7 +11,7 @@ describe('AliasCreator', () => {
         error: console.error
     } as LoggerInstance;
 
-    const fakeFn = jest.fn();
+    const fakeFn = vi.fn();
     const aliases: Record<string, ApiSchemaAlias> = {
         add: 'math.add',
         'GET hello': 'test.hello',
@@ -186,7 +186,7 @@ describe('AliasCreator', () => {
                 // @ts-ignore
                 const aliases = new AliasCreator(logger, route, { [aliasName]: alias }, true).getAliases();
 
-                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result.map(expect.objectContaining)));
+                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result.map(x => expect.objectContaining(x))));
             }
         );
 
@@ -237,7 +237,7 @@ describe('AliasCreator', () => {
                 // @ts-ignore
                 const aliases = new AliasCreator(logger, route, { [aliasName]: alias }, false).getAliases();
 
-                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result?.map(expect.objectContaining)));
+                expect(JSON.parse(JSON.stringify(aliases))).toStrictEqual(expect.arrayContaining(result?.map(x => expect.objectContaining(x)) || []));
             }
         );
     });

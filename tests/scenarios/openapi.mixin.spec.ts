@@ -1,5 +1,5 @@
 import { ServiceBroker } from 'moleculer';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { routes } from '../datas/routes.js';
 import { registerSchemaValidation, setupBroker } from './commons.js';
 import { OA_GENERATE_DOCS_INPUT, OA_GENERATE_DOCS_OUTPUT } from '../../src/index.js';

@@ -297,7 +297,8 @@
                     }
                 ],
                 "requestBody": {
-                    "required": true,
+                    "description": "Custom request body description",
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
@@ -609,6 +610,7 @@
                     },
                     "someObj": {
                         "description": "Some obj",
+                        "summary": "Some obj Global Title",
                         "$ref": "#/components/schemas/some.update.someObj"
                     },
                     "someBool": {

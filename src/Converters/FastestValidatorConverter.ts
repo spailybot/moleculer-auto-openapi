@@ -28,7 +28,7 @@ import type {
 } from 'fastest-validator';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { IConverter } from './IConverter.js';
-import { EOAExtensions } from '../constants.js';
+import { EOAExtensions, EXCLUDED_OA_KEYS, GLOBAL_OA_KEYS } from '../constants.js';
 import { EOAExtensionsValues, EOASchemaExtensionsValues, EOASchemaExtensionsValueTypes } from '../types/internal.js';
 
 export class FastestValidatorConverter implements IConverter {
@@ -79,7 +79,14 @@ export class FastestValidatorConverter implements IConverter {
     }
 
     public getMetas(schema: ValidationSchema): ValidationSchemaMetaKeys {
-        return Object.fromEntries(Object.entries(schema).filter(([k]) => k.startsWith('$$')));
+        const metas: ValidationSchemaMetaKeys = {};
+        const schemaRecord = schema as Record<string, unknown>;
+        for (const k in schemaRecord) {
+            if (k.startsWith('$$')) {
+                (metas as Record<string, unknown>)[k] = schemaRecord[k];
+            }
+        }
+        return metas;
     }
 
     public getSchemaObjectFromSchema(schema: ValidationSchema): Record<string, OpenAPIV3_1.SchemaObject> {
@@ -115,29 +122,38 @@ export class FastestValidatorConverter implements IConverter {
             throw new Error(`bad initialisation . validator ? ${!!this.validator} | string mapper ${!!this.mappers?.string}`);
         }
 
-        //clone the object, else fastestValidator will remove $$oa
+        //clone the object, else fastestValidator will remove $oa
         const clonedRule: ValidationRule = typeof pRule === 'object' ? (Array.isArray(pRule) ? [...pRule] : { ...pRule }) : pRule;
 
-        //extract known params extensions
-        const extensions: Array<[string, EOASchemaExtensionsValueTypes]> =
-            Array.isArray(clonedRule) || typeof clonedRule !== 'object' || !clonedRule.$$oa
-                ? []
-                : (
-                      [
-                          {
-                              property: 'description',
-                              extension: EOAExtensions.description
-                          },
-                          {
-                              property: 'summary',
-                              extension: EOAExtensions.summary
-                          },
-                          {
-                              property: 'deprecated',
-                              extension: EOAExtensions.deprecated
-                          }
-                      ] as Array<{ property: keyof FVOARuleMetaKeys; extension: EOAExtensionsValues }>
-                  ).map(({ property, extension }) => [extension, clonedRule.$$oa?.[property]]);
+        // If a $ref is present in $$oa, return a ReferenceObject with overrides
+        if (typeof clonedRule === 'object' && !Array.isArray(clonedRule) && clonedRule.$$oa?.$ref) {
+            const schema: OpenAPIV3_1.ReferenceObject & Record<string, unknown> = {
+                $ref: clonedRule.$$oa.$ref
+            };
+            if (clonedRule.optional) {
+                schema[EOAExtensions.optional] = true;
+            }
+
+            // Apply supported global $ keys
+            for (const key of GLOBAL_OA_KEYS) {
+                if (key in clonedRule) {
+                    const openApiKey = key.substring(2);
+                    schema[openApiKey] = clonedRule[key];
+                }
+            }
+
+            // Apply all $oa keys except the excluded ones
+            const oaParams = clonedRule.$$oa as FVOARuleMetaKeys;
+            this.handleExampleOverrides(schema, oaParams);
+            for (const key in oaParams) {
+                const oaKey = key as keyof FVOARuleMetaKeys;
+                if (key !== 'example' && key !== 'examples' && !(EXCLUDED_OA_KEYS as readonly string[]).includes(key)) {
+                    schema[key] = oaParams[oaKey];
+                }
+            }
+
+            return schema;
+        }
 
         const baseRule = this.validator.getRuleFromSchema(clonedRule)?.schema as ValidationRuleObject;
         const rule = {
@@ -156,12 +172,47 @@ export class FastestValidatorConverter implements IConverter {
             schema[EOAExtensions.optional] = true;
         }
 
-        // @ts-ignore
-        extensions.forEach(([k, v]: [EOASchemaExtensionsValues, any]) => {
-            schema[k] = v;
-        });
+        if (typeof clonedRule === 'object' && !Array.isArray(clonedRule)) {
+            const schemaRecord = schema as Record<string, unknown>;
+            const clonedRuleRecord = clonedRule as Record<string, unknown>;
+            // Apply supported global $ keys
+            for (const key of GLOBAL_OA_KEYS) {
+                if (key in clonedRuleRecord) {
+                    const openApiKey = key.substring(2);
+                    schemaRecord[openApiKey] = clonedRuleRecord[key];
+                }
+            }
+
+            // Apply all $oa keys (excluding parameter-specific keys)
+            if (clonedRule.$$oa) {
+                const oaParams = clonedRule.$$oa as FVOARuleMetaKeys;
+                this.handleExampleOverrides(schema, oaParams);
+
+                for (const key in oaParams) {
+                    const oaKey = key as keyof FVOARuleMetaKeys;
+                    if (key !== 'example' && key !== 'examples' && !(EXCLUDED_OA_KEYS as readonly string[]).includes(key)) {
+                        schemaRecord[key] = oaParams[oaKey];
+                    }
+                }
+            }
+        }
 
         return schema;
+    }
+
+    private handleExampleOverrides(schema: OpenAPIV3_1.SchemaObject, oaParams: FVOARuleMetaKeys): void {
+        if ('examples' in oaParams) {
+            if (Array.isArray(oaParams.examples)) {
+                schema.examples = oaParams.examples;
+                schema.example = undefined;
+            } else {
+                schema.examples = undefined;
+                schema.example = undefined;
+            }
+        } else if ('example' in oaParams) {
+            schema.examples = oaParams.example !== undefined ? [oaParams.example] : undefined;
+            schema.example = undefined;
+        }
     }
 }
 

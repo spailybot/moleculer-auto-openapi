@@ -50,7 +50,9 @@ export interface ActionOpenApi extends commonOpenApi {
     /**
      * allow to bypass the generation from params . Specify it yourself
      */
-    requestBody?: OpenAPIV3_1.RequestBodyObject;
+    requestBody?: Omit<OpenAPIV3_1.RequestBodyObject, 'content'> & {
+        content?: OpenAPIV3_1.RequestBodyObject['content'];
+    };
     /**
      * allow to bypass the query generation from params . Specify it yourself
      */
