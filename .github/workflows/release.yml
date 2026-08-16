@@ -70,5 +70,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Ensure npm is up to date (for trusted publishing / OIDC provenance)
+        run: npm i -g npm@latest
+
       - name: publish to NPM
-        run: pnpm publish --no-git-checks --provenance
+        run: npm publish --provenance
