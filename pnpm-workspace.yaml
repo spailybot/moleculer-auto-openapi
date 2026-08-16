@@ -1,9 +1,11 @@
 packages:
   - '!examples/**'
 
-allowBuilds:
-  '@scarf/scarf': true
-  esbuild: true
-
+# Allow-list: only these packages may run build scripts (pnpm v9+ supply-chain policy).
 onlyBuiltDependencies:
   - esbuild
+
+# Deny-list: these packages have build scripts that are explicitly refused.
+# Declaring them here suppresses ERR_PNPM_IGNORED_BUILDS.
+neverBuiltDependencies:
+  - '@scarf/scarf'

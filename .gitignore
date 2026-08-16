@@ -238,3 +238,4 @@ $RECYCLE.BIN/
 /statics
 
 dist
+/.pnpm-store
