@@ -20,7 +20,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@spailybot/moleculer-auto-openapi": "latest",
+    "@spailybot/moleculer-auto-openapi": "file:../..",
     "fastest-validator": "^1.19.1",
     "jose": "^5.10.0",
     "moleculer": "^0.15.0",

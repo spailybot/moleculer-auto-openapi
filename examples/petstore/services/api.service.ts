@@ -123,9 +123,11 @@ export default class ApiService extends Service<ApiSettingsSchemaOpenApi> {
                 }
             },
             events: {
-                'oauth2.publicKey.generated': (publicKey: string) => {
-                    this.logger.info('receive a new public key to authenticate');
-                    this.jwsPublicKey = crypto.createPublicKey(publicKey);
+                'oauth2.publicKey.generated': {
+                    handler: (ctx) => {
+                        this.logger.info('receive a new public key to authenticate');
+                        this.jwsPublicKey = crypto.createPublicKey(ctx.params as string);
+                    }
                 }
             }
         });
