@@ -1,5 +1,5 @@
 import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGenerator.js';
-import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
+import Moleculer, { Context, Service, ServiceMethods, ServiceSchema } from 'moleculer';
 import fs from 'fs';
 import {
     addMappersFn,
@@ -11,34 +11,51 @@ import {
     OpenApiPaths
 } from './types/index.js';
 import { RuleString } from 'fastest-validator';
-import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js';
+import { DEFAULT_SWAGGER_UI_DIST } from './constants.js';
 import path from 'path/posix';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 import { Alias } from './objects/Alias.js';
 
-type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
+type openApiServiceMethods = {
+    getGenerator: () => MoleculerOpenAPIGenerator;
+    getOpenApiPaths: () => OpenApiPaths;
+    getSwaggerPath: () => Promise<string>;
+    filterAliases: filterAliasesFn;
+    addMappers: addMappersFn;
+};
+
+type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator } & openApiServiceMethods;
+
+export type OpenApiMixinServiceSchema = ServiceSchema<
+    OpenApiMixinSettings,
+    openApiServiceMethods,
+    { generator?: MoleculerOpenAPIGenerator }
+>;
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<ServiceSettingSchema> = {
+export const mixin: OpenApiMixinServiceSchema = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
-        async '$api.aliases.regenerated'(this: openApiService) {
-            const generateDocsAction = 'generateDocs';
-            const { cacheMode } = this.settings;
-            if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
-                // Invalidate every cached generateDocs result (with or without version).
-                // Uses ** (not *) because versioned keys like "...|3.1" contain a dot, which "*" does not match.
-                await this.broker.cacher.clean(`${this.fullName}.${generateDocsAction}**`);
-            }
+        '$api.aliases.regenerated': {
+            throttle: 10000,
+            async handler(this: openApiService) {
+                const generateDocsAction = 'generateDocs';
+                const { cacheMode } = this.settings;
+                if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
+                    // Invalidate every cached generateDocs result (with or without version).
+                    // Uses ** (not *) because versioned keys like "...|3.1" contain a dot, which "*" does not match.
+                    await this.broker.cacher.clean(`${this.fullName}.${generateDocsAction}**`);
+                }
 
-            this.actions.regenerateOpenApiPaths().catch((e) => {
-                this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
-            });
+                this.actions.regenerateOpenApiPaths().catch((e) => {
+                    this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
+                });
 
-            if (cacheMode === ECacheMode.REFRESH) {
-                await this.actions[generateDocsAction]();
+                if (cacheMode === ECacheMode.REFRESH) {
+                    await this.actions[generateDocsAction]();
+                }
             }
         }
     },
@@ -52,15 +69,15 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 enabled(this: openApiService | undefined) {
                     return this?.settings?.cacheOpenApi ?? true;
                 },
-                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
-                    // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
-                    const name = typeof actionName === 'string' ? actionName : actionName.name;
+                keygen: (action, opts, ctx) => {
+                    const name = action.name!;
+                    const version = (ctx.params as OA_GENERATE_DOCS_INPUT | undefined)?.version;
 
-                    if (!params.version) {
+                    if (!version) {
                         return name;
                     }
 
-                    return `${name}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
+                    return `${name}|${version}`;
                 },
                 ttl: 600
             },
@@ -188,7 +205,6 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
         },
         regenerateOpenApiPaths: {
             visibility: 'private',
-            throttle: 10000,
             async handler(this: openApiService, ctx: Context) {
                 const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
                     (alias) => alias.service?.name === this.name

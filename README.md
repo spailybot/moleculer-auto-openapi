@@ -34,9 +34,9 @@ This project is a fork of [moleculer-auto-openapi](https://github.com/grinat/mol
 
 Big thanks to [grinat](https://github.com/grinat) for the original work, and also to [everyone who has contributed](https://github.com/grinat/moleculer-auto-openapi/graphs/contributors) to it!
 
-> **⚠️ Moleculer 0.14 users:** versions up to **1.4.0** support Moleculer `0.14.x`. The next major
-> releases target Moleculer `0.15.x`, so if you're on Moleculer `0.14` (or earlier), stay on
-> `1.4.0` or below.
+> **⚠️ Moleculer 0.14 users:** versions up to **1.4.0** support Moleculer `0.14.x`. Starting with
+> **2.0.0**, this library targets Moleculer `0.15.x` only (with `moleculer-web` `0.11.x`), which requires
+> **Node.js ≥ 22**. If you're on Moleculer `0.14`, stay on `1.4.0` or below.
 
 
 ## 🌟 Features
@@ -55,7 +55,17 @@ Big thanks to [grinat](https://github.com/grinat) for the original work, and als
 
 ### 📦 Prerequisites
 
-To use this library, you must have the [Moleculer](https://github.com/moleculerjs/moleculer) framework installed along with the [Moleculer-Web](https://github.com/moleculerjs/moleculer-web) module. Additionally, the `listAliases` action must be available (which is the default setting).
+This library requires:
+
+- [Moleculer](https://github.com/moleculerjs/moleculer) `0.15.x` (installed as a peer dependency)
+- [Moleculer-Web](https://github.com/moleculerjs/moleculer-web) `0.11.x`
+- **Node.js ≥ 22**
+- The `listAliases` action must be available (which is the default setting).
+
+> **Migrating from Moleculer 0.14 / moleculer-web 0.10?**
+> `moleculer-web` 0.11 ships `path-to-regexp` 8: update your route aliases — optional parameters
+> `:name?` become `{/:name}` and wildcards `*foo` become `:foo*`. In multipart (file upload) aliases,
+> form fields now land in `ctx.params` (previously `ctx.meta`) and the file in `ctx.stream`.
 
 ### 🔧 Installation
 

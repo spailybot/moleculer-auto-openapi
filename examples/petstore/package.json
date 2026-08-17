@@ -23,11 +23,11 @@
     "@spailybot/moleculer-auto-openapi": "latest",
     "fastest-validator": "^1.19.1",
     "jose": "^5.10.0",
-    "moleculer": "^0.14.35",
-    "moleculer-web": "^0.10.8",
+    "moleculer": "^0.15.0",
+    "moleculer-web": "^0.11.0",
     "swagger-ui-dist": "^5.32.13"
   },
   "engines": {
-    "node": ">= 16.x.x"
+    "node": ">= 22.x.x"
   }
 }
