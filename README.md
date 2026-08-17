@@ -34,6 +34,10 @@ This project is a fork of [moleculer-auto-openapi](https://github.com/grinat/mol
 
 Big thanks to [grinat](https://github.com/grinat) for the original work, and also to [everyone who has contributed](https://github.com/grinat/moleculer-auto-openapi/graphs/contributors) to it!
 
+> **⚠️ Moleculer 0.14 users:** versions up to **1.4.0** support Moleculer `0.14.x`. The next major
+> releases target Moleculer `0.15.x`, so if you're on Moleculer `0.14` (or earlier), stay on
+> `1.4.0` or below.
+
 
 ## 🌟 Features
 
