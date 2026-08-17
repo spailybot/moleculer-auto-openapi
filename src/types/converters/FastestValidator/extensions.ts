@@ -27,6 +27,10 @@ export interface FVOASchemaMetaKeys extends Omit<OpenAPIV3_1.RequestBodyObject, 
 /**
  * These keys can be put to use within the rule set of the fastest validator schema, under the $$oa meta parameters.
  *
+ * For object rules (rules extracted as a schema component), the `summary` key is emitted as the
+ * `summary` field on the `$ref` to the component, while `title` is emitted on the component schema
+ * itself (`components.schemas[...].title`).
+ *
  * @example
  {
      $$strict: true,

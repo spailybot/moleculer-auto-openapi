@@ -51,7 +51,7 @@ export class ComponentsManager {
     public createSchemaComponentFromObject(
         schemeName: string,
         obj: Record<string, OpenAPIV3_1.SchemaObject>,
-        customProperties: { default?: any } = {}
+        customProperties: { default?: any; title?: string } = {}
     ): OpenAPIV3_1.ReferenceObject {
         if (!this.components.schemas) {
             this.components.schemas = {};
@@ -74,6 +74,7 @@ export class ComponentsManager {
         }
 
         this.components.schemas[schemeName] = {
+            title: customProperties.title,
             type: 'object',
             properties,
             required: required.length > 0 ? required : undefined,
@@ -92,15 +93,20 @@ export class ComponentsManager {
         const systemParams: tSystemParams = this.extractSystemParams(rule as Record<string, unknown>);
 
         rule.description = systemParams.description ?? rule.description;
-        rule.title = systemParams.summary ?? rule.title;
         rule.deprecated = systemParams.deprecated ?? rule.deprecated;
 
         if (rule.type === 'object' && rule.properties) {
+            // `summary` is a valid sibling of a `$ref` (Reference Object) in OpenAPI 3.1, while
+            // `title` is a JSON Schema keyword and therefore belongs to the component itself.
+            const summary = systemParams.summary;
             return {
-                summary: rule.title,
+                ...(summary !== undefined ? { summary } : {}),
                 deprecated: rule.deprecated,
                 description: rule.description,
-                ...this.createSchemaComponentFromObject(nextSchemeName, rule.properties, { default: rule.default })
+                ...this.createSchemaComponentFromObject(nextSchemeName, rule.properties, {
+                    default: rule.default,
+                    title: rule.title
+                })
             };
         }
 

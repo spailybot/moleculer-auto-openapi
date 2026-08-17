@@ -505,6 +505,7 @@
                 }
             },
             "some.update.someObj": {
+                "title": "Some obj Global Title",
                 "type": "object",
                 "properties": {
                     "id": {

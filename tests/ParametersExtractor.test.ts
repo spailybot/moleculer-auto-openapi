@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LoggerInstance } from 'moleculer';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import { createFastestValidator } from './helpers/fastestValidator.js';
 import { ParametersExtractor } from '../src/Generators/ParametersExtractor.js';
 import { FastestValidatorConverter } from '../src/Converters/FastestValidatorConverter.js';
@@ -107,6 +108,72 @@ describe('ParametersExtractor and Ref Override tests', () => {
         expect(result[0]).toEqual({
             $ref: '#/components/parameters/UserId',
             description: 'overridden parameter description'
+        });
+    });
+
+    describe('ComponentsManager object rule title vs summary', () => {
+        it('should put $$oa.title on the component and $$oa.summary as the $ref sibling', () => {
+            const rule = converter.getSchemaObjectFromRule({
+                type: 'object',
+                props: {
+                    foo: { type: 'string' }
+                },
+                $$oa: {
+                    title: 'DemoTitle',
+                    summary: 'DemoSummary',
+                    description: 'DemoDescription'
+                }
+            }) as OpenAPIV3_1.SchemaObject;
+
+            const result = componentsManager.createSchemaPartFromRule('my.action.data', rule);
+
+            expect(result).toMatchObject({
+                summary: 'DemoSummary',
+                description: 'DemoDescription',
+                $ref: '#/components/schemas/my.action.data'
+            });
+            expect(componentsManager.components.schemas?.['my.action.data']).toMatchObject({
+                title: 'DemoTitle',
+                type: 'object'
+            });
+        });
+
+        it('should keep a plain title on scalar rules', () => {
+            const rule = converter.getSchemaObjectFromRule({
+                type: 'string',
+                $$oa: {
+                    title: 'ScalarTitle'
+                }
+            }) as OpenAPIV3_1.SchemaObject;
+
+            const result = componentsManager.createSchemaPartFromRule('my.action.field', rule);
+
+            expect(result).toMatchObject({
+                type: 'string',
+                title: 'ScalarTitle'
+            });
+        });
+
+        it('should default the $ref sibling summary to the rule summary when no $$oa.summary is given', () => {
+            const rule = converter.getSchemaObjectFromRule({
+                type: 'object',
+                props: {
+                    foo: { type: 'string' }
+                },
+                $$oa: {
+                    title: 'OnlyTitle'
+                }
+            }) as OpenAPIV3_1.SchemaObject;
+
+            const result = componentsManager.createSchemaPartFromRule('my.action.other', rule);
+
+            expect(result).toMatchObject({
+                $ref: '#/components/schemas/my.action.other'
+            });
+            expect(result).not.toHaveProperty('summary');
+            expect(componentsManager.components.schemas?.['my.action.other']).toMatchObject({
+                title: 'OnlyTitle'
+            });
         });
     });
 });

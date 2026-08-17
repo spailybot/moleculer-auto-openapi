@@ -91,7 +91,7 @@ export const SomeService: ServiceSchema = {
                 someObj: {
                     $$title: 'Some obj Global Title',
                     $$description: 'This is my global description',
-                    $$oa: { description: 'Some obj' },
+                    $$oa: { description: 'Some obj', summary: 'Some obj Global Title' },
                     default: { name: 'bar' },
                     type: 'object',
                     strict: 'remove',
