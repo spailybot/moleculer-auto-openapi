@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mixin } from '../../src/mixin.js';
 import { ServiceBroker } from 'moleculer';
 import { OpenapiService } from '../datas/services/openapi.service.js';
-import { setupBroker } from './commons.js';
+import { setupBroker, testServices } from './commons.js';
 import { routes } from '../datas/routes.js';
 
 describe('cache.enabled context binding', () => {
@@ -91,6 +91,67 @@ describe('cache.enabled context binding', () => {
                 await broker.emit('$api.aliases.regenerated');
 
                 // All cached versions must be removed
+                expect((broker.cacher as any).cache.size).toBe(0);
+            } finally {
+                await broker.stop();
+            }
+        });
+    });
+
+    describe('alias regeneration throttle', () => {
+        const withThrottle = (throttle: number) => ({
+            ...OpenapiService,
+            events: {
+                '$api.aliases.regenerated': {
+                    throttle
+                }
+            }
+        });
+
+        it('should ignore `$api.aliases.regenerated` events within the throttle window', async () => {
+            const broker = new ServiceBroker({
+                logger: false,
+                cacher: 'Memory'
+            });
+
+            try {
+                const services = testServices.map((svc) => (svc === OpenapiService ? withThrottle(10000) : svc));
+
+                await setupBroker(broker, services, [routes.base]);
+
+                const cacheKey = `${OpenapiService.name}.generateDocs`;
+                await broker.cacher!.set(cacheKey, { openapi: '3.1.0' });
+                expect((broker.cacher as any).cache.size).toBe(1);
+
+                // The throttle window was already consumed during broker setup,
+                // so this emit must be ignored and the cached key kept.
+                await broker.emit('$api.aliases.regenerated');
+
+                expect((broker.cacher as any).cache.size).toBe(1);
+            } finally {
+                await broker.stop();
+            }
+        });
+
+        it('should handle `$api.aliases.regenerated` again once the throttle window has elapsed', async () => {
+            const broker = new ServiceBroker({
+                logger: false,
+                cacher: 'Memory'
+            });
+
+            try {
+                const services = testServices.map((svc) => (svc === OpenapiService ? withThrottle(20) : svc));
+
+                await setupBroker(broker, services, [routes.base]);
+
+                const cacheKey = `${OpenapiService.name}.generateDocs`;
+                await broker.cacher!.set(cacheKey, { openapi: '3.1.0' });
+                expect((broker.cacher as any).cache.size).toBe(1);
+
+                // Wait for the throttle window to elapse, then the event must invalidate the cache
+                await new Promise((resolve) => setTimeout(resolve, 50));
+                await broker.emit('$api.aliases.regenerated');
+
                 expect((broker.cacher as any).cache.size).toBe(0);
             } finally {
                 await broker.stop();

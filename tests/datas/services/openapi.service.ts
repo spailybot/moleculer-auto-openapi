@@ -14,5 +14,12 @@ export const OpenapiService = {
         },
         skipUnresolvedActions: true,
         rest: '/'
-    } as OpenApiMixinSettings & RestServiceSettings
+    } as OpenApiMixinSettings & RestServiceSettings,
+    events: {
+        // Disable the throttle on the regeneration event so the cache
+        // invalidation stays deterministic in tests.
+        '$api.aliases.regenerated': {
+            throttle: 0
+        }
+    }
 };

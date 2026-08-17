@@ -17,7 +17,7 @@ import { OpenApiVersionsSupported } from '../../src/constants.js';
 import { EdgeService } from '../datas/services/edge.service.js';
 import { MergeBySvcService } from '../datas/services/mergeBySvc.service.js';
 
-const testServices = [
+export const testServices = [
     testMappersService,
     SomeService,
     SomeService,

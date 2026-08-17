@@ -24,21 +24,24 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
-        async '$api.aliases.regenerated'(this: openApiService) {
-            const generateDocsAction = 'generateDocs';
-            const { cacheMode } = this.settings;
-            if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
-                // Invalidate every cached generateDocs result (with or without version).
-                // Uses ** (not *) because versioned keys like "...|3.1" contain a dot, which "*" does not match.
-                await this.broker.cacher.clean(`${this.fullName}.${generateDocsAction}**`);
-            }
+        '$api.aliases.regenerated': {
+            throttle: 10000,
+            async handler(this: openApiService) {
+                const generateDocsAction = 'generateDocs';
+                const { cacheMode } = this.settings;
+                if (cacheMode !== ECacheMode.TIMEOUT && this.broker.cacher && this.actions[generateDocsAction]) {
+                    // Invalidate every cached generateDocs result (with or without version).
+                    // Uses ** (not *) because versioned keys like "...|3.1" contain a dot, which "*" does not match.
+                    await this.broker.cacher.clean(`${this.fullName}.${generateDocsAction}**`);
+                }
 
-            this.actions.regenerateOpenApiPaths().catch((e) => {
-                this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
-            });
+                this.actions.regenerateOpenApiPaths().catch((e) => {
+                    this.logger.error(`regenerateOpenApiPaths failed with error : ${e.toString()}`);
+                });
 
-            if (cacheMode === ECacheMode.REFRESH) {
-                await this.actions[generateDocsAction]();
+                if (cacheMode === ECacheMode.REFRESH) {
+                    await this.actions[generateDocsAction]();
+                }
             }
         }
     },
@@ -188,7 +191,6 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
         },
         regenerateOpenApiPaths: {
             visibility: 'private',
-            throttle: 10000,
             async handler(this: openApiService, ctx: Context) {
                 const openApiAliases = ((await this.getGenerator().getAliases(ctx)) as Array<Alias>).filter(
                     (alias) => alias.service?.name === this.name
