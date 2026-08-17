@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ServeStaticOptions | @spailybot/moleculer-auto-openapi - v1.3.9</title><meta name="description" content="Documentation for @spailybot/moleculer-auto-openapi"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@spailybot/moleculer-auto-openapi - v1.3.9</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ServeStaticOptions | @spailybot/moleculer-auto-openapi - v1.4.0</title><meta name="description" content="Documentation for @spailybot/moleculer-auto-openapi"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@spailybot/moleculer-auto-openapi - v1.4.0</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -14,7 +14,7 @@
 <h1>Interface ServeStaticOptions</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ServeStaticOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#cachecontrol">cacheControl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#dotfiles">dotfiles</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#etag">etag</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#extensions">extensions</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">false</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#fallthrough">fallthrough</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#immutable">immutable</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#index">index</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#lastmodified">lastModified</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#maxage">maxAge</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#redirect">redirect</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#setheaders">setHeaders</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">res</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">path</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">stat</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L45">src/types/moleculer-web.ts:45</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L45">src/types/moleculer-web.ts:45</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -41,7 +41,7 @@
 <h3 class="tsd-anchor-link" id="cachecontrol"><code class="tsd-tag">Optional</code><span>cache<wbr/>Control</span><a href="#cachecontrol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheControl</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L46">src/types/moleculer-web.ts:46</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L46">src/types/moleculer-web.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="dotfiles"><code class="tsd-tag">Optional</code><span>dotfiles</span><a href="#dotfiles" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">dotfiles</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -54,14 +54,14 @@ The default value is 'ignore'.
 'ignore' Pretend like the dotfile does not exist and call next()</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L57">src/types/moleculer-web.ts:57</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L57">src/types/moleculer-web.ts:57</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="etag"><code class="tsd-tag">Optional</code><span>etag</span><a href="#etag" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">etag</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Enable or disable etag generation, defaults to true.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L62">src/types/moleculer-web.ts:62</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L62">src/types/moleculer-web.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="extensions"><code class="tsd-tag">Optional</code><span>extensions</span><a href="#extensions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">extensions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">false</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
@@ -70,7 +70,7 @@ The first that exists will be served. Example: ['html', 'htm'].
 The default value is false.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L69">src/types/moleculer-web.ts:69</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L69">src/types/moleculer-web.ts:69</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="fallthrough"><code class="tsd-tag">Optional</code><span>fallthrough</span><a href="#fallthrough" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fallthrough</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -78,7 +78,7 @@ The default value is false.</p>
 The default value is true.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L75">src/types/moleculer-web.ts:75</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L75">src/types/moleculer-web.ts:75</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="immutable"><code class="tsd-tag">Optional</code><span>immutable</span><a href="#immutable" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">immutable</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -86,7 +86,7 @@ The default value is true.</p>
 If enabled, the maxAge option should also be specified to enable caching. The immutable directive will prevent supported clients from making conditional requests during the life of the maxAge option to check if the file has changed.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L81">src/types/moleculer-web.ts:81</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L81">src/types/moleculer-web.ts:81</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="index"><code class="tsd-tag">Optional</code><span>index</span><a href="#index" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">index</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
@@ -94,28 +94,28 @@ If enabled, the maxAge option should also be specified to enable caching. The im
 To disable this set false or to supply a new index pass a string or an array in preferred order.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L87">src/types/moleculer-web.ts:87</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L87">src/types/moleculer-web.ts:87</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="lastmodified"><code class="tsd-tag">Optional</code><span>last<wbr/>Modified</span><a href="#lastmodified" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">lastModified</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Enable or disable Last-Modified header, defaults to true. Uses the file system's last modified value.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L92">src/types/moleculer-web.ts:92</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L92">src/types/moleculer-web.ts:92</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="maxage"><code class="tsd-tag">Optional</code><span>max<wbr/>Age</span><a href="#maxage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">maxAge</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Provide a max-age in milliseconds for http caching, defaults to 0. This can also be a string accepted by the ms module.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L97">src/types/moleculer-web.ts:97</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L97">src/types/moleculer-web.ts:97</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="redirect"><code class="tsd-tag">Optional</code><span>redirect</span><a href="#redirect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">redirect</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Redirect to trailing &quot;/&quot; when the pathname is a dir. Defaults to true.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L102">src/types/moleculer-web.ts:102</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L102">src/types/moleculer-web.ts:102</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setheaders"><code class="tsd-tag">Optional</code><span>set<wbr/>Headers</span><a href="#setheaders" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">setHeaders</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">res</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">path</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">stat</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">any</span></div>
@@ -126,7 +126,7 @@ path the file path that is being sent
 stat the stat object of the file that is being sent</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/48ad43655a678ff7c1b2af73e218c71937ebb179/src/types/moleculer-web.ts#L111">src/types/moleculer-web.ts:111</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/5db224dd9387b35762892136c90933f2c62f901a/src/types/moleculer-web.ts#L111">src/types/moleculer-web.ts:111</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -145,7 +145,7 @@ stat the stat object of the file that is being sent</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
 <div><a href="#cachecontrol"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cache<wbr/>Control</span></a><a href="#dotfiles"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>dotfiles</span></a><a href="#etag"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>etag</span></a><a href="#extensions"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>extensions</span></a><a href="#fallthrough"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>fallthrough</span></a><a href="#immutable"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>immutable</span></a><a href="#index"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>index</span></a><a href="#lastmodified"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>last<wbr/>Modified</span></a><a href="#maxage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>max<wbr/>Age</span></a><a href="#redirect"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>redirect</span></a><a href="#setheaders"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>set<wbr/>Headers</span></a></div></details></div></details></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../modules.html">@spailybot/moleculer-auto-openapi - v1.3.9</a>
+<nav class="tsd-navigation"><a href="../modules.html">@spailybot/moleculer-auto-openapi - v1.4.0</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
