@@ -74,4 +74,7 @@ jobs:
         run: npm i -g npm@latest
 
       - name: publish to NPM
-        run: npm publish --provenance
+        # Publish under a dedicated dist-tag for the Moleculer 0.14 line (1.4.x) so
+        # `latest` stays free for the upcoming 2.0.0 (Moleculer 0.15).
+        # Users on Moleculer 0.14 install via @moleculer-0.14-backports.
+        run: npm publish --provenance --tag moleculer-0.14-backports
