@@ -34,9 +34,13 @@ This project is a fork of [moleculer-auto-openapi](https://github.com/grinat/mol
 
 Big thanks to [grinat](https://github.com/grinat) for the original work, and also to [everyone who has contributed](https://github.com/grinat/moleculer-auto-openapi/graphs/contributors) to it!
 
-> **⚠️ Moleculer 0.14 users:** versions up to **1.4.0** support Moleculer `0.14.x`. Starting with
+> **⚠️ Moleculer 0.14 users:** versions up to **1.4.x** support Moleculer `0.14.x`. Starting with
 > **2.0.0**, this library targets Moleculer `0.15.x` only (with `moleculer-web` `0.11.x`), which requires
-> **Node.js ≥ 22**. If you're on Moleculer `0.14`, stay on `1.4.0` or below.
+> **Node.js ≥ 22**. If you're on Moleculer `0.14`, install the dedicated dist-tag to keep getting fixes:
+>
+> ```
+> npm install @spailybot/moleculer-auto-openapi@moleculer-0.14-backports
+> ```
 
 
 ## 🌟 Features
