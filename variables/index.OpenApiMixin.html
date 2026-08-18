@@ -11,9 +11,15 @@
 <li><a href="../modules/index.html">index</a></li>
 <li><a href="" aria-current="page">OpenApiMixin</a></li></ul>
 <h1>Variable OpenApiMixin<code class="tsd-tag">Const</code></h1></div>
-<div class="tsd-signature"><span class="tsd-kind-variable">OpenApiMixin</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ServiceSchema</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ServiceSettingSchema</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Service</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ServiceSettingSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = mixin</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-variable">OpenApiMixin</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ServiceSchema</span><span class="tsd-signature-symbol"> = ...</span></div>
+<div class="tsd-comment tsd-typography"><p>Use the import you prefer</p>
+<p>The mixin is exposed with Moleculer's default <code>ServiceSchema</code> shape so it can be
+dropped into <code>mixins</code>. Moleculer types <code>mixins</code> as <code>Partial&lt;ServiceSchema&gt;</code> with the
+default settings generic, which cannot express a mixin carrying custom settings typing.
+The stricter typing is available as <code>OpenApiMixinServiceSchema</code>.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/219452549ef836299e042a89bd10f69014b83941/src/index.ts#L24">src/index.ts:24</a></li></ul></aside></div>
+<li>Defined in <a href="https://github.com/spailybot/moleculer-auto-openapi/blob/dce917acbb1e43c3746886083c30a9ab6bdb2d48/src/index.ts#L28">src/index.ts:28</a></li></ul></aside></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
