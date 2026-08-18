@@ -2,5 +2,40 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:recommended"
+    ],
+    "dependencyDashboard": false,
+    "baseBranches": [
+        "main",
+        "1.4-backports"
+    ],
+    "packageRules": [
+        {
+            "matchBaseBranches": [
+                "1.4-backports"
+            ],
+            "matchPackageNames": [
+                "moleculer"
+            ],
+            "allowedVersions": "<0.15"
+        },
+        {
+            "matchBaseBranches": [
+                "1.4-backports"
+            ],
+            "matchPackageNames": [
+                "moleculer-web"
+            ],
+            "allowedVersions": "<0.11"
+        },
+        {
+            "matchBaseBranches": [
+                "1.4-backports"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "major"
+            ],
+            "enabled": false
+        }
     ]
 }
