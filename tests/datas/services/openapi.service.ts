@@ -16,7 +16,7 @@ export const OpenapiService = {
         rest: '/'
     } as OpenApiMixinSettings & RestServiceSettings,
     events: {
-        // Disable the throttle on the regeneration event so the cache
+        // Disable the default 10s throttle on the regeneration event so the cache
         // invalidation stays deterministic in tests.
         '$api.aliases.regenerated': {
             throttle: 0

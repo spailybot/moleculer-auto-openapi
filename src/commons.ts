@@ -3,7 +3,7 @@ import path from 'path/posix';
 import { JOKER_METHOD, methodIsHttpMethod, rawHttpMethod, rawHttpMethodFromMWeb, REST_METHOD } from './constants.js';
 
 export const getServiceName = (svc: Service<any> | ServiceSchema<any>): string => {
-    if (svc.fullName) {
+    if ('fullName' in svc && svc.fullName) {
         return svc.fullName;
     }
 

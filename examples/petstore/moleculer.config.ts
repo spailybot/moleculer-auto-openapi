@@ -1,6 +1,6 @@
 import { CompilationFunction } from 'fastest-validator';
 import type { BrokerOptions } from 'moleculer';
-import { Errors } from 'moleculer';
+import { Errors, Validators } from 'moleculer';
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -148,49 +148,38 @@ const brokerConfig: BrokerOptions = {
     },
 
     // Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
-    validator: {
-        type: 'Fastest',
-        options: {
-            useNewCustomCheckerFunction: true,
-            customRules: {
-                even: function ({ schema, messages }, path, context) {
-                    return {
-                        source: `
+    validator: new Validators.Fastest({
+        useNewCustomCheckerFunction: true,
+        customRules: {
+            even: function ({ schema, messages }, path, context) {
+                return {
+                    source: `
             if (value % 2 != 0) {
                 errors.push({ type: "evenNumber",  actual: "value", messages });
             }
 
             return value;
         `
-                    };
-                } as CompilationFunction
-            }
+                };
+            } as CompilationFunction
         }
-    },
+    }),
 
     // Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
     metrics: {
-        enabled: false,
-        // Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
-        reporter: {
-            type: ''
-        }
+        enabled: false
     },
 
     // Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
     tracing: {
-        enabled: false,
-        // Available built-in exporters: "Console", "Datadog", "Event", "EventLegacy", "Jaeger", "Zipkin"
-        exporter: {
-            type: '' // Console exporter is only for development!
-        }
+        enabled: false
     },
 
     // Register custom middlewares
     middlewares: [],
 
     // Register custom REPL commands.
-    replCommands: null
+    replOptions: null
 
     // Called after broker created.
     // created(broker: ServiceBroker): void {},

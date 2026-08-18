@@ -1,7 +1,7 @@
 import { OpenAPIV3_1 } from 'openapi-types';
 import { addMappersFn, commonOpenApi, FastestValidatorType, openApiServiceOpenApi, TemplateVariables } from './types/index.js';
 import { getAlphabeticSorter, normalizePath } from './commons.js';
-import { LoggerInstance } from 'moleculer';
+import { Logger } from 'moleculer';
 import { Alias } from './objects/Alias.js';
 import { FastestValidatorConverter } from './Converters/FastestValidatorConverter.js';
 import { DEFAULT_SUMMARY_TEMPLATE, EOAExtensions, OpenApiVersionsSupported, UNRESOLVED_ACTION_NAME } from './constants.js';
@@ -19,7 +19,7 @@ export class OpenApiGenerator {
     private readonly requestBodyGenerator: RequestBodyGenerator;
 
     constructor(
-        private readonly logger: LoggerInstance,
+        private readonly logger: Logger,
         validator: FastestValidatorType,
         baseDocument: openApiServiceOpenApi,
         addMappersFn: addMappersFn

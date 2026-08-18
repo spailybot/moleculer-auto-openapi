@@ -1,4 +1,4 @@
-import type { Context, LoggerInstance, Service, ServiceBroker, ServiceSchema } from 'moleculer';
+import type { Context, Logger, Service, ServiceBroker, ServiceSchema } from 'moleculer';
 import Moleculer from 'moleculer';
 import {
     addMappersFn,
@@ -90,7 +90,7 @@ export class MoleculerOpenAPIGenerator {
     private readonly broker: ServiceBroker;
 
     private readonly settings: OpenApiMixinSettings;
-    private readonly logger: LoggerInstance;
+    private readonly logger: Logger;
     private validator: FastestValidatorType;
 
     constructor(broker: ServiceBroker, settings: OpenApiMixinSettings) {

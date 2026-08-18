@@ -513,25 +513,30 @@ export default class PetsService extends Service<ServiceSettingSchema & Molecule
                             optional: true
                         } as RuleString
                     },
-                    handler: (ctx: Context<NodeJS.ReadableStream, MoleculerWebMetas>) => {
+                    handler: (ctx: Context<Record<string, unknown>, MoleculerWebMetas>) => {
                         // here params need to be validated manually !
                         if (!ctx.action?.params || !this.broker.validator) {
                             throw new Error('something is wrong');
                         }
 
-                        const params = this.broker.validator.compile(ctx.action.params)(ctx.meta.$params);
+                        const validation = this.broker.validator.compile(ctx.action.params)(ctx.params);
+                        if (validation !== true) {
+                            throw new Error(`invalid upload params: ${JSON.stringify(validation)}`);
+                        }
 
-                        this.logger.info(`Received an image upload with field name ${params.fieldName} ! `, {
-                            $multipart: ctx.meta.$multipart,
-                            fieldname: ctx.meta.fieldname,
-                            filename: ctx.meta.filename,
-                            encoding: ctx.meta.encoding,
-                            mimetype: ctx.meta.mimetype,
-                            $params: ctx.meta.$params
+                        this.logger.info(`Received an image upload with field name ${ctx.params.$fieldname} ! `, {
+                            $fieldname: ctx.params.$fieldname,
+                            $filename: ctx.params.$filename,
+                            $encoding: ctx.params.$encoding,
+                            $mimetype: ctx.params.$mimetype
                         });
 
                         return new Promise<void>((resolve, reject) => {
-                            const fileStream = ctx.params;
+                            const fileStream = ctx.stream as NodeJS.ReadableStream | null;
+                            if (!fileStream) {
+                                reject(new Error('no file stream'));
+                                return;
+                            }
 
                             fileStream.on('error', (err: Error) => {
                                 this.logger.info('File error received', err.message);

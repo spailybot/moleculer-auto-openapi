@@ -1,5 +1,5 @@
 import { defaultSettings, MoleculerOpenAPIGenerator } from './MoleculerOpenAPIGenerator.js';
-import Moleculer, { Context, Service, ServiceMethods, ServiceSchema, ServiceSettingSchema } from 'moleculer';
+import Moleculer, { Context, Service, ServiceMethods, ServiceSchema } from 'moleculer';
 import fs from 'fs';
 import {
     addMappersFn,
@@ -11,16 +11,30 @@ import {
     OpenApiPaths
 } from './types/index.js';
 import { RuleString } from 'fastest-validator';
-import { DEFAULT_OPENAPI_VERSION, DEFAULT_SWAGGER_UI_DIST } from './constants.js';
+import { DEFAULT_SWAGGER_UI_DIST } from './constants.js';
 import path from 'path/posix';
 import MoleculerError = Moleculer.Errors.MoleculerError;
 import { Alias } from './objects/Alias.js';
 
-type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator };
+type openApiServiceMethods = {
+    getGenerator: () => MoleculerOpenAPIGenerator;
+    getOpenApiPaths: () => OpenApiPaths;
+    getSwaggerPath: () => Promise<string>;
+    filterAliases: filterAliasesFn;
+    addMappers: addMappersFn;
+};
+
+type openApiService = Service<OpenApiMixinSettings> & { generator?: MoleculerOpenAPIGenerator } & openApiServiceMethods;
+
+export type OpenApiMixinServiceSchema = ServiceSchema<
+    OpenApiMixinSettings,
+    openApiServiceMethods,
+    { generator?: MoleculerOpenAPIGenerator }
+>;
 
 const openApiPaths: Partial<OpenApiPaths> = {};
 
-export const mixin: ServiceSchema<ServiceSettingSchema> = {
+export const mixin: OpenApiMixinServiceSchema = {
     name: `openapi`,
     settings: defaultSettings as OpenApiMixinSettings,
     events: {
@@ -55,15 +69,15 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                 enabled(this: openApiService | undefined) {
                     return this?.settings?.cacheOpenApi ?? true;
                 },
-                keygen: (actionName: string, params: OA_GENERATE_DOCS_INPUT) => {
-                    // @ts-ignore with moleculer 0.15.0, the full action is passed, not only the name
-                    const name = typeof actionName === 'string' ? actionName : actionName.name;
+                keygen: (action, opts, ctx) => {
+                    const name = action.name!;
+                    const version = (ctx.params as OA_GENERATE_DOCS_INPUT | undefined)?.version;
 
-                    if (!params.version) {
+                    if (!version) {
                         return name;
                     }
 
-                    return `${name}|${params?.version || DEFAULT_OPENAPI_VERSION}`;
+                    return `${name}|${version}`;
                 },
                 ttl: 600
             },
@@ -186,7 +200,21 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     throw new MoleculerError('unknown error');
                 }
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
-                return fs.promises.readFile(`${await this?.getSwaggerPath()}/oauth2-redirect.html`);
+                const oauth2RedirectPath = `${await this.getSwaggerPath()}/oauth2-redirect`;
+                const html = await fs.promises.readFile(`${oauth2RedirectPath}.html`, 'utf8');
+
+                // Newer swagger-ui-dist split the redirect logic into a separate file.
+                // Inline it so the page stays self-contained (a relative "oauth2-redirect.js"
+                // would resolve against the exposed redirect URL and 404).
+                // Older versions ship a self-contained html: nothing to inline.
+                const scriptPath = `${oauth2RedirectPath}.js`;
+                if (fs.existsSync(scriptPath)) {
+                    const script = await fs.promises.readFile(scriptPath, 'utf8');
+                    const inlineHtml = html.replace('</body>', `<script>${script}</script></body>`);
+                    return html.indexOf('</body>') > -1 ? inlineHtml : `${html}<script>${script}</script>`;
+                }
+
+                return html;
             }
         },
         regenerateOpenApiPaths: {

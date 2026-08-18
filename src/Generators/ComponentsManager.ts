@@ -1,5 +1,5 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
-import type { LoggerInstance } from 'moleculer';
+import type { Logger } from 'moleculer';
 import type { FastestValidatorConverter } from '../Converters/FastestValidatorConverter.js';
 import { EOAExtensions, multiOAProperties } from '../constants.js';
 import type { OptionalOrFalse, SubOptionalOrFalse } from '../types/utils.js';
@@ -11,7 +11,7 @@ export class ComponentsManager {
     };
 
     constructor(
-        private readonly logger: LoggerInstance,
+        private readonly logger: Logger,
         private readonly converter: FastestValidatorConverter
     ) {}
 
