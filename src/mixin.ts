@@ -186,7 +186,21 @@ export const mixin: ServiceSchema<ServiceSettingSchema> = {
                     throw new MoleculerError('unknown error');
                 }
                 ctx.meta.$responseType = 'text/html; charset=utf-8';
-                return fs.promises.readFile(`${await this?.getSwaggerPath()}/oauth2-redirect.html`);
+                const oauth2RedirectPath = `${await this.getSwaggerPath()}/oauth2-redirect`;
+                const html = await fs.promises.readFile(`${oauth2RedirectPath}.html`, 'utf8');
+
+                // Newer swagger-ui-dist split the redirect logic into a separate file.
+                // Inline it so the page stays self-contained (a relative "oauth2-redirect.js"
+                // would resolve against the exposed redirect URL and 404).
+                // Older versions ship a self-contained html: nothing to inline.
+                const scriptPath = `${oauth2RedirectPath}.js`;
+                if (fs.existsSync(scriptPath)) {
+                    const script = await fs.promises.readFile(scriptPath, 'utf8');
+                    const inlineHtml = html.replace('</body>', `<script>${script}</script></body>`);
+                    return html.indexOf('</body>') > -1 ? inlineHtml : `${html}<script>${script}</script>`;
+                }
+
+                return html;
             }
         },
         regenerateOpenApiPaths: {
