@@ -71,7 +71,7 @@
     "@types/qs": "^6.15.1",
     "@types/semver": "^7.8.0",
     "@types/swagger-ui-dist": "^3.30.6",
-    "@typescript-eslint/parser": "8.68.0",
+    "@typescript-eslint/parser": "8.69.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.28.2",
     "eslint": "10.9.1",
