@@ -235,7 +235,7 @@ importers:
     optionalDependencies:
       swagger-ui-dist:
         specifier: ^5.32.13
-        version: 5.33.1
+        version: 5.33.2
 
 packages:
 
@@ -1492,8 +1492,8 @@ packages:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
 
-  swagger-ui-dist@5.33.1:
-    resolution: {integrity: sha512-H872wWkA53bFIsGgi7OWgmq+CRWw3nFQGdJWRqOB9wNwTm6e5ol34+qPDkV4AJlK+gglM2EsJiOOzsGsEGbluA==}
+  swagger-ui-dist@5.33.2:
+    resolution: {integrity: sha512-MyrWX06zkJRYPnIau8Qj8F6KfzS+Qj8D9AR36vCWkkC9ts1r1DYF84apgCvZBzO2Wzm7G7loCd5VS+4JLWoyLQ==}
 
   synckit@0.11.13:
     resolution: {integrity: sha512-eNRKgb3z66Yp3D2CixVujOUvXLFUTij/zVnV8KRyvFdQwpz7I5DS8UfRkTeLzb64u+dkzDSdelE24izu+zSSUg==}
@@ -2785,7 +2785,7 @@ snapshots:
     dependencies:
       has-flag: 3.0.0
 
-  swagger-ui-dist@5.33.1:
+  swagger-ui-dist@5.33.2:
     dependencies:
       '@scarf/scarf': 1.4.0
     optional: true
