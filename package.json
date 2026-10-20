@@ -76,7 +76,7 @@
     "esbuild": "^0.28.2",
     "eslint": "10.8.1",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-prettier": "5.5.6",
+    "eslint-plugin-prettier": "5.5.7",
     "fastest-validator": "^1.19.1",
     "moleculer": "^0.14.35",
     "moleculer-web": "^0.10.8",
