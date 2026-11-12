@@ -154,25 +154,18 @@ const brokerConfig: BrokerOptions = {
 	metrics: {
 		enabled: false,
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
-		reporter: {
-			type: "",
-		},
+		reporter: null,
 	},
 
 	// Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
 	tracing: {
 		enabled: false,
 		// Available built-in exporters: "Console", "Datadog", "Event", "EventLegacy", "Jaeger", "Zipkin"
-		exporter: {
-			type: "", // Console exporter is only for development!
-		},
+		exporter: null,
 	},
 
 	// Register custom middlewares
 	middlewares: [],
-
-	// Register custom REPL commands.
-	replCommands: null,
 
 	// Called after broker created.
 	// created(broker: ServiceBroker): void {},
