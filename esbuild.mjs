@@ -10,9 +10,8 @@ const tsConfig = JSON.parse(fs.readFileSync('./tsconfig.json').toString());
 
 const dist = path.join(__dirname, tsConfig.compilerOptions.outDir);
 
-if (!fs.existsSync(dist)) {
-    fs.mkdirSync(dist);
-}
+fs.rmSync(dist, { recursive: true, force: true });
+fs.mkdirSync(dist, { recursive: true });
 
 let makeAllPackagesExternalPlugin = {
     name: 'make-all-packages-external',
